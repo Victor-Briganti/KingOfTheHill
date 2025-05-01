@@ -1,0 +1,4 @@
+.cache
+boot/
+out/
+compile_commands.json
