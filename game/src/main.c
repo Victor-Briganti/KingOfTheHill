@@ -1,6 +1,7 @@
 #include <genesis.h>
 #include <sprite_eng.h>
 
+#include "gameobject/gameobject.h"
 #include "global.h"
 #include "joy.h"
 #include "resources.h"
@@ -8,6 +9,8 @@
 #include "sys.h"
 #include "tools.h"
 #include "vdp.h"
+
+GameObject goblin;
 
 void INPUT_eventHandler(u16 joy, u16 changed, u16 state);
 
@@ -44,31 +47,6 @@ void BACKGROUND_init() {
   VDP_drawText("LEVEL 1-1", 13, 1);
 }
 
-Sprite *SPRITE_init() {
-  Sprite *goblin = SPR_addSprite(&goblin1, POS_X(0), POS_Y(0),
-                                 TILE_ATTR(PLAYER_PAL, FALSE, FALSE, FALSE));
-  PAL_setPalette(PLAYER_PAL, goblin1.palette->data, DMA);
-
-  return goblin;
-}
-
-s8 x = 0;
-s8 y = 0;
-
-void SPRITE_clamp(s8 *x, s8 *y, u16 width, u16 height) {
-  if (*x < 0)
-    *x = 0;
-
-  if (*x >= width)
-    *x = width - 1;
-
-  if (*y < 0)
-    *y = 0;
-
-  if (*y >= height)
-    *y = height - 1;
-}
-
 void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
   if (joy != JOY_1)
     return;
@@ -79,16 +57,16 @@ void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
   // Move when the buttons are released
   if (!(directional)) {
     if (changed & BUTTON_LEFT) {
-      x--;
+      goblin.x_pos--;
     } else if (changed & BUTTON_RIGHT) {
-      x++;
+      goblin.x_pos++;
     } else if (changed & BUTTON_DOWN) {
-      y++;
+      goblin.y_pos++;
     } else if (changed & BUTTON_UP) {
-      y--;
+      goblin.y_pos--;
     }
 
-    SPRITE_clamp(&x, &y, BOARD_WIDTH, BOARD_HEIGHT);
+    GAMEOBJECT_updatePos(&goblin, BOARD_WIDTH, BOARD_HEIGHT);
   }
 }
 
@@ -101,13 +79,11 @@ int main(bool resetType) {
   SCREEN_init();
   INPUT_init();
   BACKGROUND_init();
-  Sprite *goblin = SPRITE_init();
+  GAMEOBJECT_init(&goblin, &goblin1, PLAYER_PAL, 0, 0);
 
   SYS_doVBlankProcess();
 
   while (TRUE) {
-    SPR_setPosition(goblin, POS_X(x), POS_Y(y));
-
     // update hardware sprites table
     SPR_update();
 
