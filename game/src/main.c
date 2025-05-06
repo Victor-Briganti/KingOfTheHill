@@ -4,7 +4,7 @@
 #include "gameobject/gameobject.h"
 #include "global.h"
 #include "joy.h"
-#include "resources.h"
+#include "gfx.h"
 #include "sprites.h"
 #include "sys.h"
 #include "tools.h"
