@@ -10,10 +10,12 @@
 // Palettes
 #define PLAYER_PAL PAL0
 #define ENEMY_PAL PAL1
+#define TILEMAP_PAL PAL2
 #define BACKGROUND_PAL PAL3
 
 // Planes
 #define BACKGROUND_PLANE BG_B
+#define TILEMAP_PLANE BG_A
 
 // Board size
 #define BOARD_WIDTH 7
