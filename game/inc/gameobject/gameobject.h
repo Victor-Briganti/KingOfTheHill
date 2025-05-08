@@ -1,5 +1,5 @@
-#ifndef _GAMEOBJECT_H_
-#define _GAMEOBJECT_H_
+#ifndef __GAMEOBJECT_H__
+#define __GAMEOBJECT_H__
 
 #include <genesis.h>
 
@@ -14,4 +14,4 @@ void GAMEOBJECT_init(GameObject *const obj, const SpriteDefinition *sprite, u16 
 
 void GAMEOBJECT_updatePos(GameObject *const obj, u16 widthLimit, u16 heighLimit);
 
-#endif //  _GAMEOBJECT_H_
+#endif //  __GAMEOBJECT_H__

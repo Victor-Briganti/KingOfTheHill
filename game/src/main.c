@@ -48,39 +48,130 @@ void BACKGROUND_init() {
 }
 
 u8 tile = 2;
+u8 tile_diag = 1;
 void MAP_updateTile() {
-  // 2+ in the x axis to update the right tiles
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
-                   2 + 12 + 0, 6 + 0);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
-                   2 + 12 + 1, 6 + 0);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
-                   2 + 12 + 0, 6 + 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
-                   2 + 12 + 1, 6 + 1);
+  // Updates the right tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 2, goblin.y_pos + MAP_LEVEL1_Y_POS);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 3, goblin.y_pos + MAP_LEVEL1_Y_POS);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 2, goblin.y_pos + MAP_LEVEL1_Y_POS + 1);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 3, goblin.y_pos + MAP_LEVEL1_Y_POS + 1);
 
-  // 2+ in the y axis to update the below tiles
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile), 12 + 0,
-                   2 + 6 + 0);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile), 12 + 1,
-                   2 + 6 + 0);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile), 12 + 0,
-                   2 + 6 + 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile), 12 + 1,
-                   2 + 6 + 1);
+  // Updates the bottom tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 1, goblin.y_pos + MAP_LEVEL1_Y_POS + 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS, goblin.y_pos + MAP_LEVEL1_Y_POS + 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 1, goblin.y_pos + MAP_LEVEL1_Y_POS + 3);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS, goblin.y_pos + MAP_LEVEL1_Y_POS + 3);
+
+  // Updates the left tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 1, goblin.y_pos + MAP_LEVEL1_Y_POS);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 2, goblin.y_pos + MAP_LEVEL1_Y_POS);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 1, goblin.y_pos + MAP_LEVEL1_Y_POS + 1);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 2, goblin.y_pos + MAP_LEVEL1_Y_POS + 1);
+
+  // Updates the up tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 1, goblin.y_pos + MAP_LEVEL1_Y_POS - 1);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS, goblin.y_pos + MAP_LEVEL1_Y_POS - 1);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 1, goblin.y_pos + MAP_LEVEL1_Y_POS - 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile),
+      goblin.x_pos + MAP_LEVEL1_X_POS, goblin.y_pos + MAP_LEVEL1_Y_POS - 2);
+
+  // Updates the up right diagonal tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 2, goblin.y_pos + MAP_LEVEL1_Y_POS - 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 2, goblin.y_pos + MAP_LEVEL1_Y_POS - 1);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 3, goblin.y_pos + MAP_LEVEL1_Y_POS - 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 3, goblin.y_pos + MAP_LEVEL1_Y_POS - 1);
+
+  // Updates the up left diagonal tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 1, goblin.y_pos + MAP_LEVEL1_Y_POS - 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 2, goblin.y_pos + MAP_LEVEL1_Y_POS - 1);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 2, goblin.y_pos + MAP_LEVEL1_Y_POS - 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 1, goblin.y_pos + MAP_LEVEL1_Y_POS - 1);
+
+  // Updates the bottom left diagonal tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 1, goblin.y_pos + MAP_LEVEL1_Y_POS + 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 2, goblin.y_pos + MAP_LEVEL1_Y_POS + 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 1, goblin.y_pos + MAP_LEVEL1_Y_POS + 3);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS - 2, goblin.y_pos + MAP_LEVEL1_Y_POS + 3);
+
+  // Updates the bottom right diagonal tile
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 2, goblin.y_pos + MAP_LEVEL1_Y_POS + 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 3, goblin.y_pos + MAP_LEVEL1_Y_POS + 2);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 2, goblin.y_pos + MAP_LEVEL1_Y_POS + 3);
+  VDP_setTileMapXY(
+      TILEMAP_PLANE, TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_diag),
+      goblin.x_pos + MAP_LEVEL1_X_POS + 3, goblin.y_pos + MAP_LEVEL1_Y_POS + 3);
 
   if (tile == 2) {
     tile = 4;
   } else {
     tile = 2;
+  }
+
+  if (tile_diag == 1) {
+    tile_diag = 4;
+  } else {
+    tile_diag = 1;
   }
 }
 
@@ -94,7 +185,8 @@ void MAP_init() {
                                   FALSE,       // flip X
                                   FALSE,       // flip Y
                                   baseTileIndex),
-                   12, 6,                      // screen x,y in tiles
+                   // MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, // screen x,y in tiles
+                   MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, // screen x,y in tiles
                    0, 0,                       // map x,y offset in tiles
                    level_map1.w, level_map1.h, // region size
                    DMA);
@@ -110,16 +202,17 @@ void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
   // Move when the buttons are released
   if (!(directional)) {
     if (changed & BUTTON_LEFT) {
-      goblin.x_pos--;
+      goblin.x_pos -= 2;
     } else if (changed & BUTTON_RIGHT) {
-      goblin.x_pos++;
+      goblin.x_pos += 2;
     } else if (changed & BUTTON_DOWN) {
-      goblin.y_pos++;
+      goblin.y_pos += 2;
     } else if (changed & BUTTON_UP) {
-      goblin.y_pos--;
+      goblin.y_pos -= 2;
     }
 
-    GAMEOBJECT_updatePos(&goblin, BOARD_WIDTH, BOARD_HEIGHT);
+    GAMEOBJECT_updatePos(&goblin, MAP_LEVEL1_WIDTH * 2 - 1,
+                         MAP_LEVEL1_HEIGHT * 2 - 1);
   }
 }
 
@@ -133,7 +226,7 @@ int main(bool resetType) {
   INPUT_init();
   BACKGROUND_init();
   MAP_init();
-  GAMEOBJECT_init(&goblin, &goblin1, PLAYER_PAL, 0, 0);
+  GAMEOBJECT_init(&goblin, &goblin1, PLAYER_PAL, 3 * 2, 5 * 2);
 
   SYS_doVBlankProcess();
 

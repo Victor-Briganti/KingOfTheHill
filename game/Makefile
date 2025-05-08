@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all build clean
 
 GDK := "/home/nessuno/Documents/UTFPR/Jogos/sgdk/sgdk"
 GENS := "/home/nessuno/Documents/UTFPR/Jogos/sgdk/gens/gens.exe"
