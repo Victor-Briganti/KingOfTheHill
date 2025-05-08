@@ -162,33 +162,16 @@ void MAP_updatePlayerTile() {
 }
 
 void MAP_tileUpdate() {
-  VDP_setTileMapEx(TILEMAP_PLANE, &level_map1,
-    TILE_ATTR_FULL(TILEMAP_PAL, // match your palette
-                   0,           // priority
-                   FALSE,       // flip X
-                   FALSE,       // flip Y
-                   TILE_USER_INDEX),
-    MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, // screen x,y in tiles
-    0, 0,                       // map x,y offset in tiles
-    level_map1.w, level_map1.h, // region size
-    DMA);
+  VDP_setTileMapEx(
+      TILEMAP_PLANE, &level_map1,
+      TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX),
+      MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, 0, 0, level_map1.w, level_map1.h,
+      DMA);
 }
 
 void MAP_init() {
   PAL_setPalette(TILEMAP_PAL, tileset_palette.data, DMA);
-  u16 baseTileIndex = TILE_USER_INDEX;
-  VDP_loadTileSet(&tileset, baseTileIndex, DMA);
-  VDP_setTileMapEx(TILEMAP_PLANE, &level_map1,
-                   TILE_ATTR_FULL(TILEMAP_PAL, // match your palette
-                                  0,           // priority
-                                  FALSE,       // flip X
-                                  FALSE,       // flip Y
-                                  baseTileIndex),
-                   // MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, // screen x,y in tiles
-                   MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, // screen x,y in tiles
-                   0, 0,                       // map x,y offset in tiles
-                   level_map1.w, level_map1.h, // region size
-                   DMA);
+  VDP_loadTileSet(&tileset, TILE_USER_INDEX, DMA);
 }
 
 void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
@@ -210,8 +193,7 @@ void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
       goblin.y_pos -= 2;
     }
 
-    GAMEOBJECT_updatePos(&goblin, MAP_LEVEL1_WIDTH * 2 - 1,
-                         MAP_LEVEL1_HEIGHT);
+    GAMEOBJECT_updatePos(&goblin, MAP_LEVEL1_WIDTH - 1, MAP_LEVEL1_HEIGHT - 1);
   }
 }
 
@@ -225,7 +207,8 @@ int main(bool resetType) {
   INPUT_init();
   BACKGROUND_init();
   MAP_init();
-  GAMEOBJECT_init(&goblin, &goblin1, PLAYER_PAL, 3 * 2, 5 * 2);
+  GAMEOBJECT_init(&goblin, &goblin1, PLAYER_PAL, GOBLIN_LEVEL1_X_POS,
+                  GOBLIN_LEVEL1_Y_POS);
 
   SYS_doVBlankProcess();
 

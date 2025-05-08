@@ -4,8 +4,8 @@
 #include <genesis.h>
 
 // Screen size
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 224
+#define SCREEN_WIDTH (320)
+#define SCREEN_HEIGHT (224)
 
 // Palettes
 #define PLAYER_PAL PAL0
@@ -18,25 +18,28 @@
 #define TILEMAP_PLANE BG_A
 
 // Position of each tile color
-#define BLACK_TILE 0
-#define WHITE_TILE 1
-#define PURPLE_TILE 2
-#define GREEN_TILE 3
-#define RED_TILE 4
-#define BLUE_TILE 5
+#define BLACK_TILE (0)
+#define WHITE_TILE (1)
+#define PURPLE_TILE (2)
+#define GREEN_TILE (3)
+#define RED_TILE (4)
+#define BLUE_TILE (5)
 
 // Level Map Size Information
-#define MAP_LEVEL1_HEIGHT 15 /* In Tile */
-#define MAP_LEVEL1_WIDTH 7   /* In Tile */
+#define MAP_LEVEL1_HEIGHT (16)  /* In Tile */
+#define MAP_LEVEL1_WIDTH (14)   /* In Tile */
 
 // Initial position of the map in level 1
-#define MAP_LEVEL1_X_POS MAP_LEVEL1_HEIGHT /* In Tile */
-#define MAP_LEVEL1_Y_POS MAP_LEVEL1_WIDTH  /* In Tile */
+#define MAP_LEVEL1_X_POS (14)  /* In Tile */
+#define MAP_LEVEL1_Y_POS (6)   /* In Tile */
 
-// Movement of the player or enemy
-#define POS_X(x) ((x) + MAP_LEVEL1_X_POS) * 8
-#define POS_Y(y) ((y) + MAP_LEVEL1_Y_POS) * 8
+// Transform the position of the player from tile to coodinates
+#define POS_X(x) (((x) + MAP_LEVEL1_X_POS) * 8)
+#define POS_Y(y) (((y) + MAP_LEVEL1_Y_POS) * 8)
 
+// Player initial position
+#define GOBLIN_LEVEL1_X_POS (6)
+#define GOBLIN_LEVEL1_Y_POS (14)
 
 // #TODO: This definitions are only the idea of how many pieces each board
 // should have 
