@@ -27,6 +27,7 @@ void GAMEOBJECT_init(GameObject *const obj, const SpriteDefinition *sprite, u16 
 
 void GAMEOBJECT_updatePos(GameObject *const obj, u16 widthLimit, u16 heighLimit) {
   GAMEOBJECT_clamp(obj, widthLimit, heighLimit);
-  kprintf("(%d, %d)", POS_X(obj->x_pos), POS_Y(obj->y_pos));
+  kprintf("Tile: (%d, %d)", obj->x_pos, obj->y_pos);
+  kprintf("Position: (%d, %d)", POS_X(obj->x_pos), POS_Y(obj->y_pos));
   SPR_setPosition(obj->sprite, POS_X(obj->x_pos), POS_Y(obj->y_pos));
 }

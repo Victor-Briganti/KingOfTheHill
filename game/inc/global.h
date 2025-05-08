@@ -18,11 +18,12 @@
 #define TILEMAP_PLANE BG_A
 
 // Position of each tile color
+#define BLACK_TILE 0
 #define WHITE_TILE 1
-#define BLACK_TILE 2
-#define BLUE_TILE 3
-#define GREEN_TILE 4
-#define RED_TILE 5
+#define PURPLE_TILE 2
+#define GREEN_TILE 3
+#define RED_TILE 4
+#define BLUE_TILE 5
 
 // Level Map Size Information
 #define MAP_LEVEL1_HEIGHT 15 /* In Tile */
