@@ -26,7 +26,7 @@ inline void TILEMAP_init(const TileSet *tileset) {
   VDP_loadTileSet(tileset, TILE_USER_INDEX, DMA);
 }
 
-void TILEMAP_update(const TileMap * const tilemap) {
+inline void TILEMAP_update(const TileMap *const tilemap) {
   VDP_setTileMapEx(
       TILEMAP_PLANE, tilemap,
       TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX),

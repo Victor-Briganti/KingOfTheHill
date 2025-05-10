@@ -12,8 +12,6 @@
 #include "tools.h"
 #include "vdp.h"
 
-void INPUT_eventHandler(u16 joy, u16 changed, u16 state);
-
 void SCREEN_init() {
   SYS_disableInts();
 
@@ -23,13 +21,9 @@ void SCREEN_init() {
 
   // Init the sprite and input engine
   SPR_init();
+  JOY_init();
 
   SYS_enableInts();
-}
-
-void INPUT_init() {
-  JOY_init();
-  JOY_setEventHandler(INPUT_eventHandler);
 }
 
 void BACKGROUND_init() {
@@ -50,66 +44,6 @@ void BACKGROUND_update(u16 score) {
   VDP_drawText(scoreText, SCORE_TEXT_X, SCORE_TEXT_Y);
 }
 
-void MAP_updatePlayerTile() {
-  if (player.object.x < MAP_LEVEL1_WIDTH - 2)
-    TILEMAP_updateRightTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
-                            MAP_LEVEL1_Y_POS, GREEN_TILE);
-
-  if (player.object.x != 0)
-    TILEMAP_updateLeftTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
-                           MAP_LEVEL1_Y_POS, GREEN_TILE);
-
-  if (player.object.y != 0)
-    TILEMAP_updateUpTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
-                         MAP_LEVEL1_Y_POS, GREEN_TILE);
-
-  if (player.object.y < MAP_LEVEL1_HEIGHT - 2)
-    TILEMAP_updateBottomTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
-                             MAP_LEVEL1_Y_POS, GREEN_TILE);
-
-  if (player.object.x < MAP_LEVEL1_WIDTH - 2 && player.object.y != 0)
-    TILEMAP_updateUpRighTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
-                             MAP_LEVEL1_Y_POS, GREEN_TILE);
-
-  if (player.object.x != 0 && player.object.y != 0)
-    TILEMAP_updateUpLeftTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
-                             MAP_LEVEL1_Y_POS, GREEN_TILE);
-
-  if (player.object.x < MAP_LEVEL1_WIDTH - 2 &&
-      player.object.y < MAP_LEVEL1_HEIGHT - 2)
-    TILEMAP_updateBottomRightTile(player.object.x, player.object.y,
-                                  MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS,
-                                  GREEN_TILE);
-
-  if (player.object.x != 0 && player.object.y < MAP_LEVEL1_HEIGHT - 2)
-    TILEMAP_updateBottomLeftTile(player.object.x, player.object.y,
-                                 MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS,
-                                 GREEN_TILE);
-}
-
-void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
-  if (joy != JOY_1)
-    return;
-
-  // Verify if the directionals are pressed
-  u16 directional = state & BUTTON_DIR;
-
-  // Move when the buttons are released
-  if (!(directional)) {
-    if (changed & BUTTON_LEFT) {
-      player.object.x -= 2;
-    } else if (changed & BUTTON_RIGHT) {
-      player.object.x += 2;
-    } else if (changed & BUTTON_DOWN) {
-      player.object.y += 2;
-    } else if (changed & BUTTON_UP) {
-      player.object.y -= 2;
-    }
-
-    PLAYER_update();
-  }
-}
-
 int main(bool resetType) {
   // Soft reset doesn't clear RAM. Can lead to bugs.
   if (!resetType) {
@@ -117,7 +51,6 @@ int main(bool resetType) {
   }
 
   SCREEN_init();
-  INPUT_init();
   BACKGROUND_init();
   TILEMAP_init(&tileset);
   PLAYER_init(&goblin_sprite1, PLAYER_PAL, GOBLIN_LEVEL1_X_POS,
@@ -129,7 +62,7 @@ int main(bool resetType) {
   while (TRUE) {
     BACKGROUND_update(score);
     TILEMAP_update(&level_map1);
-    MAP_updatePlayerTile();
+    PLAYER_update();
 
     // update hardware sprites table
     SPR_update();
