@@ -1,5 +1,6 @@
 #include "player/player.h"
 #include "global.h"
+#include "joy.h"
 #include "tilemap/tilemap.h"
 
 Player player;
@@ -20,21 +21,37 @@ static inline bool PLAYER_onRight() {
   return (player.object.x < mapLevelWidth - 2);
 }
 
-static void PLAYER_handleCursorPos(s8 x,  s8 y) {
-  if (x == player.object.x && y == player.object.y)
-   return;
+static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
+  if (x == player.object.x && y == player.object.y) {
+    if (direction & BUTTON_LEFT) {
+      x -= 2;
+    } else if (direction & BUTTON_RIGHT) {
+      x += 2;
+    } else if (direction & BUTTON_DOWN) {
+      y += 2;
+    } else if (direction & BUTTON_UP) {
+      y -= 2;
+    }
+  }
 
+  // Clamp player limit
   x = clamp(x, player.object.x - 2, player.object.x + 2);
   y = clamp(y, player.object.y - 2, player.object.y + 2);
-  player.cursorX = clamp(x, 0, mapLevelWidth - 2);
-  player.cursorY = clamp(y, 0, mapLevelHeight - 2);
+  
+  // Clamp map limit
+  x = clamp(x, 0, mapLevelWidth - 2);
+  y = clamp(y, 0, mapLevelHeight - 2);
+
+  if (x == player.object.x && y == player.object.y)
+    return;
+
+  player.cursorX = x;
+  player.cursorY = y;
 }
 
 static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
   if (joy != JOY_1)
     return;
-
-  // NOTE: The BUTTON_X is the z in the keyboard
 
   // Verify if the directionals are pressed
   u16 directional = state & BUTTON_DIR;
@@ -45,18 +62,18 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
     s8 y = player.cursorY;
     if (changed & BUTTON_LEFT) {
       x = player.cursorX - 2;
+      PLAYER_handleCursorPos(x, y, BUTTON_LEFT);
     } else if (changed & BUTTON_RIGHT) {
       x = player.cursorX + 2;
+      PLAYER_handleCursorPos(x, y, BUTTON_RIGHT);
     } else if (changed & BUTTON_DOWN) {
       y = player.cursorY + 2;
+      PLAYER_handleCursorPos(x, y, BUTTON_DOWN);
     } else if (changed & BUTTON_UP) {
       y = player.cursorY - 2;
+      PLAYER_handleCursorPos(x, y, BUTTON_UP);
     }
 
-    PLAYER_handleCursorPos(x, y);
-
-    // player.object.x = clamp(player.object.x, 0, mapLevelWidth - 2);
-    // player.object.y = clamp(player.object.y, 0, mapLevelHeight - 2);
     // GAMEOBJECT_updatePos(&player.object, mapLevelWidth - 2, mapLevelHeight -
     // 2);
   }

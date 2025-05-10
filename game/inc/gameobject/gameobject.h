@@ -20,7 +20,7 @@ inline void GAMEOBJECT_init(GameObject *const obj,
   obj->y = y;
 }
 
-inline void GAMEOBJECT_updatePos(GameObject *object, u16 width, u16 height) {
+inline void GAMEOBJECT_updatePos(GameObject *object) {
   SPR_setPosition(object->sprite, POS_X(object->x), POS_Y(object->y));
 }
 
