@@ -5,13 +5,12 @@
 #include "gfx.h"
 #include "global.h"
 #include "joy.h"
+#include "player/player.h"
 #include "sprites.h"
 #include "sys.h"
 #include "tilemap/tilemap.h"
 #include "tools.h"
 #include "vdp.h"
-
-GameObject goblin;
 
 void INPUT_eventHandler(u16 joy, u16 changed, u16 state);
 
@@ -52,38 +51,40 @@ void BACKGROUND_update(u16 score) {
 }
 
 void MAP_updatePlayerTile() {
-  if (goblin.x_pos < MAP_LEVEL1_WIDTH - 2)
-    TILEMAP_updateRightTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
+  if (player.object.x < MAP_LEVEL1_WIDTH - 2)
+    TILEMAP_updateRightTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
                             MAP_LEVEL1_Y_POS, GREEN_TILE);
 
-  if (goblin.x_pos != 0)
-    TILEMAP_updateLeftTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
+  if (player.object.x != 0)
+    TILEMAP_updateLeftTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
                            MAP_LEVEL1_Y_POS, GREEN_TILE);
 
-  if (goblin.y_pos != 0)
-    TILEMAP_updateUpTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
+  if (player.object.y != 0)
+    TILEMAP_updateUpTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
                          MAP_LEVEL1_Y_POS, GREEN_TILE);
 
-  if (goblin.y_pos < MAP_LEVEL1_HEIGHT - 2)
-    TILEMAP_updateBottomTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
+  if (player.object.y < MAP_LEVEL1_HEIGHT - 2)
+    TILEMAP_updateBottomTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
                              MAP_LEVEL1_Y_POS, GREEN_TILE);
 
-  if (goblin.x_pos < MAP_LEVEL1_WIDTH - 2 && goblin.y_pos != 0)
-    TILEMAP_updateUpRighTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
+  if (player.object.x < MAP_LEVEL1_WIDTH - 2 && player.object.y != 0)
+    TILEMAP_updateUpRighTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
                              MAP_LEVEL1_Y_POS, GREEN_TILE);
 
-  if (goblin.x_pos != 0 && goblin.y_pos != 0)
-    TILEMAP_updateUpLeftTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
+  if (player.object.x != 0 && player.object.y != 0)
+    TILEMAP_updateUpLeftTile(player.object.x, player.object.y, MAP_LEVEL1_X_POS,
                              MAP_LEVEL1_Y_POS, GREEN_TILE);
 
-  if (goblin.x_pos < MAP_LEVEL1_WIDTH - 2 &&
-      goblin.y_pos < MAP_LEVEL1_HEIGHT - 2)
-    TILEMAP_updateBottomRightTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
-                                  MAP_LEVEL1_Y_POS, GREEN_TILE);
+  if (player.object.x < MAP_LEVEL1_WIDTH - 2 &&
+      player.object.y < MAP_LEVEL1_HEIGHT - 2)
+    TILEMAP_updateBottomRightTile(player.object.x, player.object.y,
+                                  MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS,
+                                  GREEN_TILE);
 
-  if (goblin.x_pos != 0 && goblin.y_pos < MAP_LEVEL1_HEIGHT - 2)
-    TILEMAP_updateBottomLeftTile(goblin.x_pos, goblin.y_pos, MAP_LEVEL1_X_POS,
-                                  MAP_LEVEL1_Y_POS, GREEN_TILE);
+  if (player.object.x != 0 && player.object.y < MAP_LEVEL1_HEIGHT - 2)
+    TILEMAP_updateBottomLeftTile(player.object.x, player.object.y,
+                                 MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS,
+                                 GREEN_TILE);
 }
 
 void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
@@ -96,16 +97,16 @@ void INPUT_eventHandler(u16 joy, u16 changed, u16 state) {
   // Move when the buttons are released
   if (!(directional)) {
     if (changed & BUTTON_LEFT) {
-      goblin.x_pos -= 2;
+      player.object.x -= 2;
     } else if (changed & BUTTON_RIGHT) {
-      goblin.x_pos += 2;
+      player.object.x += 2;
     } else if (changed & BUTTON_DOWN) {
-      goblin.y_pos += 2;
+      player.object.y += 2;
     } else if (changed & BUTTON_UP) {
-      goblin.y_pos -= 2;
+      player.object.y -= 2;
     }
 
-    GAMEOBJECT_updatePos(&goblin, MAP_LEVEL1_WIDTH - 1, MAP_LEVEL1_HEIGHT - 1);
+    PLAYER_update();
   }
 }
 
@@ -119,8 +120,8 @@ int main(bool resetType) {
   INPUT_init();
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  GAMEOBJECT_init(&goblin, &goblin1, PLAYER_PAL, GOBLIN_LEVEL1_X_POS,
-                  GOBLIN_LEVEL1_Y_POS);
+  PLAYER_init(&goblin_sprite1, PLAYER_PAL, GOBLIN_LEVEL1_X_POS,
+              GOBLIN_LEVEL1_Y_POS);
 
   SYS_doVBlankProcess();
 
