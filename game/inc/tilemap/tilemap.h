@@ -29,8 +29,8 @@ inline void TILEMAP_init(const TileSet *tileset) {
 inline void TILEMAP_update(const TileMap *const tilemap) {
   VDP_setTileMapEx(
       TILEMAP_PLANE, tilemap,
-      TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX),
-      MAP_LEVEL1_X_POS, MAP_LEVEL1_Y_POS, 0, 0, tilemap->w, tilemap->h, DMA);
+      TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX), mapLevelX,
+      mapLevelY, 0, 0, tilemap->w, tilemap->h, DMA);
 }
 
 inline void TILEMAP_updateRightTile(s8 x, s8 y, u8 mapPosX, u8 mapPosY,

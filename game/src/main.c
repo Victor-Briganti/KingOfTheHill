@@ -1,7 +1,6 @@
 #include <genesis.h>
 #include <sprite_eng.h>
 
-#include "gameobject/gameobject.h"
 #include "gfx.h"
 #include "global.h"
 #include "joy.h"
@@ -12,9 +11,24 @@
 #include "tools.h"
 #include "vdp.h"
 
-void SCREEN_init() {
-  SYS_disableInts();
+//===----------------------------------------------------------------------===//
+// GLOBALS
+//===----------------------------------------------------------------------===//
 
+u16 mapLevelHeight;
+u16 mapLevelWidth;
+
+u16 mapLevelX;
+u16 mapLevelY;
+
+u16 playerInitX;
+u16 playerInitY;
+
+//===----------------------------------------------------------------------===//
+// AUXILIARY
+//===----------------------------------------------------------------------===//
+
+static void COMMON_init() {
   // Set the resolution of the screen
   VDP_setScreenWidth320();
   VDP_setScreenHeight224();
@@ -23,10 +37,21 @@ void SCREEN_init() {
   SPR_init();
   JOY_init();
 
-  SYS_enableInts();
+  // Init the player object
+  PLAYER_init();
+
+  // Initialize globals
+  mapLevelHeight = MAP_LEVEL1_HEIGHT;
+  mapLevelWidth = MAP_LEVEL1_WIDTH;
+
+  mapLevelX = MAP_LEVEL1_X_POS;
+  mapLevelY = MAP_LEVEL1_Y_POS;
+
+  playerInitX = PLAYER_LEVEL1_X_POS;
+  playerInitY = PLAYER_LEVEL1_Y_POS;
 }
 
-void BACKGROUND_init() {
+static void BACKGROUND_init() {
   // Draw background
   VDP_drawImageEx(BACKGROUND_PLANE, &background_level,
                   TILE_ATTR_FULL(BACKGROUND_PAL, 0, FALSE, FALSE, 1), 0, 0,
@@ -35,41 +60,38 @@ void BACKGROUND_init() {
   // Render level info
   VDP_setTextPalette(BACKGROUND_PAL);
   VDP_setTextPlane(BACKGROUND_PLANE);
-  VDP_drawText("LEVEL 1-1", LEVEL_TEXT_X, LEVEL_TEXT_Y);
 }
 
-void BACKGROUND_update(u16 score) {
+static void BACKGROUND_update(u16 score) {
   char scoreText[6];
   sprintf(scoreText, "%d", score);
   VDP_drawText(scoreText, SCORE_TEXT_X, SCORE_TEXT_Y);
+  VDP_drawText("LEVEL 1-1", LEVEL_TEXT_X, LEVEL_TEXT_Y);
 }
 
+//===----------------------------------------------------------------------===//
+// MAIN
+//===----------------------------------------------------------------------===//
+
 int main(bool resetType) {
-  // Soft reset doesn't clear RAM. Can lead to bugs.
   if (!resetType) {
     SYS_hardReset();
   }
 
-  SCREEN_init();
-  BACKGROUND_init();
-  TILEMAP_init(&tileset);
-  PLAYER_init(&goblin_sprite1, PLAYER_PAL, GOBLIN_LEVEL1_X_POS,
-              GOBLIN_LEVEL1_Y_POS);
-
-  SYS_doVBlankProcess();
-
-  u16 score = 0;
+  COMMON_init();
   while (TRUE) {
-    BACKGROUND_update(score);
-    TILEMAP_update(&level_map1);
-    PLAYER_update();
-
-    // update hardware sprites table
-    SPR_update();
-
-    // wait for VBLANK
+    BACKGROUND_init();
+    TILEMAP_init(&tileset);
+    PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
     SYS_doVBlankProcess();
-    score++;
+
+    while (TRUE) {
+      BACKGROUND_update(0);
+      TILEMAP_update(&level_map1);
+      PLAYER_update();
+      SPR_update();
+      SYS_doVBlankProcess();
+    }
   }
 
   return 0;

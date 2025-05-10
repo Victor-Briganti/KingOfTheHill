@@ -4,6 +4,22 @@
 #include <genesis.h>
 
 //===----------------------------------------------------------------------===//
+// EXTERN
+//===----------------------------------------------------------------------===//
+
+// Current Level Size Information
+extern u16 mapLevelHeight;
+extern u16 mapLevelWidth;
+
+// Current Map Level Size Information
+extern u16 mapLevelX;
+extern u16 mapLevelY;
+
+// Current Level Player Initial Position
+extern u16 playerInitX;
+extern u16 playerInitY;
+
+//===----------------------------------------------------------------------===//
 // SCREEN
 //===----------------------------------------------------------------------===//
 
@@ -30,23 +46,23 @@
 #define TILEMAP_PLANE BG_A
 
 // Level Map Size Information
-#define MAP_LEVEL1_HEIGHT (16)  /* In Tile */
-#define MAP_LEVEL1_WIDTH (14)   /* In Tile */
+#define MAP_LEVEL1_HEIGHT (16) /* In Tile */
+#define MAP_LEVEL1_WIDTH (14)  /* In Tile */
 
 // Initial position of the map in level 1
-#define MAP_LEVEL1_X_POS (14)  /* In Tile */
-#define MAP_LEVEL1_Y_POS (6)   /* In Tile */
+#define MAP_LEVEL1_X_POS (14) /* In Tile */
+#define MAP_LEVEL1_Y_POS (6)  /* In Tile */
 
 // Transform the position of the player from tile to coodinates
-#define POS_X(x) (((x) + MAP_LEVEL1_X_POS) * 8)
-#define POS_Y(y) (((y) + MAP_LEVEL1_Y_POS) * 8)
+#define POS_X(x) (((x) + mapLevelX) * 8)
+#define POS_Y(y) (((y) + mapLevelY) * 8)
 
 // Player initial position
-#define GOBLIN_LEVEL1_X_POS (6)
-#define GOBLIN_LEVEL1_Y_POS (14)
+#define PLAYER_LEVEL1_X_POS (6)
+#define PLAYER_LEVEL1_Y_POS (14)
 
 // #TODO: This definitions are only the idea of how many pieces each board
-// should have 
+// should have
 
 // #define MAP_MAX_HEIGHT 12
 // #define MAP_MAX_WIDTH 11
