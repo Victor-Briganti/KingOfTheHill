@@ -3,9 +3,17 @@
 
 #include <genesis.h>
 
+//===----------------------------------------------------------------------===//
+// SCREEN
+//===----------------------------------------------------------------------===//
+
 // Screen size
 #define SCREEN_WIDTH (320)
 #define SCREEN_HEIGHT (224)
+
+//===----------------------------------------------------------------------===//
+// PALETTE
+//===----------------------------------------------------------------------===//
 
 // Palettes
 #define PLAYER_PAL PAL0
@@ -13,17 +21,13 @@
 #define TILEMAP_PAL PAL2
 #define BACKGROUND_PAL PAL3
 
+//===----------------------------------------------------------------------===//
+// PLANE
+//===----------------------------------------------------------------------===//
+
 // Planes
 #define BACKGROUND_PLANE BG_B
 #define TILEMAP_PLANE BG_A
-
-// Position of each tile color
-#define BLACK_TILE (0)
-#define WHITE_TILE (1)
-#define PURPLE_TILE (2)
-#define GREEN_TILE (3)
-#define RED_TILE (4)
-#define BLUE_TILE (5)
 
 // Level Map Size Information
 #define MAP_LEVEL1_HEIGHT (16)  /* In Tile */
@@ -60,5 +64,17 @@
 
 // #define MAP_LEVEL6_HEIGHT 12
 // #define MAP_LEVEL6_WIDTH 11
+
+//===----------------------------------------------------------------------===//
+// TEXT
+//===----------------------------------------------------------------------===//
+
+// Score position
+#define SCORE_TEXT_X 0
+#define SCORE_TEXT_Y 1
+
+// Level position
+#define LEVEL_TEXT_X 15
+#define LEVEL_TEXT_Y 1
 
 #endif // __GLOBAL_H__
