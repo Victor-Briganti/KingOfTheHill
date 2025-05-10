@@ -10,20 +10,6 @@ typedef struct GameObject {
   s8 y;
 } GameObject;
 
-inline void GAMEOBJECT_clamp(GameObject *const obj, u16 width, u16 height) {
-  if (obj->x < 0)
-    obj->x = 0;
-
-  if (obj->x >= width)
-    obj->x = width - 1;
-
-  if (obj->y < 0)
-    obj->y = 0;
-
-  if (obj->y >= height)
-    obj->y = height - 1;
-}
-
 inline void GAMEOBJECT_init(GameObject *const obj,
                             const SpriteDefinition *sprite, u16 palette, s8 x,
                             s8 y) {
@@ -34,9 +20,8 @@ inline void GAMEOBJECT_init(GameObject *const obj,
   obj->y = y;
 }
 
-inline void GAMEOBJECT_updatePos(GameObject *const obj, u16 width, u16 height) {
-  GAMEOBJECT_clamp(obj, width, height);
-  SPR_setPosition(obj->sprite, POS_X(obj->x), POS_Y(obj->y));
+inline void GAMEOBJECT_updatePos(GameObject *object, u16 width, u16 height) {
+  SPR_setPosition(object->sprite, POS_X(object->x), POS_Y(object->y));
 }
 
 #endif //  __GAMEOBJECT_H__

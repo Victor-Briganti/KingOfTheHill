@@ -161,4 +161,19 @@ inline void TILEMAP_updateBottomLeftTile(s8 x, s8 y, u8 mapPosX, u8 mapPosY,
                    x + mapPosX - 2, y + mapPosY + 3);
 }
 
+inline void TILEMAP_setTile(s8 x, s8 y, u8 mapPosX, u8 mapPosY, u16 tileIndex) {
+  VDP_setTileMapXY(TILEMAP_PLANE,
+                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
+                   x + mapLevelX, y + mapLevelY);
+  VDP_setTileMapXY(TILEMAP_PLANE,
+                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
+                   x + mapLevelX + 1, y + mapLevelY);
+  VDP_setTileMapXY(TILEMAP_PLANE,
+                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
+                   x + mapLevelX, y + mapLevelY + 1);
+  VDP_setTileMapXY(TILEMAP_PLANE,
+                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
+                   x + mapLevelX + 1, y + mapLevelY + 1);
+}
+
 #endif // __TILEMAP_H__
