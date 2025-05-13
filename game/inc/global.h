@@ -61,6 +61,10 @@ extern u16 playerInitY;
 #define PLAYER_LEVEL1_X_POS (6)
 #define PLAYER_LEVEL1_Y_POS (14)
 
+// PAWN initial position
+#define PAWN_LEVEL1_X_POS (6)
+#define PAWN_LEVEL1_Y_POS (0)
+
 // #TODO: This definitions are only the idea of how many pieces each board
 // should have
 

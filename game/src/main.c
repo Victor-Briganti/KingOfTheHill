@@ -1,6 +1,8 @@
 #include "global.h"
 #include "player/player.h"
 #include "tilemap/tilemap.h"
+#include "map/map.h"
+#include "enemy/pawn.h"
 
 #include <genesis.h>
 #include <gfx.h>
@@ -39,6 +41,7 @@ static void COMMON_init() {
 
   // Init the player object
   PLAYER_init();
+  PAWN_init();
 
   // Initialize globals
   mapLevelHeight = MAP_LEVEL1_HEIGHT;
@@ -82,7 +85,9 @@ int main(const bool resetType) {
   while (TRUE) {
     BACKGROUND_init();
     TILEMAP_init(&tileset);
+    MAP_initLevel1();
     PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
+    PAWN_levelInit(&pawn_sprite1, ENEMY_PAL, PAWN_LEVEL1_X_POS, PAWN_LEVEL1_Y_POS);
     SYS_doVBlankProcess();
 
     while (TRUE) {
@@ -90,6 +95,9 @@ int main(const bool resetType) {
       TILEMAP_update(&level_map1);
       PLAYER_update();
       SPR_update();
+      if (!MAP_updateLevel1()) {
+        break;
+      }
       SYS_doVBlankProcess();
     }
   }
