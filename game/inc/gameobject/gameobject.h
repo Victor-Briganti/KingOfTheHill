@@ -7,13 +7,13 @@
 
 typedef struct GameObject {
   Sprite *sprite;
-  s8 x;
-  s8 y;
+  s16 x;
+  s16 y;
 } GameObject;
 
 inline void GAMEOBJECT_init(GameObject *const obj,
-                            const SpriteDefinition *sprite, u16 palette, s8 x,
-                            s8 y) {
+                            const SpriteDefinition *sprite, u16 palette, s16 x,
+                            s16 y) {
   PAL_setPalette(palette, sprite->palette->data, DMA);
   obj->sprite = SPR_addSprite(sprite, POS_X(x), POS_Y(y),
                               TILE_ATTR(PLAYER_PAL, FALSE, FALSE, FALSE));

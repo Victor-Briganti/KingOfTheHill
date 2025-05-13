@@ -22,7 +22,7 @@ static inline bool PLAYER_onRight() {
   return (player.object.x < mapLevelWidth - 2);
 }
 
-static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
+static void PLAYER_handleCursorPos(s16 x, s16 y, u8 direction) {
   if (x == player.object.x && y == player.object.y) {
     // Jump the player if the button was preset against it
     if (direction & BUTTON_LEFT) {
@@ -52,8 +52,8 @@ static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
 }
 
 static void PLAYER_cursorInnertia() {
-  u8 x = player.cursorX;
-  u8 y = player.cursorY;
+  s16 x = player.cursorX;
+  s16 y = player.cursorY;
   u8 direction = BUTTON_UP;
 
   if (x == player.object.x && y > player.object.y) { /* Down of the player */
@@ -153,8 +153,8 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
 
   // Move when the buttons are released
   if (!directional) {
-    s8 x = player.cursorX;
-    s8 y = player.cursorY;
+    s16 x = player.cursorX;
+    s16 y = player.cursorY;
     if (changed & BUTTON_LEFT) {
       x = player.cursorX - 2;
       PLAYER_handleCursorPos(x, y, BUTTON_LEFT);
@@ -226,7 +226,7 @@ void PLAYER_update() {
   PLAYER_updateCursorTile();
 }
 
-void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s8 x, s8 y) {
+void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
   player.cursorX = x;
   player.cursorY = y - 2;
 
