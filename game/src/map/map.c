@@ -8,6 +8,8 @@ void MAP_initLevel1() {
     map[PLAYER_LEVEL1_Y_POS][PLAYER_LEVEL1_X_POS] = MAP_MARK_PLAYER;
 }
 
-void MAP_updateLevel1() {
+bool MAP_updateLevel1() {
+    map[player.previousY][player.previousX] = MAP_MARK_EMPTY;
     map[player.object.y][player.object.x] = MAP_MARK_PLAYER;
+    return TRUE;
 }

@@ -93,6 +93,10 @@ static void PLAYER_cursorInnertia() {
     direction = BUTTON_RIGHT | BUTTON_DOWN;
   }
 
+  // Save the old values
+  player.previousX = player.object.x;
+  player.previousY = player.object.y;
+  
   player.object.x = player.cursorX;
   player.object.y = player.cursorY;
 
