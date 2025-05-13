@@ -215,8 +215,6 @@ inline static void PLAYER_updateCursorTile() {
 //===----------------------------------------------------------------------===//
 
 void PLAYER_init() {
-  player.object.x = 0;
-  player.object.y = 0;
   player.health = 0;
   player.totalHealth = 0;
   player.cursorX = 0;
@@ -229,9 +227,6 @@ void PLAYER_update() {
 }
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s8 x, s8 y) {
-  player.object.x = x;
-  player.object.y = y;
-
   player.cursorX = x;
   player.cursorY = y - 2;
 

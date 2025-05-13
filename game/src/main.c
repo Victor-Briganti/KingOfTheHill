@@ -73,7 +73,7 @@ static void BACKGROUND_update(u16 score) {
 // MAIN
 //===----------------------------------------------------------------------===//
 
-int main(bool resetType) {
+int main(const bool resetType) {
   if (!resetType) {
     SYS_hardReset();
   }
