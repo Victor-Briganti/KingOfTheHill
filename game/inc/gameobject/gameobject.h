@@ -2,6 +2,7 @@
 #define __GAMEOBJECT_H__
 
 #include "global.h"
+
 #include <genesis.h>
 
 typedef struct GameObject {

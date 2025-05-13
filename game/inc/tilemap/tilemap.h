@@ -1,9 +1,10 @@
 #ifndef __TILEMAP_H__
 #define __TILEMAP_H__
 
-#include "gfx.h"
 #include "global.h"
+
 #include <genesis.h>
+#include <gfx.h>
 
 //===----------------------------------------------------------------------===//
 // TILESET

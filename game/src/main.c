@@ -1,15 +1,15 @@
-#include <genesis.h>
-#include <sprite_eng.h>
-
-#include "gfx.h"
 #include "global.h"
-#include "joy.h"
 #include "player/player.h"
-#include "sprites.h"
-#include "sys.h"
 #include "tilemap/tilemap.h"
-#include "tools.h"
-#include "vdp.h"
+
+#include <genesis.h>
+#include <gfx.h>
+#include <joy.h>
+#include <sprite_eng.h>
+#include <sprites.h>
+#include <sys.h>
+#include <tools.h>
+#include <vdp.h>
 
 //===----------------------------------------------------------------------===//
 // GLOBALS
@@ -93,6 +93,5 @@ int main(bool resetType) {
       SYS_doVBlankProcess();
     }
   }
-
   return 0;
 }

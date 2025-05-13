@@ -1,7 +1,8 @@
 #include "player/player.h"
 #include "global.h"
-#include "joy.h"
 #include "tilemap/tilemap.h"
+
+#include <joy.h>
 
 Player player;
 
@@ -23,6 +24,7 @@ static inline bool PLAYER_onRight() {
 
 static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
   if (x == player.object.x && y == player.object.y) {
+    // Jump the player if the button was preset against it
     if (direction & BUTTON_LEFT) {
       x -= 2;
     } else if (direction & BUTTON_RIGHT) {
@@ -37,7 +39,7 @@ static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
   // Clamp player limit
   x = clamp(x, player.object.x - 2, player.object.x + 2);
   y = clamp(y, player.object.y - 2, player.object.y + 2);
-  
+
   // Clamp map limit
   x = clamp(x, 0, mapLevelWidth - 2);
   y = clamp(y, 0, mapLevelHeight - 2);
@@ -49,6 +51,90 @@ static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
   player.cursorY = y;
 }
 
+static void PLAYER_cursorInnertia() {
+  u8 x = player.cursorX;
+  u8 y = player.cursorY;
+  u8 direction = BUTTON_UP;
+
+  if (x == player.object.x && y > player.object.y) { /* Down of the player */
+    y += 2;
+    direction = BUTTON_DOWN;
+  } else if (x == player.object.x &&
+             y < player.object.y) { /* Up of the player */
+    y -= 2;
+    direction = BUTTON_UP;
+  } else if (x < player.object.x &&
+             y == player.object.y) { /* Left of the player */
+    x -= 2;
+    direction = BUTTON_LEFT;
+  } else if (x > player.object.x &&
+             y == player.object.y) { /* Right of the player */
+    x += 2;
+    direction = BUTTON_RIGHT;
+  } else if (x > player.object.x &&
+             y > player.object.y) { /* Down Right of the player */
+    x += 2;
+    y += 2;
+    direction = BUTTON_RIGHT | BUTTON_DOWN;
+  } else if (x > player.object.x &&
+             y < player.object.y) { /* Up Right of the player */
+    x += 2;
+    y -= 2;
+    direction = BUTTON_RIGHT | BUTTON_UP;
+  } else if (x < player.object.x &&
+             y > player.object.y) { /* Down Left of the player */
+    x -= 2;
+    y += 2;
+    direction = BUTTON_LEFT | BUTTON_DOWN;
+  } else if (x < player.object.x &&
+             y < player.object.y) { /* Down Right of the player */
+    x -= 2;
+    y -= 2;
+    direction = BUTTON_RIGHT | BUTTON_DOWN;
+  }
+
+  player.object.x = player.cursorX;
+  player.object.y = player.cursorY;
+
+  PLAYER_handleCursorPos(x, y, direction);
+
+  if (player.cursorX == player.object.x && player.object.y == player.cursorY) {
+    if (PLAYER_onRight())
+      player.cursorX -= 4;
+
+    if (PLAYER_onLeft())
+      player.cursorX += 4;
+
+    if (PLAYER_onUp())
+      player.cursorY += 4;
+
+    if (PLAYER_onBottom())
+      player.cursorY -= 4;
+
+    if (PLAYER_onUp() && PLAYER_onRight()) {
+      player.cursorX = player.object.x + 2;
+      player.cursorY = player.object.y;
+    }
+
+    if (PLAYER_onUp() && PLAYER_onLeft()) {
+      player.cursorX = player.object.x - 2;
+      player.cursorY = player.object.y;
+    }
+    
+    if (PLAYER_onBottom() && PLAYER_onRight()) {
+      player.cursorX = player.object.x + 2;
+      player.cursorY = player.object.y;
+    }
+    
+    if (PLAYER_onBottom() && PLAYER_onLeft()) {
+      player.cursorX = player.object.x - 2;
+      player.cursorY = player.object.y;
+    }
+  }
+
+  GAMEOBJECT_updatePos(&player.object);
+}
+
 static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
   if (joy != JOY_1)
     return;
@@ -56,8 +142,17 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
   // Verify if the directionals are pressed
   u16 directional = state & BUTTON_DIR;
 
+  // Verify if the command button was pressed
+  u16 command = state & BUTTON_A;
+
+  // Act when the command is pressed
+  if (command) {
+    PLAYER_cursorInnertia();
+    return;
+  }
+
   // Move when the buttons are released
-  if (!(directional)) {
+  if (!directional) {
     s8 x = player.cursorX;
     s8 y = player.cursorY;
     if (changed & BUTTON_LEFT) {
@@ -73,9 +168,6 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
       y = player.cursorY - 2;
       PLAYER_handleCursorPos(x, y, BUTTON_UP);
     }
-
-    // GAMEOBJECT_updatePos(&player.object, mapLevelWidth - 2, mapLevelHeight -
-    // 2);
   }
 }
 

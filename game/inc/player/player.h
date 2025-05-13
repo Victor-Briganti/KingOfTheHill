@@ -7,10 +7,10 @@ typedef struct Player {
   GameObject object;
   u8 health;
   u8 totalHealth;
-  
+
   //  Define the selector position
-  s8 cursorX; 
-  s8 cursorY; 
+  s8 cursorX;
+  s8 cursorY;
 } Player;
 
 extern Player player;
