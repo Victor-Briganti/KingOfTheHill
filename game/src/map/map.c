@@ -16,14 +16,14 @@ void MAP_initLevel1() {
 }
 
 bool MAP_updateLevel1() {
-  map[player.previousY][player.previousX] &= ~MAP_MARK_EMPTY;
-  map[player.object.y][player.object.x] |= MAP_MARK_PLAYER;
+  map[player.previousY][player.previousX] &= ~MAP_MARK_PLAYER;
+  map[player.posY][player.posX] |= MAP_MARK_PLAYER;
 
-  map[pawn.previousY][pawn.previousX] &= ~MAP_MARK_EMPTY;
-  map[pawn.object.y][pawn.object.x] |= MAP_MARK_PAWN;
+  map[pawn.previousY][pawn.previousX] &= ~MAP_MARK_PAWN;
+  map[pawn.posY][pawn.posX] |= MAP_MARK_PAWN;
 
-  if (map[player.object.y][player.object.x] & MAP_MARK_PAWN &&
-      map[player.object.y][player.object.x] & MAP_MARK_PLAYER) {
+  if (map[player.posY][player.posX] & MAP_MARK_PAWN &&
+      map[player.posY][player.posX] & MAP_MARK_PLAYER) {
     player.health--;
     return FALSE;
   }
