@@ -83,6 +83,11 @@ static void BACKGROUND_update(u16 score) {
 // MAIN
 //===----------------------------------------------------------------------===//
 
+static const MapObject mapObj[2] = {
+  {.x=PLAYER_LEVEL1_X_POS, .y=PLAYER_LEVEL1_Y_POS, .object=MAP_OBJECT_PLAYER},
+  {.x=PAWN_LEVEL1_X_POS, .y=PAWN_LEVEL1_Y_POS, .object=MAP_OBJECT_PAWN},
+};
+
 int main(const bool resetType) {
   if (!resetType) {
     SYS_hardReset();
@@ -93,7 +98,7 @@ int main(const bool resetType) {
   while (TRUE) {
     BACKGROUND_init();
     TILEMAP_init(&tileset);
-    MAP_initLevel1();
+    MAP_initLevel(MAP_LEVEL1_HEIGHT, MAP_LEVEL1_WIDTH);
     PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
     PAWN_levelInit(&pawn_sprite1, ENEMY_PAL, PAWN_LEVEL1_X_POS,
                    PAWN_LEVEL1_Y_POS);
@@ -108,7 +113,7 @@ int main(const bool resetType) {
       PLAYER_update();
       PAWN_update();
       SPR_update();
-      if (!MAP_updateLevel1()) {
+      if (!MAP_updateLevel()) {
         kprintf("%d", player.health);
         HEART_update();
         GAMEOBJECT_releaseSprite(&player.object);

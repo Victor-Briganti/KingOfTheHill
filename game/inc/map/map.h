@@ -3,18 +3,33 @@
 
 #include "global.h"
 
-extern u16 map[MAP_LEVEL1_HEIGHT][MAP_LEVEL1_WIDTH];
+#define MAP_MAX_HEIGHT MAP_LEVEL1_HEIGHT 
+#define MAP_MAX_WIDTH MAP_LEVEL1_WIDTH
 
-#define MAP_MARK_EMPTY (0)
-#define MAP_MARK_PLAYER (1)
-#define MAP_MARK_PAWN (2)
-#define MAP_MARK_TOWER (4)
-#define MAP_MARK_BISHOP (8)
-#define MAP_MARK_KNIGHT (16)
-#define MAP_MARK_QUEEN (32)
-#define MAP_MARK_KING (64)
+extern u16 map[MAP_MAX_HEIGHT][MAP_MAX_WIDTH];
 
-void MAP_initLevel1();
-bool MAP_updateLevel1();
+typedef enum MapObjectType {
+    MAP_OBJECT_EMPTY  = 0,
+    MAP_OBJECT_PLAYER = 1 << 0,
+    MAP_OBJECT_PAWN   = 1 << 1,
+    MAP_OBJECT_TOWER  = 1 << 2,
+    MAP_OBJECT_BISHOP = 1 << 3,
+    MAP_OBJECT_KNIGHT = 1 << 4,
+    MAP_OBJECT_QUEEN  = 1 << 5,
+    MAP_OBJECT_KING   = 1 << 6
+} MapObjectType;
+
+typedef struct MapObject{
+    u16 x;
+    u16 y;
+    MapObjectType object;
+} MapObject;
+
+
+void MAP_initLevel(u16 mapHeight, u16 mapWidth);
+
+void MAP_initObjects(MapObject objectVector[], u16 count);
+
+bool MAP_updateLevel();
 
 #endif // __MAP_H__
