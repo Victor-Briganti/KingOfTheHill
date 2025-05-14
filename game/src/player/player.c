@@ -11,19 +11,15 @@ Player player;
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-static inline bool PLAYER_onBottom() {
-  return (player.posY < mapLevelHeight - 2);
-}
+static inline bool isOnBottom() { return (player.posY < mapLevelHeight - 2); }
 
-static inline bool PLAYER_onUp() { return (player.posY != 0); }
+static inline bool isOnTop() { return (player.posY != 0); }
 
-static inline bool PLAYER_onLeft() { return (player.posX != 0); }
+static inline bool isOnLeft() { return (player.posX != 0); }
 
-static inline bool PLAYER_onRight() {
-  return (player.posX < mapLevelWidth - 2);
-}
+static inline bool isOnRight() { return (player.posX < mapLevelWidth - 2); }
 
-static void PLAYER_handleCursorPos(s16 x, s16 y, u8 direction) {
+static void handleCursorPos(s16 x, s16 y, u8 direction) {
   if (x == player.posX && y == player.posY) {
     // Jump the player if the button was preset against it
     if (direction & BUTTON_LEFT) {
@@ -52,7 +48,7 @@ static void PLAYER_handleCursorPos(s16 x, s16 y, u8 direction) {
   player.cursorY = y;
 }
 
-static void PLAYER_cursorInnertia() {
+static void cursorInnertia() {
   s16 x = player.cursorX;
   s16 y = player.cursorY;
   u8 direction = BUTTON_UP;
@@ -96,37 +92,37 @@ static void PLAYER_cursorInnertia() {
   player.posX = player.cursorX;
   player.posY = player.cursorY;
 
-  PLAYER_handleCursorPos(x, y, direction);
+  handleCursorPos(x, y, direction);
 
   if (player.cursorX == player.posX && player.posY == player.cursorY) {
-    if (PLAYER_onRight())
+    if (isOnRight())
       player.cursorX -= 4;
 
-    if (PLAYER_onLeft())
+    if (isOnLeft())
       player.cursorX += 4;
 
-    if (PLAYER_onUp())
+    if (isOnTop())
       player.cursorY += 4;
 
-    if (PLAYER_onBottom())
+    if (isOnBottom())
       player.cursorY -= 4;
 
-    if (PLAYER_onUp() && PLAYER_onRight()) {
+    if (isOnTop() && isOnRight()) {
       player.cursorX = player.posX + 2;
       player.cursorY = player.posY;
     }
 
-    if (PLAYER_onUp() && PLAYER_onLeft()) {
+    if (isOnTop() && isOnLeft()) {
       player.cursorX = player.posX - 2;
       player.cursorY = player.posY;
     }
 
-    if (PLAYER_onBottom() && PLAYER_onRight()) {
+    if (isOnBottom() && isOnRight()) {
       player.cursorX = player.posX + 2;
       player.cursorY = player.posY;
     }
 
-    if (PLAYER_onBottom() && PLAYER_onLeft()) {
+    if (isOnBottom() && isOnLeft()) {
       player.cursorX = player.posX - 2;
       player.cursorY = player.posY;
     }
@@ -135,7 +131,7 @@ static void PLAYER_cursorInnertia() {
   // GAMEOBJECT_updatePos(&player.object);
 }
 
-static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
+static void inputHandler(u16 joy, u16 changed, u16 state) {
   if (joy != JOY_1 || turn == ENEMY || player.state == PLAYER_MOVING)
     return;
 
@@ -147,7 +143,7 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
 
   // Act when the command is pressed
   if (command) {
-    PLAYER_cursorInnertia();
+    cursorInnertia();
     player.state = PLAYER_MOVING;
     return;
   }
@@ -158,77 +154,65 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
     s16 y = player.cursorY;
     if (changed & BUTTON_LEFT) {
       x = player.cursorX - 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_LEFT);
+      handleCursorPos(x, y, BUTTON_LEFT);
     } else if (changed & BUTTON_RIGHT) {
       x = player.cursorX + 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_RIGHT);
+      handleCursorPos(x, y, BUTTON_RIGHT);
     } else if (changed & BUTTON_DOWN) {
       y = player.cursorY + 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_DOWN);
+      handleCursorPos(x, y, BUTTON_DOWN);
     } else if (changed & BUTTON_UP) {
       y = player.cursorY - 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_UP);
+      handleCursorPos(x, y, BUTTON_UP);
     }
   }
 }
 
-inline static void PLAYER_updateSelectTile() {
-  if (PLAYER_onRight())
+inline static void updateSelectTile() {
+  if (isOnRight())
     TILEMAP_updateRightTile(player.posX, player.posY, mapLevelX, mapLevelY,
                             GREEN_TILE);
 
-  if (PLAYER_onLeft())
+  if (isOnLeft())
     TILEMAP_updateLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
                            GREEN_TILE);
 
-  if (PLAYER_onUp())
+  if (isOnTop())
     TILEMAP_updateUpTile(player.posX, player.posY, mapLevelX, mapLevelY,
                          GREEN_TILE);
 
-  if (PLAYER_onBottom())
+  if (isOnBottom())
     TILEMAP_updateBottomTile(player.posX, player.posY, mapLevelX, mapLevelY,
                              GREEN_TILE);
 
-  if (PLAYER_onUp() && PLAYER_onRight())
+  if (isOnTop() && isOnRight())
     TILEMAP_updateUpRighTile(player.posX, player.posY, mapLevelX, mapLevelY,
                              GREEN_TILE);
 
-  if (PLAYER_onUp() && PLAYER_onLeft())
+  if (isOnTop() && isOnLeft())
     TILEMAP_updateUpLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
                              GREEN_TILE);
 
-  if (PLAYER_onBottom() && PLAYER_onRight())
+  if (isOnBottom() && isOnRight())
     TILEMAP_updateBottomRightTile(player.posX, player.posY, mapLevelX,
                                   mapLevelY, GREEN_TILE);
 
-  if (PLAYER_onBottom() && PLAYER_onLeft())
+  if (isOnBottom() && isOnLeft())
     TILEMAP_updateBottomLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
                                  GREEN_TILE);
 }
 
-inline static void PLAYER_updateCursorTile() {
+inline static void updateCursorTile() {
   TILEMAP_setTile(player.cursorX, player.cursorY, mapLevelX, mapLevelY,
                   BLUE_TILE);
 }
 
-inline static void PLAYER_moveAnimation() {
+inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    if (player.object.x < player.posX)
-      player.object.x++;
-    else if (player.object.x > player.posX)
-      player.object.x--;
-
-    if (player.object.y < player.posY)
-      player.object.y++;
-    else if (player.object.y > player.posY)
-      player.object.y--;
-
-    if (player.object.x == player.posX && player.object.y == player.posY) {
+    if (GAMEOBJECT_animateTo(&player.object, player.posX, player.posY)) {
       turn = ENEMY;
       player.state = PLAYER_IDLE;
     }
-
-    GAMEOBJECT_updatePos(&player.object);
   }
 }
 
@@ -251,18 +235,18 @@ void PLAYER_update() {
     return;
 
   if (player.state == PLAYER_MOVING) {
-    PLAYER_moveAnimation();
+    callAnimation();
     return;
   }
 
-  PLAYER_updateSelectTile();
-  PLAYER_updateCursorTile();
+  updateSelectTile();
+  updateCursorTile();
 }
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
   GAMEOBJECT_initInBoard(&player.object, sprite, palette, x, y);
-  JOY_setEventHandler(PLAYER_inputHandler);
+  JOY_setEventHandler(inputHandler);
 
   player.cursorX = x;
   player.cursorY = y - 2;

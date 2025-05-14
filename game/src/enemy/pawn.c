@@ -1,4 +1,5 @@
 #include "enemy/pawn.h"
+#include "gameobject/gameobject.h"
 
 Pawn pawn;
 
@@ -6,7 +7,7 @@ Pawn pawn;
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-inline static void PAWN_updatePosition() {
+inline static void updatePosition() {
   pawn.previousX = pawn.posX;
   pawn.previousY = pawn.posY;
   pawn.posY += 2;
@@ -14,24 +15,12 @@ inline static void PAWN_updatePosition() {
   pawn.state = PAWN_MOVING;
 }
 
-inline static void PAWN_moveAnimation() {
+inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    if (pawn.object.x < pawn.posX)
-      pawn.object.x++;
-    else if (pawn.object.x > pawn.posX)
-      pawn.object.x--;
-
-    if (pawn.object.y < pawn.posY)
-      pawn.object.y++;
-    else if (pawn.object.y > pawn.posY)
-      pawn.object.y--;
-
-    if (pawn.object.x == pawn.posX && pawn.object.y == pawn.posY) {
+    if (GAMEOBJECT_animateTo(&pawn.object, pawn.posX, pawn.posY)) {
       turn = PLAYER;
       pawn.state = PAWN_IDLE;
     }
-
-    GAMEOBJECT_updatePos(&pawn.object);
   }
 }
 
@@ -50,11 +39,11 @@ void PAWN_update() {
     return;
 
   if (pawn.state == PAWN_MOVING) {
-    PAWN_moveAnimation();
+    callAnimation();
     return;
   }
 
-  PAWN_updatePosition();
+  updatePosition();
 }
 
 void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
