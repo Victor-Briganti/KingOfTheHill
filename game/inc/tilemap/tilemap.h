@@ -18,6 +18,28 @@
 #define RED_TILE (4)
 #define BLUE_TILE (5)
 
+static const s16 TILE_OFFSET_RIGHT[4][2] = {{2, 0}, {3, 0}, {2, 1}, {3, 1}};
+
+static const s16 TILE_OFFSET_LEFT[4][2] = {{-1, 0}, {-2, 0}, {-1, 1}, {-2, 1}};
+
+static const s16 TILE_OFFSET_UP[4][2] = {{1, -1}, {0, -1}, {1, -2}, {0, -2}};
+
+static const s16 TILE_OFFSET_DOWN[4][2] = {{1, 2}, {0, 2}, {1, 3}, {0, 3}};
+
+static const s16 TILE_OFFSET_UP_RIGHT[4][2] = {
+    {2, -2}, {2, -1}, {3, -2}, {3, -1}};
+
+static const s16 TILE_OFFSET_UP_LEFT[4][2] = {
+    {-1, -2}, {-2, -1}, {-2, -2}, {-1, -1}};
+
+static const s16 TILE_OFFSET_DOWN_RIGHT[4][2] = {
+    {2, 2}, {3, 2}, {2, 3}, {3, 3}};
+
+static const s16 TILE_OFFSET_DOWN_LEFT[4][2] = {
+    {-1, 2}, {-2, 2}, {-1, 3}, {-2, 3}};
+
+static const s16 TILE_OFFSET_CENTER[4][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
+
 //===----------------------------------------------------------------------===//
 // TILEMAP
 //===----------------------------------------------------------------------===//
@@ -34,148 +56,49 @@ inline void TILEMAP_update(const TileMap *const tilemap) {
       mapLevelY, 0, 0, tilemap->w, tilemap->h, DMA);
 }
 
-inline void TILEMAP_updateRightTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                    u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 2, y + mapPosY);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 3, y + mapPosY);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 2, y + mapPosY + 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 3, y + mapPosY + 1);
+inline void TILEMAP_placeTiles(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
+                               u16 tileIndex, const s16 offsets[][2],
+                               u16 count) {
+  u16 attr = TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex);
+  for (u16 i = 0; i < count; i++)
+    VDP_setTileMapXY(TILEMAP_PLANE, attr, x + mapPosX + offsets[i][0],
+                     y + mapPosY + offsets[i][1]);
 }
 
-inline void TILEMAP_updateLeftTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                   u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 1, y + mapPosY);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 2, y + mapPosY);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 1, y + mapPosY + 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 2, y + mapPosY + 1);
-}
+#define TILEMAP_updateRightTile(x, y, mapPosX, mapPosY, tileIndex)             \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_RIGHT, 4)
 
-inline void TILEMAP_updateUpTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                 u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 1, y + mapPosY - 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX, y + mapPosY - 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 1, y + mapPosY - 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX, y + mapPosY - 2);
-}
+#define TILEMAP_updateLeftTile(x, y, mapPosX, mapPosY, tileIndex)              \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_LEFT, 4)
 
-inline void TILEMAP_updateBottomTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                     u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 1, y + mapPosY + 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX, y + mapPosY + 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 1, y + mapPosY + 3);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX, y + mapPosY + 3);
-}
+#define TILEMAP_updateUpTile(x, y, mapPosX, mapPosY, tileIndex)                \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_UP, 4)
 
-inline void TILEMAP_updateUpRighTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                     u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 2, y + mapPosY - 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 2, y + mapPosY - 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 3, y + mapPosY - 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 3, y + mapPosY - 1);
-}
+#define TILEMAP_updateBottomTile(x, y, mapPosX, mapPosY, tileIndex)            \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_DOWN, 4)
 
-inline void TILEMAP_updateUpLeftTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                     u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 1, y + mapPosY - 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 2, y + mapPosY - 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 2, y + mapPosY - 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX - 1, y + mapPosY - 1);
-}
+#define TILEMAP_updateUpRighTile(x, y, mapPosX, mapPosY, tileIndex)            \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_UP_RIGHT, 4)
 
-inline void TILEMAP_updateBottomRightTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                          u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 2, y + mapPosY + 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 3, y + mapPosY + 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 2, y + mapPosY + 3);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapPosX + 3, y + mapPosY + 3);
-}
+#define TILEMAP_updateUpLeftTile(x, y, mapPosX, mapPosY, tileIndex)            \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_UP_LEFT, 4)
 
-inline void TILEMAP_updateBottomLeftTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                                         u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, GREEN_TILE),
-                   x + mapPosX - 1, y + mapPosY + 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, GREEN_TILE),
-                   x + mapPosX - 2, y + mapPosY + 2);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, GREEN_TILE),
-                   x + mapPosX - 1, y + mapPosY + 3);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, GREEN_TILE),
-                   x + mapPosX - 2, y + mapPosY + 3);
-}
+#define TILEMAP_updateBottomRightTile(x, y, mapPosX, mapPosY, tileIndex)       \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_DOWN_RIGHT, 4)
 
-inline void TILEMAP_setTile(s16 x, s16 y, s16 mapPosX, s16 mapPosY,
-                            u16 tileIndex) {
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapLevelX, y + mapLevelY);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapLevelX + 1, y + mapLevelY);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapLevelX, y + mapLevelY + 1);
-  VDP_setTileMapXY(TILEMAP_PLANE,
-                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex),
-                   x + mapLevelX + 1, y + mapLevelY + 1);
-}
+#define TILEMAP_updateBottomLeftTile(x, y, mapPosX, mapPosY, tileIndex)        \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_DOWN_LEFT, 4)
+
+#define TILEMAP_setTile(x, y, mapPosX, mapPosY, tileIndex)                     \
+  TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
+                     TILE_OFFSET_CENTER, 4)
 
 #endif // __TILEMAP_H__

@@ -14,7 +14,6 @@ typedef enum HeartStatus {
 
 typedef struct Heart {
   GameObject object[3];
-
   HeartStatus status[3];
 } Heart;
 
