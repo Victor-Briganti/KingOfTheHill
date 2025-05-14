@@ -3,11 +3,21 @@
 
 #include "gameobject/gameobject.h"
 
+typedef enum PawnState {
+  PAWN_MOVING,
+  PAWN_IDLE,
+} PawnState;
+
 typedef struct Pawn {
   GameObject object;
-  
+
   s16 previousX;
   s16 previousY;
+
+  s16 posX;
+  s16 posY;
+
+  PawnState state;
 } Pawn;
 
 extern Pawn pawn;

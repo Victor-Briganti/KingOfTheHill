@@ -28,6 +28,8 @@ u16 playerInitY;
 
 GameTurn turn;
 
+u16 frame = 0;
+
 //===----------------------------------------------------------------------===//
 // AUXILIARY
 //===----------------------------------------------------------------------===//
@@ -105,7 +107,11 @@ int main(const bool resetType) {
         break;
       }
       SYS_doVBlankProcess();
+
+      frame++;
     }
+
+    frame = 0;
   }
   return 0;
 }

@@ -4,8 +4,8 @@
 #include <genesis.h>
 
 typedef enum GameTurn {
-    PLAYER = 0,
-    ENEMY = 1,
+  PLAYER = 0,
+  ENEMY = 1,
 } GameTurn;
 
 //===----------------------------------------------------------------------===//
@@ -24,8 +24,11 @@ extern u16 mapLevelY;
 extern u16 playerInitX;
 extern u16 playerInitY;
 
-// Define who turn is this. 
+// Define who turn is this
 extern GameTurn turn;
+
+// Define the "frame" of the game
+extern u16 frame;
 
 //===----------------------------------------------------------------------===//
 // SCREEN
@@ -104,5 +107,11 @@ extern GameTurn turn;
 // Level position
 #define LEVEL_TEXT_X 15
 #define LEVEL_TEXT_Y 1
+
+//===----------------------------------------------------------------------===//
+// FRAME
+//===----------------------------------------------------------------------===//
+
+#define FRAME_ANIMATION 30
 
 #endif // __GLOBAL_H__
