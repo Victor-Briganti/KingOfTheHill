@@ -239,7 +239,7 @@ inline static void PLAYER_moveAnimation() {
 void PLAYER_init() {
   player.state = PLAYER_IDLE;
   player.health = 6;
-  player.totalHealth = 0;
+  player.totalHealth = 6;
   player.cursorX = 0;
   player.cursorY = 0;
   player.posX = 0;
@@ -261,7 +261,7 @@ void PLAYER_update() {
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
-  GAMEOBJECT_init(&player.object, sprite, palette, x, y);
+  GAMEOBJECT_initInBoard(&player.object, sprite, palette, x, y);
   JOY_setEventHandler(PLAYER_inputHandler);
 
   player.cursorX = x;

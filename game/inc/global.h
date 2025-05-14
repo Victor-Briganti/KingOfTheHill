@@ -76,16 +76,6 @@ extern u16 frame;
 #define PAWN_LEVEL1_X_POS (6)
 #define PAWN_LEVEL1_Y_POS (0)
 
-// Hearts initial positions
-#define HEART1_X_POS (20)
-#define HEART1_Y_POS (0)
-
-#define HEART2_X_POS (6)
-#define HEART2_Y_POS (0)
-
-#define HEART3_X_POS (6)
-#define HEART3_Y_POS (0)
-
 // #TODO: This definitions are only the idea of how many pieces each board
 // should have
 

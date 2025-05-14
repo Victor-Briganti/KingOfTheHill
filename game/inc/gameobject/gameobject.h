@@ -11,9 +11,9 @@ typedef struct GameObject {
   s16 y;
 } GameObject;
 
-inline void GAMEOBJECT_init(GameObject *const obj,
-                            const SpriteDefinition *sprite, u16 palette, s16 x,
-                            s16 y) {
+inline void GAMEOBJECT_initInBoard(GameObject *const obj,
+                                   const SpriteDefinition *sprite, u16 palette,
+                                   s16 x, s16 y) {
   PAL_setPalette(palette, sprite->palette->data, DMA);
   obj->sprite = SPR_addSprite(sprite, POS_X(x), POS_Y(y),
                               TILE_ATTR(palette, FALSE, FALSE, FALSE));
@@ -22,9 +22,9 @@ inline void GAMEOBJECT_init(GameObject *const obj,
   obj->y = y;
 }
 
-inline void GAMEOBJECT2_init(GameObject *const obj,
-                             const SpriteDefinition *sprite, u16 palette, s16 x,
-                             s16 y) {
+inline void GAMEOBJECT_initRawCoords(GameObject *const obj,
+                                      const SpriteDefinition *sprite,
+                                      u16 palette, s16 x, s16 y) {
   PAL_setPalette(palette, sprite->palette->data, DMA);
   obj->sprite =
       SPR_addSprite(sprite, x, y, TILE_ATTR(palette, FALSE, FALSE, FALSE));

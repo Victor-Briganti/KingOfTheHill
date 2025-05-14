@@ -1,57 +1,50 @@
 #include "hud/heart.h"
 #include "gameobject/gameobject.h"
+#include "genesis.h"
 #include "global.h"
 #include "player/player.h"
 #include "sprites.h"
 
 Heart heart;
 
+#define MAX_HEARTS 3
+
+static const s16 heartX[MAX_HEARTS] = {300, 280, 260};
+static const s16 heartY = 1;
+
 //===----------------------------------------------------------------------===//
 // PRIVATE
 //===----------------------------------------------------------------------===//
+
+static const SpriteDefinition *getHeartSprite(s8 heartIndex) {
+  s8 remaining = player.totalHealth - player.health;
+
+  if (remaining - (heartIndex * 2) <= 0)
+    return &heart_full;
+
+  if (remaining - (heartIndex * 2) <= 1)
+    return &heart_half;
+
+  return &heart_empty;
+}
 
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
 void HEART_init() {
-  heart.status[0] = FULL;
-  heart.status[1] = FULL;
-  heart.status[2] = FULL;
+  for (u8 i = 0; i < MAX_HEARTS; i++) {
+    heart.status[i] = FULL;
 
-  GAMEOBJECT2_init(&heart.object[0], &heart_full, ENEMY_PAL, 300, 1);
-  GAMEOBJECT2_init(&heart.object[1], &heart_full, ENEMY_PAL, 280, 1);
-  GAMEOBJECT2_init(&heart.object[2], &heart_full, ENEMY_PAL, 260, 1);
+    GAMEOBJECT_initRawCoords(&heart.object[i], &heart_full, ENEMY_PAL,
+                             heartX[i], heartY);
+  }
 }
 
 void HEART_update() {
-  GAMEOBJECT_releaseSprite(&heart.object[0]);
-  GAMEOBJECT_releaseSprite(&heart.object[1]);
-  GAMEOBJECT_releaseSprite(&heart.object[2]);
-
-  if (player.health == 5) {
-    GAMEOBJECT2_init(&heart.object[0], &heart_half, ENEMY_PAL, 300, 1);
-    GAMEOBJECT2_init(&heart.object[1], &heart_full, ENEMY_PAL, 280, 1);
-    GAMEOBJECT2_init(&heart.object[2], &heart_full, ENEMY_PAL, 260, 1);
-  } else if (player.health == 4) {
-    GAMEOBJECT2_init(&heart.object[0], &heart_empty, ENEMY_PAL, 300, 1);
-    GAMEOBJECT2_init(&heart.object[1], &heart_full, ENEMY_PAL, 280, 1);
-    GAMEOBJECT2_init(&heart.object[2], &heart_full, ENEMY_PAL, 260, 1);
-  } else if (player.health == 3) {
-    GAMEOBJECT2_init(&heart.object[0], &heart_empty, ENEMY_PAL, 300, 1);
-    GAMEOBJECT2_init(&heart.object[1], &heart_half, ENEMY_PAL, 280, 1);
-    GAMEOBJECT2_init(&heart.object[2], &heart_full, ENEMY_PAL, 260, 1);
-  } else if (player.health == 2) {
-    GAMEOBJECT2_init(&heart.object[0], &heart_empty, ENEMY_PAL, 300, 1);
-    GAMEOBJECT2_init(&heart.object[1], &heart_empty, ENEMY_PAL, 280, 1);
-    GAMEOBJECT2_init(&heart.object[2], &heart_full, ENEMY_PAL, 260, 1);
-  } else if (player.health == 1) {
-    GAMEOBJECT2_init(&heart.object[0], &heart_empty, ENEMY_PAL, 300, 1);
-    GAMEOBJECT2_init(&heart.object[1], &heart_empty, ENEMY_PAL, 280, 1);
-    GAMEOBJECT2_init(&heart.object[2], &heart_half, ENEMY_PAL, 260, 1);
-  } else if (player.health == 0) {
-    GAMEOBJECT2_init(&heart.object[0], &heart_empty, ENEMY_PAL, 300, 1);
-    GAMEOBJECT2_init(&heart.object[1], &heart_empty, ENEMY_PAL, 280, 1);
-    GAMEOBJECT2_init(&heart.object[2], &heart_empty, ENEMY_PAL, 260, 1);
+  for (u8 i = 0; i < MAX_HEARTS; i++) {
+    GAMEOBJECT_releaseSprite(&heart.object[i]);
+    GAMEOBJECT_initRawCoords(&heart.object[i], getHeartSprite(i), ENEMY_PAL,
+                             heartX[i], heartY);
   }
 }
