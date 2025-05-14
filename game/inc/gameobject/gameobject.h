@@ -22,12 +22,23 @@ inline void GAMEOBJECT_init(GameObject *const obj,
   obj->y = y;
 }
 
+inline void GAMEOBJECT2_init(GameObject *const obj,
+                             const SpriteDefinition *sprite, u16 palette, s16 x,
+                             s16 y) {
+  PAL_setPalette(palette, sprite->palette->data, DMA);
+  obj->sprite =
+      SPR_addSprite(sprite, x, y, TILE_ATTR(palette, FALSE, FALSE, FALSE));
+
+  obj->x = x;
+  obj->y = y;
+}
+
 inline void GAMEOBJECT_updatePos(GameObject *object) {
   SPR_setPosition(object->sprite, POS_X(object->x), POS_Y(object->y));
 }
 
-inline void GAMEOBJECT_hiddeSprite(GameObject *const obj) {
-  SPR_setVisibility(obj->sprite, HIDDEN);
+inline void GAMEOBJECT_releaseSprite(GameObject *const obj) {
+  SPR_releaseSprite(obj->sprite);
 }
 
 #endif //  __GAMEOBJECT_H__

@@ -238,7 +238,7 @@ inline static void PLAYER_moveAnimation() {
 
 void PLAYER_init() {
   player.state = PLAYER_IDLE;
-  player.health = 0;
+  player.health = 6;
   player.totalHealth = 0;
   player.cursorX = 0;
   player.cursorY = 0;

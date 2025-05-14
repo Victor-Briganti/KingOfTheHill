@@ -1,5 +1,6 @@
 #include "enemy/pawn.h"
 #include "global.h"
+#include "hud/heart.h"
 #include "map/map.h"
 #include "player/player.h"
 #include "tilemap/tilemap.h"
@@ -88,6 +89,7 @@ int main(const bool resetType) {
   }
 
   COMMON_init();
+  HEART_init();
   while (TRUE) {
     BACKGROUND_init();
     TILEMAP_init(&tileset);
@@ -97,6 +99,9 @@ int main(const bool resetType) {
                    PAWN_LEVEL1_Y_POS);
     SYS_doVBlankProcess();
 
+    if (!player.health)
+      continue;
+
     while (TRUE) {
       BACKGROUND_update(0);
       TILEMAP_update(&level_map1);
@@ -104,8 +109,10 @@ int main(const bool resetType) {
       PAWN_update();
       SPR_update();
       if (!MAP_updateLevel1()) {
-        GAMEOBJECT_hiddeSprite(&player.object);
-        GAMEOBJECT_hiddeSprite(&pawn.object);
+        kprintf("%d", player.health);
+        HEART_update();
+        GAMEOBJECT_releaseSprite(&player.object);
+        GAMEOBJECT_releaseSprite(&pawn.object);
         break;
       }
       SYS_doVBlankProcess();

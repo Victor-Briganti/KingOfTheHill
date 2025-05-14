@@ -24,7 +24,7 @@ bool MAP_updateLevel1() {
 
   if (map[player.object.y][player.object.x] & MAP_MARK_PAWN &&
       map[player.object.y][player.object.x] & MAP_MARK_PLAYER) {
-    kprintf("%d", map[player.object.y][player.object.x]);
+    player.health--;
     return FALSE;
   }
 
