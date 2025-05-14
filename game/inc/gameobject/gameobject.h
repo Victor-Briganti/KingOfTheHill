@@ -26,4 +26,8 @@ inline void GAMEOBJECT_updatePos(GameObject *object) {
   SPR_setPosition(object->sprite, POS_X(object->x), POS_Y(object->y));
 }
 
+inline void GAMEOBJECT_hiddeSprite(GameObject *const obj) {
+  SPR_setVisibility(obj->sprite, HIDDEN);
+}
+
 #endif //  __GAMEOBJECT_H__

@@ -104,6 +104,8 @@ int main(const bool resetType) {
       PAWN_update();
       SPR_update();
       if (!MAP_updateLevel1()) {
+        GAMEOBJECT_hiddeSprite(&player.object);
+        GAMEOBJECT_hiddeSprite(&pawn.object);
         break;
       }
       SYS_doVBlankProcess();
