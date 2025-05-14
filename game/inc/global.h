@@ -3,6 +3,11 @@
 
 #include <genesis.h>
 
+typedef enum GameTurn {
+  PLAYER = 0,
+  ENEMY = 1,
+} GameTurn;
+
 //===----------------------------------------------------------------------===//
 // EXTERN
 //===----------------------------------------------------------------------===//
@@ -18,6 +23,12 @@ extern u16 mapLevelY;
 // Current Level Player Initial Position
 extern u16 playerInitX;
 extern u16 playerInitY;
+
+// Define who turn is this
+extern GameTurn turn;
+
+// Define the "frame" of the game
+extern u16 frame;
 
 //===----------------------------------------------------------------------===//
 // SCREEN
@@ -61,6 +72,20 @@ extern u16 playerInitY;
 #define PLAYER_LEVEL1_X_POS (6)
 #define PLAYER_LEVEL1_Y_POS (14)
 
+// PAWN initial position
+#define PAWN_LEVEL1_X_POS (6)
+#define PAWN_LEVEL1_Y_POS (0)
+
+// Hearts initial positions
+#define HEART1_X_POS (20)
+#define HEART1_Y_POS (0)
+
+#define HEART2_X_POS (6)
+#define HEART2_Y_POS (0)
+
+#define HEART3_X_POS (6)
+#define HEART3_Y_POS (0)
+
 // #TODO: This definitions are only the idea of how many pieces each board
 // should have
 
@@ -92,5 +117,11 @@ extern u16 playerInitY;
 // Level position
 #define LEVEL_TEXT_X 15
 #define LEVEL_TEXT_Y 1
+
+//===----------------------------------------------------------------------===//
+// FRAME
+//===----------------------------------------------------------------------===//
+
+#define FRAME_ANIMATION 30
 
 #endif // __GLOBAL_H__

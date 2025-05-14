@@ -1,4 +1,5 @@
 #include "player/player.h"
+#include "gameobject/gameobject.h"
 #include "global.h"
 #include "tilemap/tilemap.h"
 
@@ -11,19 +12,19 @@ Player player;
 //===----------------------------------------------------------------------===//
 
 static inline bool PLAYER_onBottom() {
-  return (player.object.y < mapLevelHeight - 2);
+  return (player.posY < mapLevelHeight - 2);
 }
 
-static inline bool PLAYER_onUp() { return (player.object.y != 0); }
+static inline bool PLAYER_onUp() { return (player.posY != 0); }
 
-static inline bool PLAYER_onLeft() { return (player.object.x != 0); }
+static inline bool PLAYER_onLeft() { return (player.posX != 0); }
 
 static inline bool PLAYER_onRight() {
-  return (player.object.x < mapLevelWidth - 2);
+  return (player.posX < mapLevelWidth - 2);
 }
 
-static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
-  if (x == player.object.x && y == player.object.y) {
+static void PLAYER_handleCursorPos(s16 x, s16 y, u8 direction) {
+  if (x == player.posX && y == player.posY) {
     // Jump the player if the button was preset against it
     if (direction & BUTTON_LEFT) {
       x -= 2;
@@ -37,14 +38,14 @@ static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
   }
 
   // Clamp player limit
-  x = clamp(x, player.object.x - 2, player.object.x + 2);
-  y = clamp(y, player.object.y - 2, player.object.y + 2);
+  x = clamp(x, player.posX - 2, player.posX + 2);
+  y = clamp(y, player.posY - 2, player.posY + 2);
 
   // Clamp map limit
   x = clamp(x, 0, mapLevelWidth - 2);
   y = clamp(y, 0, mapLevelHeight - 2);
 
-  if (x == player.object.x && y == player.object.y)
+  if (x == player.posX && y == player.posY)
     return;
 
   player.cursorX = x;
@@ -52,53 +53,52 @@ static void PLAYER_handleCursorPos(s8 x, s8 y, u8 direction) {
 }
 
 static void PLAYER_cursorInnertia() {
-  u8 x = player.cursorX;
-  u8 y = player.cursorY;
+  s16 x = player.cursorX;
+  s16 y = player.cursorY;
   u8 direction = BUTTON_UP;
 
-  if (x == player.object.x && y > player.object.y) { /* Down of the player */
+  if (x == player.posX && y > player.posY) { /* Down of the player */
     y += 2;
     direction = BUTTON_DOWN;
-  } else if (x == player.object.x &&
-             y < player.object.y) { /* Up of the player */
+  } else if (x == player.posX && y < player.posY) { /* Up of the player */
     y -= 2;
     direction = BUTTON_UP;
-  } else if (x < player.object.x &&
-             y == player.object.y) { /* Left of the player */
+  } else if (x < player.posX && y == player.posY) { /* Left of the player */
     x -= 2;
     direction = BUTTON_LEFT;
-  } else if (x > player.object.x &&
-             y == player.object.y) { /* Right of the player */
+  } else if (x > player.posX && y == player.posY) { /* Right of the player */
     x += 2;
     direction = BUTTON_RIGHT;
-  } else if (x > player.object.x &&
-             y > player.object.y) { /* Down Right of the player */
+  } else if (x > player.posX &&
+             y > player.posY) { /* Down Right of the player */
     x += 2;
     y += 2;
     direction = BUTTON_RIGHT | BUTTON_DOWN;
-  } else if (x > player.object.x &&
-             y < player.object.y) { /* Up Right of the player */
+  } else if (x > player.posX && y < player.posY) { /* Up Right of the player */
     x += 2;
     y -= 2;
     direction = BUTTON_RIGHT | BUTTON_UP;
-  } else if (x < player.object.x &&
-             y > player.object.y) { /* Down Left of the player */
+  } else if (x < player.posX && y > player.posY) { /* Down Left of the player */
     x -= 2;
     y += 2;
     direction = BUTTON_LEFT | BUTTON_DOWN;
-  } else if (x < player.object.x &&
-             y < player.object.y) { /* Down Right of the player */
+  } else if (x < player.posX &&
+             y < player.posY) { /* Down Right of the player */
     x -= 2;
     y -= 2;
     direction = BUTTON_RIGHT | BUTTON_DOWN;
   }
 
-  player.object.x = player.cursorX;
-  player.object.y = player.cursorY;
+  // Save the old values
+  player.previousX = player.posX;
+  player.previousY = player.posY;
+
+  player.posX = player.cursorX;
+  player.posY = player.cursorY;
 
   PLAYER_handleCursorPos(x, y, direction);
 
-  if (player.cursorX == player.object.x && player.object.y == player.cursorY) {
+  if (player.cursorX == player.posX && player.posY == player.cursorY) {
     if (PLAYER_onRight())
       player.cursorX -= 4;
 
@@ -112,31 +112,31 @@ static void PLAYER_cursorInnertia() {
       player.cursorY -= 4;
 
     if (PLAYER_onUp() && PLAYER_onRight()) {
-      player.cursorX = player.object.x + 2;
-      player.cursorY = player.object.y;
+      player.cursorX = player.posX + 2;
+      player.cursorY = player.posY;
     }
 
     if (PLAYER_onUp() && PLAYER_onLeft()) {
-      player.cursorX = player.object.x - 2;
-      player.cursorY = player.object.y;
+      player.cursorX = player.posX - 2;
+      player.cursorY = player.posY;
     }
-    
+
     if (PLAYER_onBottom() && PLAYER_onRight()) {
-      player.cursorX = player.object.x + 2;
-      player.cursorY = player.object.y;
+      player.cursorX = player.posX + 2;
+      player.cursorY = player.posY;
     }
-    
+
     if (PLAYER_onBottom() && PLAYER_onLeft()) {
-      player.cursorX = player.object.x - 2;
-      player.cursorY = player.object.y;
+      player.cursorX = player.posX - 2;
+      player.cursorY = player.posY;
     }
   }
 
-  GAMEOBJECT_updatePos(&player.object);
+  // GAMEOBJECT_updatePos(&player.object);
 }
 
 static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
-  if (joy != JOY_1)
+  if (joy != JOY_1 || turn == ENEMY || player.state == PLAYER_MOVING)
     return;
 
   // Verify if the directionals are pressed
@@ -148,13 +148,14 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
   // Act when the command is pressed
   if (command) {
     PLAYER_cursorInnertia();
+    player.state = PLAYER_MOVING;
     return;
   }
 
   // Move when the buttons are released
   if (!directional) {
-    s8 x = player.cursorX;
-    s8 y = player.cursorY;
+    s16 x = player.cursorX;
+    s16 y = player.cursorY;
     if (changed & BUTTON_LEFT) {
       x = player.cursorX - 2;
       PLAYER_handleCursorPos(x, y, BUTTON_LEFT);
@@ -173,36 +174,36 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
 
 inline static void PLAYER_updateSelectTile() {
   if (PLAYER_onRight())
-    TILEMAP_updateRightTile(player.object.x, player.object.y, mapLevelX,
-                            mapLevelY, GREEN_TILE);
+    TILEMAP_updateRightTile(player.posX, player.posY, mapLevelX, mapLevelY,
+                            GREEN_TILE);
 
   if (PLAYER_onLeft())
-    TILEMAP_updateLeftTile(player.object.x, player.object.y, mapLevelX,
-                           mapLevelY, GREEN_TILE);
+    TILEMAP_updateLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
+                           GREEN_TILE);
 
   if (PLAYER_onUp())
-    TILEMAP_updateUpTile(player.object.x, player.object.y, mapLevelX, mapLevelY,
+    TILEMAP_updateUpTile(player.posX, player.posY, mapLevelX, mapLevelY,
                          GREEN_TILE);
 
   if (PLAYER_onBottom())
-    TILEMAP_updateBottomTile(player.object.x, player.object.y, mapLevelX,
-                             mapLevelY, GREEN_TILE);
+    TILEMAP_updateBottomTile(player.posX, player.posY, mapLevelX, mapLevelY,
+                             GREEN_TILE);
 
   if (PLAYER_onUp() && PLAYER_onRight())
-    TILEMAP_updateUpRighTile(player.object.x, player.object.y, mapLevelX,
-                             mapLevelY, GREEN_TILE);
+    TILEMAP_updateUpRighTile(player.posX, player.posY, mapLevelX, mapLevelY,
+                             GREEN_TILE);
 
   if (PLAYER_onUp() && PLAYER_onLeft())
-    TILEMAP_updateUpLeftTile(player.object.x, player.object.y, mapLevelX,
-                             mapLevelY, GREEN_TILE);
+    TILEMAP_updateUpLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
+                             GREEN_TILE);
 
   if (PLAYER_onBottom() && PLAYER_onRight())
-    TILEMAP_updateBottomRightTile(player.object.x, player.object.y, mapLevelX,
+    TILEMAP_updateBottomRightTile(player.posX, player.posY, mapLevelX,
                                   mapLevelY, GREEN_TILE);
 
   if (PLAYER_onBottom() && PLAYER_onLeft())
-    TILEMAP_updateBottomLeftTile(player.object.x, player.object.y, mapLevelX,
-                                 mapLevelY, GREEN_TILE);
+    TILEMAP_updateBottomLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
+                                 GREEN_TILE);
 }
 
 inline static void PLAYER_updateCursorTile() {
@@ -210,26 +211,62 @@ inline static void PLAYER_updateCursorTile() {
                   BLUE_TILE);
 }
 
+inline static void PLAYER_moveAnimation() {
+  if (frame % FRAME_ANIMATION == 0) {
+    if (player.object.x < player.posX)
+      player.object.x++;
+    else if (player.object.x > player.posX)
+      player.object.x--;
+
+    if (player.object.y < player.posY)
+      player.object.y++;
+    else if (player.object.y > player.posY)
+      player.object.y--;
+
+    if (player.object.x == player.posX && player.object.y == player.posY) {
+      turn = ENEMY;
+      player.state = PLAYER_IDLE;
+    }
+
+    GAMEOBJECT_updatePos(&player.object);
+  }
+}
+
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
 void PLAYER_init() {
-  player.health = 0;
+  player.state = PLAYER_IDLE;
+  player.health = 6;
   player.totalHealth = 0;
   player.cursorX = 0;
   player.cursorY = 0;
+  player.posX = 0;
+  player.posY = 0;
 }
 
 void PLAYER_update() {
+  if (turn == ENEMY)
+    return;
+
+  if (player.state == PLAYER_MOVING) {
+    PLAYER_moveAnimation();
+    return;
+  }
+
   PLAYER_updateSelectTile();
   PLAYER_updateCursorTile();
 }
 
-void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s8 x, s8 y) {
+void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
+                      s16 y) {
+  GAMEOBJECT_init(&player.object, sprite, palette, x, y);
+  JOY_setEventHandler(PLAYER_inputHandler);
+
   player.cursorX = x;
   player.cursorY = y - 2;
 
-  GAMEOBJECT_init(&player.object, sprite, palette, x, y);
-  JOY_setEventHandler(PLAYER_inputHandler);
+  player.posX = x;
+  player.posY = y;
 }

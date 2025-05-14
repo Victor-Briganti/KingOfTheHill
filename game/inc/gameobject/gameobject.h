@@ -7,22 +7,38 @@
 
 typedef struct GameObject {
   Sprite *sprite;
-  s8 x;
-  s8 y;
+  s16 x;
+  s16 y;
 } GameObject;
 
 inline void GAMEOBJECT_init(GameObject *const obj,
-                            const SpriteDefinition *sprite, u16 palette, s8 x,
-                            s8 y) {
+                            const SpriteDefinition *sprite, u16 palette, s16 x,
+                            s16 y) {
   PAL_setPalette(palette, sprite->palette->data, DMA);
   obj->sprite = SPR_addSprite(sprite, POS_X(x), POS_Y(y),
-                              TILE_ATTR(PLAYER_PAL, FALSE, FALSE, FALSE));
+                              TILE_ATTR(palette, FALSE, FALSE, FALSE));
+
+  obj->x = x;
+  obj->y = y;
+}
+
+inline void GAMEOBJECT2_init(GameObject *const obj,
+                             const SpriteDefinition *sprite, u16 palette, s16 x,
+                             s16 y) {
+  PAL_setPalette(palette, sprite->palette->data, DMA);
+  obj->sprite =
+      SPR_addSprite(sprite, x, y, TILE_ATTR(palette, FALSE, FALSE, FALSE));
+
   obj->x = x;
   obj->y = y;
 }
 
 inline void GAMEOBJECT_updatePos(GameObject *object) {
   SPR_setPosition(object->sprite, POS_X(object->x), POS_Y(object->y));
+}
+
+inline void GAMEOBJECT_releaseSprite(GameObject *const obj) {
+  SPR_releaseSprite(obj->sprite);
 }
 
 #endif //  __GAMEOBJECT_H__
