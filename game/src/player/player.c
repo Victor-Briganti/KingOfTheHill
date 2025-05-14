@@ -96,7 +96,7 @@ static void PLAYER_cursorInnertia() {
   // Save the old values
   player.previousX = player.object.x;
   player.previousY = player.object.y;
-  
+
   player.object.x = player.cursorX;
   player.object.y = player.cursorY;
 
@@ -124,12 +124,12 @@ static void PLAYER_cursorInnertia() {
       player.cursorX = player.object.x - 2;
       player.cursorY = player.object.y;
     }
-    
+
     if (PLAYER_onBottom() && PLAYER_onRight()) {
       player.cursorX = player.object.x + 2;
       player.cursorY = player.object.y;
     }
-    
+
     if (PLAYER_onBottom() && PLAYER_onLeft()) {
       player.cursorX = player.object.x - 2;
       player.cursorY = player.object.y;
@@ -140,7 +140,7 @@ static void PLAYER_cursorInnertia() {
 }
 
 static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
-  if (joy != JOY_1)
+  if (joy != JOY_1 || turn == ENEMY)
     return;
 
   // Verify if the directionals are pressed
@@ -152,6 +152,7 @@ static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
   // Act when the command is pressed
   if (command) {
     PLAYER_cursorInnertia();
+    turn = ENEMY;
     return;
   }
 
@@ -226,14 +227,18 @@ void PLAYER_init() {
 }
 
 void PLAYER_update() {
+  if (turn == ENEMY)
+    return;
+
   PLAYER_updateSelectTile();
   PLAYER_updateCursorTile();
 }
 
-void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
-  player.cursorX = x;
-  player.cursorY = y - 2;
-
+void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
+                      s16 y) {
   GAMEOBJECT_init(&player.object, sprite, palette, x, y);
   JOY_setEventHandler(PLAYER_inputHandler);
+
+  player.cursorX = x;
+  player.cursorY = y - 2;
 }

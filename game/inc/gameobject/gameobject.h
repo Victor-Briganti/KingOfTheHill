@@ -17,6 +17,7 @@ inline void GAMEOBJECT_init(GameObject *const obj,
   PAL_setPalette(palette, sprite->palette->data, DMA);
   obj->sprite = SPR_addSprite(sprite, POS_X(x), POS_Y(y),
                               TILE_ATTR(palette, FALSE, FALSE, FALSE));
+
   obj->x = x;
   obj->y = y;
 }

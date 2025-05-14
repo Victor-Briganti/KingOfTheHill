@@ -7,7 +7,7 @@ typedef struct Player {
   GameObject object;
   u8 health;
   u8 totalHealth;
-
+  
   // Define the cursor position
   s16 cursorX;
   s16 cursorY;

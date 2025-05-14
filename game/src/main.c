@@ -1,8 +1,8 @@
+#include "enemy/pawn.h"
 #include "global.h"
+#include "map/map.h"
 #include "player/player.h"
 #include "tilemap/tilemap.h"
-#include "map/map.h"
-#include "enemy/pawn.h"
 
 #include <genesis.h>
 #include <gfx.h>
@@ -25,6 +25,8 @@ u16 mapLevelY;
 
 u16 playerInitX;
 u16 playerInitY;
+
+GameTurn turn;
 
 //===----------------------------------------------------------------------===//
 // AUXILIARY
@@ -52,6 +54,8 @@ static void COMMON_init() {
 
   playerInitX = PLAYER_LEVEL1_X_POS;
   playerInitY = PLAYER_LEVEL1_Y_POS;
+
+  turn = PLAYER;
 }
 
 static void BACKGROUND_init() {
@@ -87,13 +91,15 @@ int main(const bool resetType) {
     TILEMAP_init(&tileset);
     MAP_initLevel1();
     PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
-    PAWN_levelInit(&pawn_sprite1, ENEMY_PAL, PAWN_LEVEL1_X_POS, PAWN_LEVEL1_Y_POS);
+    PAWN_levelInit(&pawn_sprite1, ENEMY_PAL, PAWN_LEVEL1_X_POS,
+                   PAWN_LEVEL1_Y_POS);
     SYS_doVBlankProcess();
 
     while (TRUE) {
       BACKGROUND_update(0);
       TILEMAP_update(&level_map1);
       PLAYER_update();
+      PAWN_update();
       SPR_update();
       if (!MAP_updateLevel1()) {
         break;

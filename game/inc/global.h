@@ -3,6 +3,11 @@
 
 #include <genesis.h>
 
+typedef enum GameTurn {
+    PLAYER = 0,
+    ENEMY = 1,
+} GameTurn;
+
 //===----------------------------------------------------------------------===//
 // EXTERN
 //===----------------------------------------------------------------------===//
@@ -18,6 +23,9 @@ extern u16 mapLevelY;
 // Current Level Player Initial Position
 extern u16 playerInitX;
 extern u16 playerInitY;
+
+// Define who turn is this. 
+extern GameTurn turn;
 
 //===----------------------------------------------------------------------===//
 // SCREEN
