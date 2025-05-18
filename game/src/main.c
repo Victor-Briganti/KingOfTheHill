@@ -24,8 +24,8 @@ u16 mapLevelWidth;
 u16 mapLevelX;
 u16 mapLevelY;
 
-u16 playerInitX;
-u16 playerInitY;
+s16 playerInitX;
+s16 playerInitY;
 
 GameTurn turn;
 

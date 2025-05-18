@@ -178,7 +178,7 @@ inline static void updateSelectTile() {
                              mapLevelY, GREEN_TILE);
 
   if (playerTopPos() && playerRightPos())
-    TILEMAP_updateUpRighTile(player.actor.collisionCurPos.x,
+    TILEMAP_updateUpRightTile(player.actor.collisionCurPos.x,
                              player.actor.collisionCurPos.y, mapLevelX,
                              mapLevelY, GREEN_TILE);
 
