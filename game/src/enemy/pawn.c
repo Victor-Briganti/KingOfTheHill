@@ -8,16 +8,18 @@ Pawn pawn;
 //===----------------------------------------------------------------------===//
 
 inline static void startMovement() {
-  pawn.previousX = pawn.posX;
-  pawn.previousY = pawn.posY;
-  pawn.posY += 2;
-  pawn.posY = clamp(pawn.posY, 0, mapLevelHeight - 2);
+  s16 x = pawn.object.pos.x; 
+  s16 y = pawn.object.pos.y + 2; 
+  y = clamp(y, 0, mapLevelHeight - 2);
+  GAMEOBJECT_setTargetPos(&pawn.object, x, y);
   pawn.state = PAWN_MOVING;
 }
 
 inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    if (GAMEOBJECT_animateTo(&pawn.object, pawn.posX, pawn.posY)) {
+    GAMEOBJECT_animateTo2(&pawn.object);
+    
+    if (!pawn.object.moving) {
       turn = PLAYER;
       pawn.state = PAWN_IDLE;
     }
@@ -29,8 +31,6 @@ inline static void callAnimation() {
 //===----------------------------------------------------------------------===//
 
 void PAWN_init() {
-  pawn.previousX = 0;
-  pawn.previousY = 0;
   pawn.state = PAWN_IDLE;
 }
 
@@ -47,7 +47,5 @@ void PAWN_update() {
 }
 
 void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
-  pawn.posX = x;
-  pawn.posY = y;
   GAMEOBJECT_initInBoard(&pawn.object, sprite, palette, x, y);
 }

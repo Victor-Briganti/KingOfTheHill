@@ -25,8 +25,8 @@ bool MAP_updateLevel() {
   map[player.previousY][player.previousX] &= ~MAP_OBJECT_PLAYER;
   map[player.posY][player.posX] |= MAP_OBJECT_PLAYER;
 
-  map[pawn.previousY][pawn.previousX] &= ~MAP_OBJECT_PAWN;
-  map[pawn.posY][pawn.posX] |= MAP_OBJECT_PAWN;
+  map[pawn.object.prev.y][pawn.object.prev.x] &= ~MAP_OBJECT_PAWN;
+  map[pawn.object.cur.y][pawn.object.cur.x] |= MAP_OBJECT_PAWN;
 
   if (map[player.posY][player.posX] & MAP_OBJECT_PAWN &&
       map[player.posY][player.posX] & MAP_OBJECT_PLAYER) {

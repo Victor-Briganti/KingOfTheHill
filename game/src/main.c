@@ -103,6 +103,7 @@ int main(const bool resetType) {
     PAWN_levelInit(&pawn_sprite1, ENEMY_PAL, PAWN_LEVEL1_X_POS,
                    PAWN_LEVEL1_Y_POS);
     SYS_doVBlankProcess();
+    turn = PLAYER;
 
     if (!player.health)
       continue;
