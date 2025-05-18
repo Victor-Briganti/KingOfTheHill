@@ -24,7 +24,6 @@ typedef struct MapObject{
     MapObjectType object;
 } MapObject;
 
-
 void MAP_initLevel(u16 mapHeight, u16 mapWidth);
 
 void MAP_initObjects(MapObject objectVector[], u16 count);

@@ -6,6 +6,7 @@
 typedef enum PawnState {
   PAWN_MOVING,
   PAWN_IDLE,
+  PAWN_DEAD,
 } PawnState;
 
 typedef struct Pawn {

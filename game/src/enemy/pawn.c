@@ -47,5 +47,5 @@ void PAWN_update() {
 }
 
 void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
-  GAMEOBJECT_initInBoard(&pawn.object, sprite, palette, x, y);
+  GAMEOBJECT_initInBoard(&pawn.object, sprite, palette, x, y, COLLISION_OBJECT_PAWN);
 }
