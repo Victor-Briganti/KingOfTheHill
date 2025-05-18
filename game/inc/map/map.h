@@ -20,8 +20,7 @@ typedef enum MapObjectType {
 } MapObjectType;
 
 typedef struct MapObject{
-    u16 x;
-    u16 y;
+    u16 x, y;
     MapObjectType object;
 } MapObject;
 
@@ -30,6 +29,6 @@ void MAP_initLevel(u16 mapHeight, u16 mapWidth);
 
 void MAP_initObjects(MapObject objectVector[], u16 count);
 
-bool MAP_updateLevel();
+void MAP_updateLevel();
 
 #endif // __MAP_H__

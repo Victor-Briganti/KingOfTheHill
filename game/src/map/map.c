@@ -21,18 +21,12 @@ void MAP_initObjects(MapObject objectVector[], u16 count) {
   }
 }
 
-bool MAP_updateLevel() {
+void MAP_updateLevel() {
+  // Updates the position of the player
   map[player.object.prev.y][player.object.prev.x] &= ~MAP_OBJECT_PLAYER;
   map[player.object.cur.y][player.object.cur.x] |= MAP_OBJECT_PLAYER;
-
+  
+  // Updates the position of the pawn
   map[pawn.object.prev.y][pawn.object.prev.x] &= ~MAP_OBJECT_PAWN;
   map[pawn.object.cur.y][pawn.object.cur.x] |= MAP_OBJECT_PAWN;
-
-  if (map[player.object.cur.y][player.object.cur.x] & MAP_OBJECT_PAWN &&
-      map[player.object.cur.y][player.object.cur.x] & MAP_OBJECT_PLAYER) {
-    player.health--;
-    return FALSE;
-  }
-
-  return TRUE;
 }

@@ -61,19 +61,19 @@ inline void GAMEOBJECT_animateTo(GameObject *const object) {
   if (object->moving == FALSE)
     return;
 
-  if (object->pos.x <object->target.x)
+  if (object->pos.x < object->target.x)
     object->pos.x++;
-  else if (object->pos.x >object->target.x)
+  else if (object->pos.x > object->target.x)
     object->pos.x--;
 
-  if (object->pos.y <object->target.y)
+  if (object->pos.y < object->target.y)
     object->pos.y++;
-  else if (object->pos.y >object->target.y)
+  else if (object->pos.y > object->target.y)
     object->pos.y--;
 
   GAMEOBJECT_updatePos(object);
 
-  if (object->pos.x ==object->target.x && object->pos.y ==object->target.y) {
+  if (object->pos.x == object->target.x && object->pos.y == object->target.y) {
     object->cur = object->pos;
     object->moving = FALSE;
   }

@@ -16,11 +16,10 @@ typedef struct Player {
   // Define the cursor position
   Vect2D_s16 cursor;
   
-  // Define the health of the player
-  u8 health;
-  u8 totalHealth;
-  
   PlayerState state;
+
+  // Define the health of the player
+  u8 health, totalHealth;
 } Player;
 
 extern Player player;

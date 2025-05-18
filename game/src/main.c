@@ -84,8 +84,10 @@ static void BACKGROUND_update(u16 score) {
 //===----------------------------------------------------------------------===//
 
 static const MapObject mapObj[2] = {
-  {.x=PLAYER_LEVEL1_X_POS, .y=PLAYER_LEVEL1_Y_POS, .object=MAP_OBJECT_PLAYER},
-  {.x=PAWN_LEVEL1_X_POS, .y=PAWN_LEVEL1_Y_POS, .object=MAP_OBJECT_PAWN},
+    {.x = PLAYER_LEVEL1_X_POS,
+     .y = PLAYER_LEVEL1_Y_POS,
+     .object = MAP_OBJECT_PLAYER},
+    {.x = PAWN_LEVEL1_X_POS, .y = PAWN_LEVEL1_Y_POS, .object = MAP_OBJECT_PAWN},
 };
 
 int main(const bool resetType) {
@@ -114,13 +116,10 @@ int main(const bool resetType) {
       PLAYER_update();
       PAWN_update();
       SPR_update();
-      if (!MAP_updateLevel()) {
-        kprintf("%d", player.health);
-        HEART_update();
-        GAMEOBJECT_releaseSprite(&player.object);
-        GAMEOBJECT_releaseSprite(&pawn.object);
-        break;
-      }
+      MAP_updateLevel();
+      // HEART_update();
+      // GAMEOBJECT_releaseSprite(&player.object);
+      // GAMEOBJECT_releaseSprite(&pawn.object);
       SYS_doVBlankProcess();
 
       frame++;
