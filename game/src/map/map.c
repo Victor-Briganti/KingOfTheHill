@@ -18,6 +18,10 @@ static inline void MAP_updateCollisions() {
   for (u8 i = 0; i < 2; i++) {
     y = actors[i]->collisionPrevPos.y;
     x = actors[i]->collisionPrevPos.x;
+
+    if (x < 0 && y < 0)
+      continue;
+
     map[y][x] &= ~actors[i]->collisionType;
 
     y = actors[i]->collisionCurPos.y;

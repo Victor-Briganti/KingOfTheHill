@@ -113,14 +113,23 @@ int main(const bool resetType) {
     while (TRUE) {
       BACKGROUND_update(0);
       TILEMAP_update(&level_map1);
+      MAP_updateLevel();
       PLAYER_update();
       PAWN_update();
       SPR_update();
-      MAP_updateLevel();
-      // HEART_update();
-      // GAMEOBJECT_releaseSprite(&player.object);
-      // GAMEOBJECT_releaseSprite(&pawn.object);
       SYS_doVBlankProcess();
+
+      if (pawn.state == PAWN_DEAD) {
+        PAWN_destroy();
+        turn = PLAYER;
+      }
+
+      if (player.state == PLAYER_DEAD) {
+        PLAYER_destroy();
+        PAWN_destroy();
+        HEART_update();
+        break;
+      }
 
       frame++;
     }

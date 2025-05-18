@@ -1,4 +1,5 @@
 #include "player/player.h"
+#include "enemy/pawn.h"
 #include "global.h"
 #include "map/map.h"
 #include "node/actor.h"
@@ -198,7 +199,6 @@ inline static void updateSelectTile() {
 }
 
 inline static void updateCursorTile() {
-  kprintf("Cursor: %d", map[player.cursor.y][player.cursor.x]);
   if (map[player.cursor.y][player.cursor.x] != 0) {
     TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
                     RED_TILE);
@@ -213,6 +213,11 @@ inline static void callAnimation() {
     ACTOR_animateTo(&player.actor);
 
     if (!player.actor.moving) {
+      if (ACTOR_checkCollision(&player.actor)) {
+        kprintf("Pawn hit");
+        pawn.state = PAWN_DEAD;
+      }
+
       turn = ENEMY;
       player.state = PLAYER_IDLE;
     }
@@ -231,8 +236,12 @@ void PLAYER_init() {
   player.cursor.y = 0;
 }
 
+void PLAYER_destroy() {
+  ACTOR_destroy(&player.actor);
+}
+
 void PLAYER_update() {
-  if (turn == ENEMY)
+  if (turn == ENEMY || player.state == PLAYER_DEAD)
     return;
 
   if (player.state == PLAYER_MOVING) {
@@ -248,5 +257,6 @@ void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
   ACTOR_init(&player.actor, sprite, palette, x, y, COLLISION_TYPE_PLAYER);
   JOY_setEventHandler(inputHandler);
+  player.state = PLAYER_IDLE;
   player.cursor = (Vect2D_s16){x, y - 2};
 }

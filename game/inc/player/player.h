@@ -27,6 +27,8 @@ extern Player player;
 
 void PLAYER_init();
 
+void PLAYER_destroy();
+
 void PLAYER_update();
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,

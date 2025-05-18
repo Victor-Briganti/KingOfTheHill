@@ -6,6 +6,7 @@
 typedef enum GameTurn {
   PLAYER = 0,
   ENEMY = 1,
+  GAME_OVER = 2,
 } GameTurn;
 
 //===----------------------------------------------------------------------===//

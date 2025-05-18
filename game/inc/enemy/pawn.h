@@ -18,6 +18,8 @@ extern Pawn pawn;
 
 void PAWN_init();
 
+void PAWN_destroy();
+
 void PAWN_update();
 
 void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y);

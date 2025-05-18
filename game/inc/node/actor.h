@@ -2,6 +2,7 @@
 #define __ACTOR_H__
 
 #include "global.h"
+#include "map/map.h"
 
 #include <genesis.h>
 #include <maths.h>
@@ -53,6 +54,25 @@ inline void ACTOR_init(ActorNode *const node, const SpriteDefinition *sprite,
   node->collisionType = type;
 }
 
+inline void ACTOR_destroy(ActorNode *const node) {
+  // Release the resources
+  SPR_releaseSprite(node->sprite);
+  
+  // Clean the map
+  map[node->collisionPrevPos.y][node->collisionPrevPos.x] =
+  COLLISION_TYPE_EMPTY;
+  map[node->collisionCurPos.y][node->collisionCurPos.x] = COLLISION_TYPE_EMPTY;
+  
+  // Clean other values
+  Vect2D_s16 vec = {-1, -1};
+  node->animationPos = vec;
+  node->animationTargetPos = vec;
+  node->collisionPrevPos = vec;
+  node->collisionCurPos = vec;
+  node->collisionType = COLLISION_TYPE_EMPTY;
+  node->moving = FALSE;
+}
+
 inline void ACTOR_animateTo(ActorNode *const node) {
   if (node->moving == FALSE)
     return;
@@ -81,9 +101,14 @@ inline void ACTOR_setTargetAnimPos(ActorNode *const node, s16 x, s16 y) {
 
   node->collisionPrevPos = node->animationPos;
   node->collisionCurPos = vec;
-  
+
   node->animationTargetPos = vec;
   node->moving = TRUE;
+}
+
+inline bool ACTOR_checkCollision(ActorNode *const node) {
+  s16 entry = map[node->collisionCurPos.y][node->collisionCurPos.x];
+  return ((entry != 0) && ((~node->collisionType & entry) != 0));
 }
 
 #endif // __ACTOR_H__
