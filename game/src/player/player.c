@@ -7,29 +7,44 @@
 
 Player player;
 
+typedef struct CursorMovement {
+  s16 x;
+  s16 y;
+  s16 direction;
+} CursorMovement;
+
+static const CursorMovement cursorMoves[] = {
+    {.x = 2, .y = 0, .direction = BUTTON_RIGHT},
+    {.x = -2, .y = 0, .direction = BUTTON_LEFT},
+    {.x = 0, .y = 2, .direction = BUTTON_DOWN},
+    {.x = 0, .y = -2, .direction = BUTTON_UP},
+};
+
 //===----------------------------------------------------------------------===//
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-static inline bool isOnBottom() { return (player.posY < mapLevelHeight - 2); }
+static inline bool playerBottomPos() {
+  return (player.posY < mapLevelHeight - 2);
+}
 
-static inline bool isOnTop() { return (player.posY != 0); }
+static inline bool playerTopPos() { return (player.posY != 0); }
 
-static inline bool isOnLeft() { return (player.posX != 0); }
+static inline bool playerLeftPos() { return (player.posX != 0); }
 
-static inline bool isOnRight() { return (player.posX < mapLevelWidth - 2); }
+static inline bool playerRightPos() {
+  return (player.posX < mapLevelWidth - 2);
+}
 
 static void handleCursorPos(s16 x, s16 y, u8 direction) {
   if (x == player.posX && y == player.posY) {
     // Jump the player if the button was preset against it
-    if (direction & BUTTON_LEFT) {
-      x -= 2;
-    } else if (direction & BUTTON_RIGHT) {
-      x += 2;
-    } else if (direction & BUTTON_DOWN) {
-      y += 2;
-    } else if (direction & BUTTON_UP) {
-      y -= 2;
+    for (u8 i = 0; i < 4; i++) {
+      if (cursorMoves[i].direction & direction) {
+        x += cursorMoves[i].x;
+        y += cursorMoves[i].y;
+        break;
+      }
     }
   }
 
@@ -48,41 +63,28 @@ static void handleCursorPos(s16 x, s16 y, u8 direction) {
   player.cursorY = y;
 }
 
-static void cursorInnertia() {
+static void cursorInertia() {
   s16 x = player.cursorX;
   s16 y = player.cursorY;
-  u8 direction = BUTTON_UP;
+  s16 dx = x - player.posX;
+  s16 dy = y - player.posY;
+  u8 direction = 0;
 
-  if (x == player.posX && y > player.posY) { /* Down of the player */
-    y += 2;
-    direction = BUTTON_DOWN;
-  } else if (x == player.posX && y < player.posY) { /* Up of the player */
-    y -= 2;
-    direction = BUTTON_UP;
-  } else if (x < player.posX && y == player.posY) { /* Left of the player */
-    x -= 2;
-    direction = BUTTON_LEFT;
-  } else if (x > player.posX && y == player.posY) { /* Right of the player */
-    x += 2;
-    direction = BUTTON_RIGHT;
-  } else if (x > player.posX &&
-             y > player.posY) { /* Down Right of the player */
-    x += 2;
-    y += 2;
-    direction = BUTTON_RIGHT | BUTTON_DOWN;
-  } else if (x > player.posX && y < player.posY) { /* Up Right of the player */
-    x += 2;
-    y -= 2;
-    direction = BUTTON_RIGHT | BUTTON_UP;
-  } else if (x < player.posX && y > player.posY) { /* Down Left of the player */
-    x -= 2;
-    y += 2;
-    direction = BUTTON_LEFT | BUTTON_DOWN;
-  } else if (x < player.posX &&
-             y < player.posY) { /* Down Right of the player */
-    x -= 2;
-    y -= 2;
-    direction = BUTTON_RIGHT | BUTTON_DOWN;
+  if (dx > 0)
+    direction |= BUTTON_RIGHT;
+  if (dx < 0)
+    direction |= BUTTON_LEFT;
+
+  if (dy > 0)
+    direction |= BUTTON_DOWN;
+  if (dy < 0)
+    direction |= BUTTON_UP;
+
+  for (u8 i = 0; i < 4; i++) {
+    if (cursorMoves[i].direction & direction) {
+      x += cursorMoves[i].x;
+      y += cursorMoves[i].y;
+    }
   }
 
   // Save the old values
@@ -95,55 +97,53 @@ static void cursorInnertia() {
   handleCursorPos(x, y, direction);
 
   if (player.cursorX == player.posX && player.posY == player.cursorY) {
-    if (isOnRight())
+    if (playerRightPos())
       player.cursorX -= 4;
 
-    if (isOnLeft())
+    if (playerLeftPos())
       player.cursorX += 4;
 
-    if (isOnTop())
+    if (playerTopPos())
       player.cursorY += 4;
 
-    if (isOnBottom())
+    if (playerBottomPos())
       player.cursorY -= 4;
 
-    if (isOnTop() && isOnRight()) {
+    if (playerTopPos() && playerRightPos()) {
       player.cursorX = player.posX + 2;
       player.cursorY = player.posY;
     }
 
-    if (isOnTop() && isOnLeft()) {
+    if (playerTopPos() && playerLeftPos()) {
       player.cursorX = player.posX - 2;
       player.cursorY = player.posY;
     }
 
-    if (isOnBottom() && isOnRight()) {
+    if (playerBottomPos() && playerRightPos()) {
       player.cursorX = player.posX + 2;
       player.cursorY = player.posY;
     }
 
-    if (isOnBottom() && isOnLeft()) {
+    if (playerBottomPos() && playerLeftPos()) {
       player.cursorX = player.posX - 2;
       player.cursorY = player.posY;
     }
   }
-
-  // GAMEOBJECT_updatePos(&player.object);
 }
 
-static void inputHandler(u16 joy, u16 changed, u16 state) {
+static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
   if (joy != JOY_1 || turn == ENEMY || player.state == PLAYER_MOVING)
     return;
 
   // Verify if the directionals are pressed
-  u16 directional = state & BUTTON_DIR;
+  const u16 directional = state & BUTTON_DIR;
 
   // Verify if the command button was pressed
-  u16 command = state & BUTTON_A;
+  const u16 command = state & BUTTON_A;
 
   // Act when the command is pressed
   if (command) {
-    cursorInnertia();
+    cursorInertia();
     player.state = PLAYER_MOVING;
     return;
   }
@@ -152,52 +152,47 @@ static void inputHandler(u16 joy, u16 changed, u16 state) {
   if (!directional) {
     s16 x = player.cursorX;
     s16 y = player.cursorY;
-    if (changed & BUTTON_LEFT) {
-      x = player.cursorX - 2;
-      handleCursorPos(x, y, BUTTON_LEFT);
-    } else if (changed & BUTTON_RIGHT) {
-      x = player.cursorX + 2;
-      handleCursorPos(x, y, BUTTON_RIGHT);
-    } else if (changed & BUTTON_DOWN) {
-      y = player.cursorY + 2;
-      handleCursorPos(x, y, BUTTON_DOWN);
-    } else if (changed & BUTTON_UP) {
-      y = player.cursorY - 2;
-      handleCursorPos(x, y, BUTTON_UP);
+    for (u8 i = 0; i < 4; i++) {
+      if (cursorMoves[i].direction & changed) {
+        x += cursorMoves[i].x;
+        y += cursorMoves[i].y;
+        handleCursorPos(x, y, cursorMoves[i].direction);
+        break;
+      }
     }
   }
 }
 
 inline static void updateSelectTile() {
-  if (isOnRight())
+  if (playerRightPos())
     TILEMAP_updateRightTile(player.posX, player.posY, mapLevelX, mapLevelY,
                             GREEN_TILE);
 
-  if (isOnLeft())
+  if (playerLeftPos())
     TILEMAP_updateLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
                            GREEN_TILE);
 
-  if (isOnTop())
+  if (playerTopPos())
     TILEMAP_updateUpTile(player.posX, player.posY, mapLevelX, mapLevelY,
                          GREEN_TILE);
 
-  if (isOnBottom())
+  if (playerBottomPos())
     TILEMAP_updateBottomTile(player.posX, player.posY, mapLevelX, mapLevelY,
                              GREEN_TILE);
 
-  if (isOnTop() && isOnRight())
+  if (playerTopPos() && playerRightPos())
     TILEMAP_updateUpRighTile(player.posX, player.posY, mapLevelX, mapLevelY,
                              GREEN_TILE);
 
-  if (isOnTop() && isOnLeft())
+  if (playerTopPos() && playerLeftPos())
     TILEMAP_updateUpLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
                              GREEN_TILE);
 
-  if (isOnBottom() && isOnRight())
+  if (playerBottomPos() && playerRightPos())
     TILEMAP_updateBottomRightTile(player.posX, player.posY, mapLevelX,
                                   mapLevelY, GREEN_TILE);
 
-  if (isOnBottom() && isOnLeft())
+  if (playerBottomPos() && playerLeftPos())
     TILEMAP_updateBottomLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
                                  GREEN_TILE);
 }

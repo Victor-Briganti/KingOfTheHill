@@ -7,7 +7,7 @@ Pawn pawn;
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-inline static void updatePosition() {
+inline static void startMovement() {
   pawn.previousX = pawn.posX;
   pawn.previousY = pawn.posY;
   pawn.posY += 2;
@@ -43,7 +43,7 @@ void PAWN_update() {
     return;
   }
 
-  updatePosition();
+  startMovement();
 }
 
 void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
