@@ -1,6 +1,5 @@
 #include "map/map.h"
 #include "enemy/pawn.h"
-#include "gameobject/gameobject.h"
 #include "player/player.h"
 
 u16 map[MAP_MAX_HEIGHT][MAP_MAX_WIDTH] = {0};
@@ -9,24 +8,21 @@ u16 map[MAP_MAX_HEIGHT][MAP_MAX_WIDTH] = {0};
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-GameObject *objects[2] = {
-    &player.object,
-    &pawn.object,
+ActorNode *actors[2] = {
+    &player.actor,
+    &pawn.actor,
 };
 
-static void MAP_updateCollisions() {
+static inline void MAP_updateCollisions() {
   s16 x, y;
-  CollisionObjectType type;
   for (u8 i = 0; i < 2; i++) {
-    type = GAMEOBJECT_getCollisionType(objects[i]);
+    y = actors[i]->collisionPrevPos.y;
+    x = actors[i]->collisionPrevPos.x;
+    map[y][x] &= ~actors[i]->collisionType;
 
-    y = GAMEOBJECT_getPrevCollisionY(objects[i]);
-    x = GAMEOBJECT_getPrevCollisionX(objects[i]);
-    map[y][x] &= ~type;
-
-    y = GAMEOBJECT_getCurCollisionY(objects[i]);
-    x = GAMEOBJECT_getCurCollisionX(objects[i]);
-    map[y][x] |= type;
+    y = actors[i]->collisionCurPos.y;
+    x = actors[i]->collisionCurPos.x;
+    map[y][x] |= actors[i]->collisionType;
   }
 }
 

@@ -1,7 +1,7 @@
 #ifndef __HEART_H__
 #define __HEART_H__
 
-#include "gameobject/gameobject.h"
+#include "node/overlay.h"
 
 #include <sprite_eng.h>
 #include <sprites.h>
@@ -13,7 +13,7 @@ typedef enum HeartStatus {
 } HeartStatus;
 
 typedef struct Heart {
-  GameObject object[3];
+  OverlayNode node[3];
   HeartStatus status[3];
 } Heart;
 

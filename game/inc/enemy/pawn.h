@@ -1,7 +1,7 @@
 #ifndef __PAWN_H__
 #define __PAWN_H__
 
-#include "gameobject/gameobject.h"
+#include "node/actor.h"
 
 typedef enum PawnState {
   PAWN_MOVING,
@@ -10,7 +10,7 @@ typedef enum PawnState {
 } PawnState;
 
 typedef struct Pawn {
-  GameObject object;
+  ActorNode actor;
   PawnState state;
 } Pawn;
 

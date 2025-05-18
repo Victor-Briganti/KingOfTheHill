@@ -1,5 +1,4 @@
 #include "enemy/pawn.h"
-#include "gameobject/gameobject.h"
 
 Pawn pawn;
 
@@ -8,18 +7,17 @@ Pawn pawn;
 //===----------------------------------------------------------------------===//
 
 inline static void startMovement() {
-  s16 x = pawn.object.pos.x; 
-  s16 y = pawn.object.pos.y + 2; 
-  y = clamp(y, 0, mapLevelHeight - 2);
-  GAMEOBJECT_setTargetPos(&pawn.object, x, y);
+  s16 x = pawn.actor.collisionCurPos.x; 
+  s16 y = clamp(pawn.actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2) ; 
+  ACTOR_setTargetAnimPos(&pawn.actor, x, y);
   pawn.state = PAWN_MOVING;
 }
 
 inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    GAMEOBJECT_animateTo(&pawn.object);
+    ACTOR_animateTo(&pawn.actor);
     
-    if (!pawn.object.moving) {
+    if (!pawn.actor.moving) {
       turn = PLAYER;
       pawn.state = PAWN_IDLE;
     }
@@ -47,5 +45,5 @@ void PAWN_update() {
 }
 
 void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y) {
-  GAMEOBJECT_initInBoard(&pawn.object, sprite, palette, x, y, COLLISION_OBJECT_PAWN);
+  ACTOR_init(&pawn.actor, sprite, palette, x, y, COLLISION_TYPE_PAWN);
 }

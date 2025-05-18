@@ -1,7 +1,7 @@
 #include "hud/heart.h"
-#include "gameobject/gameobject.h"
 #include "genesis.h"
 #include "global.h"
+#include "node/overlay.h"
 #include "player/player.h"
 #include "sprites.h"
 
@@ -36,15 +36,14 @@ void HEART_init() {
   for (u8 i = 0; i < MAX_HEARTS; i++) {
     heart.status[i] = FULL;
 
-    GAMEOBJECT_initRawCoords(&heart.object[i], &heart_full, ENEMY_PAL,
-                             heartX[i], heartY);
+    OVERLAY_init(&heart.node[i], &heart_full, ENEMY_PAL, heartX[i], heartY);
   }
 }
 
 void HEART_update() {
   for (u8 i = 0; i < MAX_HEARTS; i++) {
-    GAMEOBJECT_releaseSprite(&heart.object[i]);
-    GAMEOBJECT_initRawCoords(&heart.object[i], getHeartSprite(i), ENEMY_PAL,
-                             heartX[i], heartY);
+    OVERLAY_releaseSprite(&heart.node[i]);
+    OVERLAY_init(&heart.node[i], getHeartSprite(i), ENEMY_PAL, heartX[i],
+                 heartY);
   }
 }

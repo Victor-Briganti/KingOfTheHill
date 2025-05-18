@@ -1,7 +1,7 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
-#include "gameobject/gameobject.h"
+#include "node/actor.h"
 
 #include <maths.h>
 
@@ -12,7 +12,7 @@ typedef enum PlayerState {
 } PlayerState;
 
 typedef struct Player {
-  GameObject object;
+  ActorNode actor;
   
   // Define the cursor position
   Vect2D_s16 cursor;
