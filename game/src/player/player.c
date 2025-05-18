@@ -1,6 +1,7 @@
 #include "player/player.h"
 #include "gameobject/gameobject.h"
 #include "global.h"
+#include "map/map.h"
 #include "tilemap/tilemap.h"
 
 #include <joy.h>
@@ -23,19 +24,19 @@ static const CursorMovement cursorMoves[] = {
 //===----------------------------------------------------------------------===//
 
 static inline bool playerBottomPos() {
-  return (player.posY < mapLevelHeight - 2);
+  return (player.object.cur.y < mapLevelHeight - 2);
 }
 
-static inline bool playerTopPos() { return (player.posY != 0); }
+static inline bool playerTopPos() { return (player.object.cur.y != 0); }
 
-static inline bool playerLeftPos() { return (player.posX != 0); }
+static inline bool playerLeftPos() { return (player.object.cur.x != 0); }
 
 static inline bool playerRightPos() {
-  return (player.posX < mapLevelWidth - 2);
+  return (player.object.cur.x < mapLevelWidth - 2);
 }
 
 static void handleCursorPos(s16 x, s16 y, u8 direction) {
-  if (x == player.posX && y == player.posY) {
+  if (x == player.object.cur.x && y == player.object.cur.y) {
     // Jump the player if the button was preset against it
     for (u8 i = 0; i < 4; i++) {
       if (cursorMoves[i].direction & direction) {
@@ -47,14 +48,14 @@ static void handleCursorPos(s16 x, s16 y, u8 direction) {
   }
 
   // Clamp player limit
-  x = clamp(x, player.posX - 2, player.posX + 2);
-  y = clamp(y, player.posY - 2, player.posY + 2);
+  x = clamp(x, player.object.cur.x - 2, player.object.cur.x + 2);
+  y = clamp(y, player.object.cur.y - 2, player.object.cur.y + 2);
 
   // Clamp map limit
   x = clamp(x, 0, mapLevelWidth - 2);
   y = clamp(y, 0, mapLevelHeight - 2);
 
-  if (x == player.posX && y == player.posY)
+  if (x == player.object.cur.x && y == player.object.cur.y)
     return;
 
   player.cursor = (Vect2D_s16){x, y};
@@ -63,8 +64,8 @@ static void handleCursorPos(s16 x, s16 y, u8 direction) {
 static void cursorInertia() {
   s16 x = player.cursor.x;
   s16 y = player.cursor.y;
-  s16 dx = x - player.posX;
-  s16 dy = y - player.posY;
+  s16 dx = x - player.object.cur.x;
+  s16 dy = y - player.object.cur.y;
   u8 direction = 0;
 
   if (dx > 0)
@@ -85,15 +86,11 @@ static void cursorInertia() {
   }
 
   // Save the old values
-  player.previousX = player.posX;
-  player.previousY = player.posY;
-
-  player.posX = player.cursor.x;
-  player.posY = player.cursor.y;
-
+  GAMEOBJECT_setTargetPos(&player.object, player.cursor.x, player.cursor.y);
   handleCursorPos(x, y, direction);
 
-  if (player.cursor.x == player.posX && player.posY == player.cursor.y) {
+  if (player.cursor.x == player.object.cur.x &&
+      player.object.cur.y == player.cursor.y) {
     if (playerRightPos())
       player.cursor.x -= 4;
 
@@ -108,11 +105,13 @@ static void cursorInertia() {
 
     if ((playerTopPos() && playerRightPos()) ||
         (playerBottomPos() && playerRightPos()))
-      player.cursor = (Vect2D_s16){player.posX + 2, player.posY};
+      player.cursor =
+          (Vect2D_s16){player.object.cur.x + 2, player.object.cur.y};
 
     if ((playerTopPos() && playerLeftPos()) ||
         (playerBottomPos() && playerLeftPos()))
-      player.cursor = (Vect2D_s16){player.posX - 2, player.posY};
+      player.cursor =
+          (Vect2D_s16){player.object.cur.x - 2, player.object.cur.y};
   }
 }
 
@@ -150,46 +149,53 @@ static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
 
 inline static void updateSelectTile() {
   if (playerRightPos())
-    TILEMAP_updateRightTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                            GREEN_TILE);
+    TILEMAP_updateRightTile(player.object.cur.x, player.object.cur.y, mapLevelX,
+                            mapLevelY, GREEN_TILE);
 
   if (playerLeftPos())
-    TILEMAP_updateLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                           GREEN_TILE);
+    TILEMAP_updateLeftTile(player.object.cur.x, player.object.cur.y, mapLevelX,
+                           mapLevelY, GREEN_TILE);
 
   if (playerTopPos())
-    TILEMAP_updateUpTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                         GREEN_TILE);
+    TILEMAP_updateUpTile(player.object.cur.x, player.object.cur.y, mapLevelX,
+                         mapLevelY, GREEN_TILE);
 
   if (playerBottomPos())
-    TILEMAP_updateBottomTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                             GREEN_TILE);
+    TILEMAP_updateBottomTile(player.object.cur.x, player.object.cur.y,
+                             mapLevelX, mapLevelY, GREEN_TILE);
 
   if (playerTopPos() && playerRightPos())
-    TILEMAP_updateUpRighTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                             GREEN_TILE);
+    TILEMAP_updateUpRighTile(player.object.cur.x, player.object.cur.y,
+                             mapLevelX, mapLevelY, GREEN_TILE);
 
   if (playerTopPos() && playerLeftPos())
-    TILEMAP_updateUpLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                             GREEN_TILE);
+    TILEMAP_updateUpLeftTile(player.object.cur.x, player.object.cur.y,
+                             mapLevelX, mapLevelY, GREEN_TILE);
 
   if (playerBottomPos() && playerRightPos())
-    TILEMAP_updateBottomRightTile(player.posX, player.posY, mapLevelX,
-                                  mapLevelY, GREEN_TILE);
+    TILEMAP_updateBottomRightTile(player.object.cur.x, player.object.cur.y,
+                                  mapLevelX, mapLevelY, GREEN_TILE);
 
   if (playerBottomPos() && playerLeftPos())
-    TILEMAP_updateBottomLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                                 GREEN_TILE);
+    TILEMAP_updateBottomLeftTile(player.object.cur.x, player.object.cur.y,
+                                 mapLevelX, mapLevelY, GREEN_TILE);
 }
 
 inline static void updateCursorTile() {
-  TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
-                  BLUE_TILE);
+  if (map[player.cursor.y][player.cursor.x] != 0) {
+    TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
+                    RED_TILE);
+  } else {
+    TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
+                    BLUE_TILE);
+  }
 }
 
 inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    if (GAMEOBJECT_animateTo(&player.object, player.posX, player.posY)) {
+    GAMEOBJECT_animateTo(&player.object);
+
+    if (!player.object.moving) {
       turn = ENEMY;
       player.state = PLAYER_IDLE;
     }
@@ -206,8 +212,6 @@ void PLAYER_init() {
   player.totalHealth = 6;
   player.cursor.x = 0;
   player.cursor.y = 0;
-  player.posX = 0;
-  player.posY = 0;
 }
 
 void PLAYER_update() {
@@ -228,8 +232,5 @@ void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
   GAMEOBJECT_initInBoard(&player.object, sprite, palette, x, y);
   JOY_setEventHandler(inputHandler);
 
-  player.cursor = (Vect2D_s16){x, y - 2}; 
-
-  player.posX = x;
-  player.posY = y;
+  player.cursor = (Vect2D_s16){x, y - 2};
 }

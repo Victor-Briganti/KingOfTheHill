@@ -16,14 +16,7 @@ typedef struct Player {
   // Define the cursor position
   Vect2D_s16 cursor;
   
-  // Define the previous player position
-  s16 previousX;
-  s16 previousY;
-  
-  // Define the final position of the player
-  s16 posX;
-  s16 posY;
-  
+  // Define the health of the player
   u8 health;
   u8 totalHealth;
   

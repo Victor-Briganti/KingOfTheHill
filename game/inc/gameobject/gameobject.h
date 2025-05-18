@@ -46,10 +46,6 @@ inline void GAMEOBJECT_updatePos(GameObject *object) {
   SPR_setPosition(object->sprite, POS_X(object->pos.x), POS_Y(object->pos.y));
 }
 
-inline void GAMEOBJECT_setPrevPos(GameObject *const object) {
-  object->prev = object->pos;
-}
-
 inline void GAMEOBJECT_setTargetPos(GameObject *const object, s16 x, s16 y) {
   object->prev = object->pos;
   object->cur = (Vect2D_s16){x, y};
@@ -61,23 +57,7 @@ inline void GAMEOBJECT_releaseSprite(GameObject *const object) {
   SPR_releaseSprite(object->sprite);
 }
 
-inline bool GAMEOBJECT_animateTo(GameObject *const object, s16 posX, s16 posY) {
-  if (object->pos.x < posX)
-    object->pos.x++;
-  else if (object->pos.x > posX)
-    object->pos.x--;
-
-  if (object->pos.y < posY)
-    object->pos.y++;
-  else if (object->pos.y > posY)
-    object->pos.y--;
-
-  GAMEOBJECT_updatePos(object);
-
-  return (object->pos.x == posX && object->pos.y == posY);
-}
-
-inline void GAMEOBJECT_animateTo2(GameObject *const object) {
+inline void GAMEOBJECT_animateTo(GameObject *const object) {
   if (object->moving == FALSE)
     return;
 

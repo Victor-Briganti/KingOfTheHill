@@ -17,7 +17,7 @@ inline static void startMovement() {
 
 inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    GAMEOBJECT_animateTo2(&pawn.object);
+    GAMEOBJECT_animateTo(&pawn.object);
     
     if (!pawn.object.moving) {
       turn = PLAYER;
