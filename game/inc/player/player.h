@@ -3,6 +3,8 @@
 
 #include "gameobject/gameobject.h"
 
+#include <maths.h>
+
 typedef enum PlayerState {
   PLAYER_MOVING,
   PLAYER_IDLE,
@@ -10,21 +12,21 @@ typedef enum PlayerState {
 
 typedef struct Player {
   GameObject object;
-  u8 health;
-  u8 totalHealth;
-
+  
   // Define the cursor position
-  s16 cursorX;
-  s16 cursorY;
-
+  Vect2D_s16 cursor;
+  
   // Define the previous player position
   s16 previousX;
   s16 previousY;
-
+  
   // Define the final position of the player
   s16 posX;
   s16 posY;
-
+  
+  u8 health;
+  u8 totalHealth;
+  
   PlayerState state;
 } Player;
 

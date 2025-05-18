@@ -8,9 +8,7 @@
 Player player;
 
 typedef struct CursorMovement {
-  s16 x;
-  s16 y;
-  s16 direction;
+  s16 x, y, direction;
 } CursorMovement;
 
 static const CursorMovement cursorMoves[] = {
@@ -59,13 +57,12 @@ static void handleCursorPos(s16 x, s16 y, u8 direction) {
   if (x == player.posX && y == player.posY)
     return;
 
-  player.cursorX = x;
-  player.cursorY = y;
+  player.cursor = (Vect2D_s16){x, y};
 }
 
 static void cursorInertia() {
-  s16 x = player.cursorX;
-  s16 y = player.cursorY;
+  s16 x = player.cursor.x;
+  s16 y = player.cursor.y;
   s16 dx = x - player.posX;
   s16 dy = y - player.posY;
   u8 direction = 0;
@@ -91,43 +88,31 @@ static void cursorInertia() {
   player.previousX = player.posX;
   player.previousY = player.posY;
 
-  player.posX = player.cursorX;
-  player.posY = player.cursorY;
+  player.posX = player.cursor.x;
+  player.posY = player.cursor.y;
 
   handleCursorPos(x, y, direction);
 
-  if (player.cursorX == player.posX && player.posY == player.cursorY) {
+  if (player.cursor.x == player.posX && player.posY == player.cursor.y) {
     if (playerRightPos())
-      player.cursorX -= 4;
+      player.cursor.x -= 4;
 
     if (playerLeftPos())
-      player.cursorX += 4;
+      player.cursor.x += 4;
 
     if (playerTopPos())
-      player.cursorY += 4;
+      player.cursor.y += 4;
 
     if (playerBottomPos())
-      player.cursorY -= 4;
+      player.cursor.y -= 4;
 
-    if (playerTopPos() && playerRightPos()) {
-      player.cursorX = player.posX + 2;
-      player.cursorY = player.posY;
-    }
+    if ((playerTopPos() && playerRightPos()) ||
+        (playerBottomPos() && playerRightPos()))
+      player.cursor = (Vect2D_s16){player.posX + 2, player.posY};
 
-    if (playerTopPos() && playerLeftPos()) {
-      player.cursorX = player.posX - 2;
-      player.cursorY = player.posY;
-    }
-
-    if (playerBottomPos() && playerRightPos()) {
-      player.cursorX = player.posX + 2;
-      player.cursorY = player.posY;
-    }
-
-    if (playerBottomPos() && playerLeftPos()) {
-      player.cursorX = player.posX - 2;
-      player.cursorY = player.posY;
-    }
+    if ((playerTopPos() && playerLeftPos()) ||
+        (playerBottomPos() && playerLeftPos()))
+      player.cursor = (Vect2D_s16){player.posX - 2, player.posY};
   }
 }
 
@@ -150,8 +135,8 @@ static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
 
   // Move when the buttons are released
   if (!directional) {
-    s16 x = player.cursorX;
-    s16 y = player.cursorY;
+    s16 x = player.cursor.x;
+    s16 y = player.cursor.y;
     for (u8 i = 0; i < 4; i++) {
       if (cursorMoves[i].direction & changed) {
         x += cursorMoves[i].x;
@@ -198,7 +183,7 @@ inline static void updateSelectTile() {
 }
 
 inline static void updateCursorTile() {
-  TILEMAP_setTile(player.cursorX, player.cursorY, mapLevelX, mapLevelY,
+  TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
                   BLUE_TILE);
 }
 
@@ -219,8 +204,8 @@ void PLAYER_init() {
   player.state = PLAYER_IDLE;
   player.health = 6;
   player.totalHealth = 6;
-  player.cursorX = 0;
-  player.cursorY = 0;
+  player.cursor.x = 0;
+  player.cursor.y = 0;
   player.posX = 0;
   player.posY = 0;
 }
@@ -243,8 +228,7 @@ void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
   GAMEOBJECT_initInBoard(&player.object, sprite, palette, x, y);
   JOY_setEventHandler(inputHandler);
 
-  player.cursorX = x;
-  player.cursorY = y - 2;
+  player.cursor = (Vect2D_s16){x, y - 2}; 
 
   player.posX = x;
   player.posY = y;
