@@ -179,8 +179,8 @@ inline static void updateSelectTile() {
 
   if (playerTopPos() && playerRightPos())
     TILEMAP_updateUpRightTile(player.actor.collisionCurPos.x,
-                             player.actor.collisionCurPos.y, mapLevelX,
-                             mapLevelY, GREEN_TILE);
+                              player.actor.collisionCurPos.y, mapLevelX,
+                              mapLevelY, GREEN_TILE);
 
   if (playerTopPos() && playerLeftPos())
     TILEMAP_updateUpLeftTile(player.actor.collisionCurPos.x,
@@ -236,9 +236,7 @@ void PLAYER_init() {
   player.cursor.y = 0;
 }
 
-void PLAYER_destroy() {
-  ACTOR_destroy(&player.actor);
-}
+void PLAYER_destroy() { ACTOR_destroy(&player.actor); }
 
 void PLAYER_update() {
   if (turn == ENEMY || player.state == PLAYER_DEAD)
