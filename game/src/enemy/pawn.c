@@ -8,6 +8,24 @@
 inline static void startMovement(Pawn *pawn) {
   s16 x = pawn->actor.collisionCurPos.x;
   s16 y = clamp(pawn->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
+
+  if (map[y][x] != COLLISION_TYPE_EMPTY) {
+    turn = PLAYER;
+    return;
+  }
+
+  // Player on diagonal right
+  if ((map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0) &&
+      (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
+          0)
+    x = clamp(x + 2, 0, mapLevelHeight - 2);
+
+  // Player on diagonal left
+  if ((map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0) &&
+      (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
+          0)
+    x = clamp(x - 2, 0, mapLevelHeight - 2);
+
   ACTOR_setTargetAnimPos(&pawn->actor, x, y);
   pawn->state = PAWN_MOVING;
 }
