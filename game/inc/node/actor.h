@@ -3,20 +3,10 @@
 
 #include "global.h"
 #include "map/map.h"
+#include "types/collision.h"
 
 #include <genesis.h>
 #include <maths.h>
-
-typedef enum CollisionType {
-  COLLISION_TYPE_EMPTY = 0,
-  COLLISION_TYPE_PLAYER = 1 << 0,
-  COLLISION_TYPE_PAWN = 1 << 1,
-  COLLISION_TYPE_TOWER = 1 << 2,
-  COLLISION_TYPE_BISHOP = 1 << 3,
-  COLLISION_TYPE_KNIGHT = 1 << 4,
-  COLLISION_TYPE_QUEEN = 1 << 5,
-  COLLISION_TYPE_KING = 1 << 6
-} CollisionType;
 
 typedef struct ActorNode {
   // Animation components
