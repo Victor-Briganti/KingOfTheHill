@@ -18,7 +18,6 @@ Pawn pawn;
 //===----------------------------------------------------------------------===//
 
 static inline void SCENE1_initGlobals() {
-  // Initialize the globals
   mapLevelHeight = MAP_SCENE1_HEIGHT;
   mapLevelWidth = MAP_SCENE1_WIDTH;
 
