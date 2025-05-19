@@ -103,4 +103,18 @@ inline bool ACTOR_checkCollision(const ActorNode *const node) {
   return ((entry != 0) && ((~node->collisionType & entry) != 0));
 }
 
+inline void ACTOR_blink(const ActorNode *const node) {
+  if (frame % FRAME_ANIMATION == 0) {
+    if (SPR_getVisibility(node->sprite) == HIDDEN) {
+      SPR_setVisibility(node->sprite, VISIBLE);
+    } else {
+      SPR_setVisibility(node->sprite, HIDDEN);
+    }
+  }
+}
+
+inline void ACTOR_setVisible(const ActorNode *const node) {
+  SPR_setVisibility(node->sprite, VISIBLE);
+}
+
 #endif // __ACTOR_H__

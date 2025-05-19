@@ -239,6 +239,11 @@ void PLAYER_init() {
 void PLAYER_destroy() { ACTOR_destroy(&player.actor); }
 
 void PLAYER_update() {
+  if (player.state == PLAYER_DAMAGED)
+    ACTOR_blink(&player.actor);
+  else
+    ACTOR_setVisible(&player.actor);
+
   if (turn == ENEMY || player.state == PLAYER_DEAD)
     return;
 
@@ -255,6 +260,5 @@ void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
   ACTOR_init(&player.actor, sprite, palette, x, y, COLLISION_TYPE_PLAYER);
   JOY_setEventHandler(inputHandler);
-  player.state = PLAYER_IDLE;
   player.cursor = (Vect2D_s16){x, y - 2};
 }

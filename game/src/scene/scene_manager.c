@@ -66,6 +66,9 @@ static inline void SCENE1_destroyPlayer() {
   PLAYER_destroy();
   PAWN_destroy(&pawn);
   HEART_update();
+
+  if (player.health > 0)
+    player.state = PLAYER_DAMAGED;
 }
 
 static inline void SCENE1_destroyEnemies() {

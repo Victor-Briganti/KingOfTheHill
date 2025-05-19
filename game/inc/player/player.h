@@ -8,6 +8,7 @@
 typedef enum PlayerState {
   PLAYER_MOVING,
   PLAYER_IDLE,
+  PLAYER_DAMAGED,
   PLAYER_DEAD,
 } PlayerState;
 
