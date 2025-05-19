@@ -1,32 +1,54 @@
 #include "map/map.h"
 #include "enemy/pawn.h"
-#include "global.h"
 #include "player/player.h"
 
-u16 map[MAP_LEVEL1_HEIGHT][MAP_LEVEL1_WIDTH];
+u16 map[MAP_MAX_HEIGHT][MAP_MAX_WIDTH] = {0};
 
-void MAP_initLevel1() {
-  for (u8 i = 0; i < MAP_LEVEL1_HEIGHT; i++) {
-    for (u8 j = 0; j < MAP_LEVEL1_WIDTH; j++) {
-      map[i][j] = 0;
+//===----------------------------------------------------------------------===//
+// PRIVATE
+//===----------------------------------------------------------------------===//
+
+ActorNode *actors[2] = {
+    &player.actor,
+    &pawn.actor,
+};
+
+static inline void MAP_updateCollisions() {
+    s16 x = 0, y = 0;
+    for (u8 i = 0; i < 2; i++) {
+        y = actors[i]->collisionPrevPos.y;
+        x = actors[i]->collisionPrevPos.x;
+
+        if (x < 0 && y < 0)
+            continue;
+
+        map[y][x] &= ~actors[i]->collisionType;
+
+        y = actors[i]->collisionCurPos.y;
+        x = actors[i]->collisionCurPos.x;
+        map[y][x] |= actors[i]->collisionType;
     }
-  }
-
-  map[PLAYER_LEVEL1_Y_POS][PLAYER_LEVEL1_X_POS] = MAP_MARK_PLAYER;
 }
 
-bool MAP_updateLevel1() {
-  map[player.previousY][player.previousX] &= ~MAP_MARK_EMPTY;
-  map[player.object.y][player.object.x] |= MAP_MARK_PLAYER;
+//===----------------------------------------------------------------------===//
+// PUBLIC
+//===----------------------------------------------------------------------===//
 
-  map[pawn.previousY][pawn.previousX] &= ~MAP_MARK_EMPTY;
-  map[pawn.object.y][pawn.object.x] |= MAP_MARK_PAWN;
+void MAP_initLevel(const u16 mapHeight, const u16 mapWidth) {
+    if (mapHeight > MAP_MAX_HEIGHT && mapWidth > MAP_MAX_WIDTH)
+        kprintf("Map is bigger than supported");
 
-  if (map[player.object.y][player.object.x] & MAP_MARK_PAWN &&
-      map[player.object.y][player.object.x] & MAP_MARK_PLAYER) {
-    player.health--;
-    return FALSE;
-  }
-
-  return TRUE;
+    for (u16 i = 0; i < mapHeight; i++) {
+        for (u16 j = 0; j < mapWidth; j++) {
+            map[i][j] = 0;
+        }
+    }
 }
+
+void MAP_initObjects(MapObject objectVector[], const u16 count) {
+    for (u16 i = 0; i < count; i++) {
+        map[objectVector[i].y][objectVector[i].x] |= objectVector[i].object;
+    }
+}
+
+void MAP_updateLevel() { MAP_updateCollisions(); }

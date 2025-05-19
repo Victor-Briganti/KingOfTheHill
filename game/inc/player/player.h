@@ -1,36 +1,33 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
-#include "gameobject/gameobject.h"
+#include "node/actor.h"
+
+#include <maths.h>
 
 typedef enum PlayerState {
   PLAYER_MOVING,
   PLAYER_IDLE,
+  PLAYER_DEAD,
 } PlayerState;
 
 typedef struct Player {
-  GameObject object;
-  u8 health;
-  u8 totalHealth;
-
+  ActorNode actor;
+  
   // Define the cursor position
-  s16 cursorX;
-  s16 cursorY;
-
-  // Define the previous player position
-  s16 previousX;
-  s16 previousY;
-
-  // Define the final position of the player
-  s16 posX;
-  s16 posY;
-
+  Vect2D_s16 cursor;
+  
   PlayerState state;
+
+  // Define the health of the player
+  u8 health, totalHealth;
 } Player;
 
 extern Player player;
 
 void PLAYER_init();
+
+void PLAYER_destroy();
 
 void PLAYER_update();
 

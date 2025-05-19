@@ -1,234 +1,226 @@
 #include "player/player.h"
-#include "gameobject/gameobject.h"
+#include "enemy/pawn.h"
 #include "global.h"
+#include "map/map.h"
+#include "node/actor.h"
 #include "tilemap/tilemap.h"
 
 #include <joy.h>
 
 Player player;
 
+typedef struct CursorMovement {
+  s16 x, y, direction;
+} CursorMovement;
+
+static const CursorMovement cursorMoves[] = {
+    {.x = 2, .y = 0, .direction = BUTTON_RIGHT},
+    {.x = -2, .y = 0, .direction = BUTTON_LEFT},
+    {.x = 0, .y = 2, .direction = BUTTON_DOWN},
+    {.x = 0, .y = -2, .direction = BUTTON_UP},
+};
+
 //===----------------------------------------------------------------------===//
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-static inline bool PLAYER_onBottom() {
-  return (player.posY < mapLevelHeight - 2);
+static inline bool playerBottomPos() {
+  return (player.actor.collisionCurPos.y < mapLevelHeight - 2);
 }
 
-static inline bool PLAYER_onUp() { return (player.posY != 0); }
-
-static inline bool PLAYER_onLeft() { return (player.posX != 0); }
-
-static inline bool PLAYER_onRight() {
-  return (player.posX < mapLevelWidth - 2);
+static inline bool playerTopPos() {
+  return (player.actor.collisionCurPos.y != 0);
 }
 
-static void PLAYER_handleCursorPos(s16 x, s16 y, u8 direction) {
-  if (x == player.posX && y == player.posY) {
+static inline bool playerLeftPos() {
+  return (player.actor.collisionCurPos.x != 0);
+}
+
+static inline bool playerRightPos() {
+  return (player.actor.collisionCurPos.x < mapLevelWidth - 2);
+}
+
+static void handleCursorPos(s16 x, s16 y, u8 direction) {
+  if (x == player.actor.collisionCurPos.x &&
+      y == player.actor.collisionCurPos.y) {
     // Jump the player if the button was preset against it
-    if (direction & BUTTON_LEFT) {
-      x -= 2;
-    } else if (direction & BUTTON_RIGHT) {
-      x += 2;
-    } else if (direction & BUTTON_DOWN) {
-      y += 2;
-    } else if (direction & BUTTON_UP) {
-      y -= 2;
+    for (u8 i = 0; i < 4; i++) {
+      if (cursorMoves[i].direction & direction) {
+        x += cursorMoves[i].x;
+        y += cursorMoves[i].y;
+        break;
+      }
     }
   }
 
   // Clamp player limit
-  x = clamp(x, player.posX - 2, player.posX + 2);
-  y = clamp(y, player.posY - 2, player.posY + 2);
+  x = clamp(x, player.actor.collisionCurPos.x - 2,
+            player.actor.collisionCurPos.x + 2);
+  y = clamp(y, player.actor.collisionCurPos.y - 2,
+            player.actor.collisionCurPos.y + 2);
 
   // Clamp map limit
   x = clamp(x, 0, mapLevelWidth - 2);
   y = clamp(y, 0, mapLevelHeight - 2);
 
-  if (x == player.posX && y == player.posY)
+  if (x == player.actor.collisionCurPos.x &&
+      y == player.actor.collisionCurPos.y)
     return;
 
-  player.cursorX = x;
-  player.cursorY = y;
+  player.cursor = (Vect2D_s16){x, y};
 }
 
-static void PLAYER_cursorInnertia() {
-  s16 x = player.cursorX;
-  s16 y = player.cursorY;
-  u8 direction = BUTTON_UP;
+static void cursorInertia() {
+  s16 x = player.cursor.x;
+  s16 y = player.cursor.y;
+  s16 dx = x - player.actor.collisionCurPos.x;
+  s16 dy = y - player.actor.collisionCurPos.y;
+  u8 direction = 0;
 
-  if (x == player.posX && y > player.posY) { /* Down of the player */
-    y += 2;
-    direction = BUTTON_DOWN;
-  } else if (x == player.posX && y < player.posY) { /* Up of the player */
-    y -= 2;
-    direction = BUTTON_UP;
-  } else if (x < player.posX && y == player.posY) { /* Left of the player */
-    x -= 2;
-    direction = BUTTON_LEFT;
-  } else if (x > player.posX && y == player.posY) { /* Right of the player */
-    x += 2;
-    direction = BUTTON_RIGHT;
-  } else if (x > player.posX &&
-             y > player.posY) { /* Down Right of the player */
-    x += 2;
-    y += 2;
-    direction = BUTTON_RIGHT | BUTTON_DOWN;
-  } else if (x > player.posX && y < player.posY) { /* Up Right of the player */
-    x += 2;
-    y -= 2;
-    direction = BUTTON_RIGHT | BUTTON_UP;
-  } else if (x < player.posX && y > player.posY) { /* Down Left of the player */
-    x -= 2;
-    y += 2;
-    direction = BUTTON_LEFT | BUTTON_DOWN;
-  } else if (x < player.posX &&
-             y < player.posY) { /* Down Right of the player */
-    x -= 2;
-    y -= 2;
-    direction = BUTTON_RIGHT | BUTTON_DOWN;
+  if (dx > 0)
+    direction |= BUTTON_RIGHT;
+  if (dx < 0)
+    direction |= BUTTON_LEFT;
+
+  if (dy > 0)
+    direction |= BUTTON_DOWN;
+  if (dy < 0)
+    direction |= BUTTON_UP;
+
+  for (u8 i = 0; i < 4; i++) {
+    if (cursorMoves[i].direction & direction) {
+      x += cursorMoves[i].x;
+      y += cursorMoves[i].y;
+    }
   }
 
   // Save the old values
-  player.previousX = player.posX;
-  player.previousY = player.posY;
+  ACTOR_setTargetAnimPos(&player.actor, player.cursor.x, player.cursor.y);
+  handleCursorPos(x, y, direction);
 
-  player.posX = player.cursorX;
-  player.posY = player.cursorY;
+  if (player.cursor.x == player.actor.collisionCurPos.x &&
+      player.actor.collisionCurPos.y == player.cursor.y) {
+    if (playerRightPos())
+      player.cursor.x -= 4;
 
-  PLAYER_handleCursorPos(x, y, direction);
+    if (playerLeftPos())
+      player.cursor.x += 4;
 
-  if (player.cursorX == player.posX && player.posY == player.cursorY) {
-    if (PLAYER_onRight())
-      player.cursorX -= 4;
+    if (playerTopPos())
+      player.cursor.y += 4;
 
-    if (PLAYER_onLeft())
-      player.cursorX += 4;
+    if (playerBottomPos())
+      player.cursor.y -= 4;
 
-    if (PLAYER_onUp())
-      player.cursorY += 4;
+    if ((playerTopPos() && playerRightPos()) ||
+        (playerBottomPos() && playerRightPos()))
+      player.cursor = (Vect2D_s16){player.actor.collisionCurPos.x + 2,
+                                   player.actor.collisionCurPos.y};
 
-    if (PLAYER_onBottom())
-      player.cursorY -= 4;
-
-    if (PLAYER_onUp() && PLAYER_onRight()) {
-      player.cursorX = player.posX + 2;
-      player.cursorY = player.posY;
-    }
-
-    if (PLAYER_onUp() && PLAYER_onLeft()) {
-      player.cursorX = player.posX - 2;
-      player.cursorY = player.posY;
-    }
-
-    if (PLAYER_onBottom() && PLAYER_onRight()) {
-      player.cursorX = player.posX + 2;
-      player.cursorY = player.posY;
-    }
-
-    if (PLAYER_onBottom() && PLAYER_onLeft()) {
-      player.cursorX = player.posX - 2;
-      player.cursorY = player.posY;
-    }
+    if ((playerTopPos() && playerLeftPos()) ||
+        (playerBottomPos() && playerLeftPos()))
+      player.cursor = (Vect2D_s16){player.actor.collisionCurPos.x - 2,
+                                   player.actor.collisionCurPos.y};
   }
-
-  // GAMEOBJECT_updatePos(&player.object);
 }
 
-static void PLAYER_inputHandler(u16 joy, u16 changed, u16 state) {
+static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
   if (joy != JOY_1 || turn == ENEMY || player.state == PLAYER_MOVING)
     return;
 
   // Verify if the directionals are pressed
-  u16 directional = state & BUTTON_DIR;
+  const u16 directional = state & BUTTON_DIR;
 
   // Verify if the command button was pressed
-  u16 command = state & BUTTON_A;
+  const u16 command = state & BUTTON_A;
 
   // Act when the command is pressed
   if (command) {
-    PLAYER_cursorInnertia();
+    cursorInertia();
     player.state = PLAYER_MOVING;
     return;
   }
 
   // Move when the buttons are released
   if (!directional) {
-    s16 x = player.cursorX;
-    s16 y = player.cursorY;
-    if (changed & BUTTON_LEFT) {
-      x = player.cursorX - 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_LEFT);
-    } else if (changed & BUTTON_RIGHT) {
-      x = player.cursorX + 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_RIGHT);
-    } else if (changed & BUTTON_DOWN) {
-      y = player.cursorY + 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_DOWN);
-    } else if (changed & BUTTON_UP) {
-      y = player.cursorY - 2;
-      PLAYER_handleCursorPos(x, y, BUTTON_UP);
+    s16 x = player.cursor.x;
+    s16 y = player.cursor.y;
+    for (u8 i = 0; i < 4; i++) {
+      if (cursorMoves[i].direction & changed) {
+        x += cursorMoves[i].x;
+        y += cursorMoves[i].y;
+        handleCursorPos(x, y, cursorMoves[i].direction);
+        break;
+      }
     }
   }
 }
 
-inline static void PLAYER_updateSelectTile() {
-  if (PLAYER_onRight())
-    TILEMAP_updateRightTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                            GREEN_TILE);
+inline static void updateSelectTile() {
+  if (playerRightPos())
+    TILEMAP_updateRightTile(player.actor.collisionCurPos.x,
+                            player.actor.collisionCurPos.y, mapLevelX,
+                            mapLevelY, GREEN_TILE);
 
-  if (PLAYER_onLeft())
-    TILEMAP_updateLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
+  if (playerLeftPos())
+    TILEMAP_updateLeftTile(player.actor.collisionCurPos.x,
+                           player.actor.collisionCurPos.y, mapLevelX, mapLevelY,
                            GREEN_TILE);
 
-  if (PLAYER_onUp())
-    TILEMAP_updateUpTile(player.posX, player.posY, mapLevelX, mapLevelY,
+  if (playerTopPos())
+    TILEMAP_updateUpTile(player.actor.collisionCurPos.x,
+                         player.actor.collisionCurPos.y, mapLevelX, mapLevelY,
                          GREEN_TILE);
 
-  if (PLAYER_onBottom())
-    TILEMAP_updateBottomTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                             GREEN_TILE);
+  if (playerBottomPos())
+    TILEMAP_updateBottomTile(player.actor.collisionCurPos.x,
+                             player.actor.collisionCurPos.y, mapLevelX,
+                             mapLevelY, GREEN_TILE);
 
-  if (PLAYER_onUp() && PLAYER_onRight())
-    TILEMAP_updateUpRighTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                             GREEN_TILE);
+  if (playerTopPos() && playerRightPos())
+    TILEMAP_updateUpRightTile(player.actor.collisionCurPos.x,
+                              player.actor.collisionCurPos.y, mapLevelX,
+                              mapLevelY, GREEN_TILE);
 
-  if (PLAYER_onUp() && PLAYER_onLeft())
-    TILEMAP_updateUpLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                             GREEN_TILE);
+  if (playerTopPos() && playerLeftPos())
+    TILEMAP_updateUpLeftTile(player.actor.collisionCurPos.x,
+                             player.actor.collisionCurPos.y, mapLevelX,
+                             mapLevelY, GREEN_TILE);
 
-  if (PLAYER_onBottom() && PLAYER_onRight())
-    TILEMAP_updateBottomRightTile(player.posX, player.posY, mapLevelX,
+  if (playerBottomPos() && playerRightPos())
+    TILEMAP_updateBottomRightTile(player.actor.collisionCurPos.x,
+                                  player.actor.collisionCurPos.y, mapLevelX,
                                   mapLevelY, GREEN_TILE);
 
-  if (PLAYER_onBottom() && PLAYER_onLeft())
-    TILEMAP_updateBottomLeftTile(player.posX, player.posY, mapLevelX, mapLevelY,
-                                 GREEN_TILE);
+  if (playerBottomPos() && playerLeftPos())
+    TILEMAP_updateBottomLeftTile(player.actor.collisionCurPos.x,
+                                 player.actor.collisionCurPos.y, mapLevelX,
+                                 mapLevelY, GREEN_TILE);
 }
 
-inline static void PLAYER_updateCursorTile() {
-  TILEMAP_setTile(player.cursorX, player.cursorY, mapLevelX, mapLevelY,
-                  BLUE_TILE);
+inline static void updateCursorTile() {
+  if (map[player.cursor.y][player.cursor.x] != 0) {
+    TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
+                    RED_TILE);
+  } else {
+    TILEMAP_setTile(player.cursor.x, player.cursor.y, mapLevelX, mapLevelY,
+                    BLUE_TILE);
+  }
 }
 
-inline static void PLAYER_moveAnimation() {
+inline static void callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
-    if (player.object.x < player.posX)
-      player.object.x++;
-    else if (player.object.x > player.posX)
-      player.object.x--;
+    ACTOR_animateTo(&player.actor);
 
-    if (player.object.y < player.posY)
-      player.object.y++;
-    else if (player.object.y > player.posY)
-      player.object.y--;
+    if (!player.actor.moving) {
+      if (ACTOR_checkCollision(&player.actor)) {
+        kprintf("Pawn hit");
+        pawn.state = PAWN_DEAD;
+      }
 
-    if (player.object.x == player.posX && player.object.y == player.posY) {
       turn = ENEMY;
       player.state = PLAYER_IDLE;
     }
-
-    GAMEOBJECT_updatePos(&player.object);
   }
 }
 
@@ -239,34 +231,30 @@ inline static void PLAYER_moveAnimation() {
 void PLAYER_init() {
   player.state = PLAYER_IDLE;
   player.health = 6;
-  player.totalHealth = 0;
-  player.cursorX = 0;
-  player.cursorY = 0;
-  player.posX = 0;
-  player.posY = 0;
+  player.totalHealth = 6;
+  player.cursor.x = 0;
+  player.cursor.y = 0;
 }
 
+void PLAYER_destroy() { ACTOR_destroy(&player.actor); }
+
 void PLAYER_update() {
-  if (turn == ENEMY)
+  if (turn == ENEMY || player.state == PLAYER_DEAD)
     return;
 
   if (player.state == PLAYER_MOVING) {
-    PLAYER_moveAnimation();
+    callAnimation();
     return;
   }
 
-  PLAYER_updateSelectTile();
-  PLAYER_updateCursorTile();
+  updateSelectTile();
+  updateCursorTile();
 }
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
-  GAMEOBJECT_init(&player.object, sprite, palette, x, y);
-  JOY_setEventHandler(PLAYER_inputHandler);
-
-  player.cursorX = x;
-  player.cursorY = y - 2;
-
-  player.posX = x;
-  player.posY = y;
+  ACTOR_init(&player.actor, sprite, palette, x, y, COLLISION_TYPE_PLAYER);
+  JOY_setEventHandler(inputHandler);
+  player.state = PLAYER_IDLE;
+  player.cursor = (Vect2D_s16){x, y - 2};
 }

@@ -1,28 +1,24 @@
 #ifndef __PAWN_H__
 #define __PAWN_H__
 
-#include "gameobject/gameobject.h"
+#include "node/actor.h"
 
 typedef enum PawnState {
   PAWN_MOVING,
   PAWN_IDLE,
+  PAWN_DEAD,
 } PawnState;
 
 typedef struct Pawn {
-  GameObject object;
-
-  s16 previousX;
-  s16 previousY;
-
-  s16 posX;
-  s16 posY;
-
+  ActorNode actor;
   PawnState state;
 } Pawn;
 
 extern Pawn pawn;
 
 void PAWN_init();
+
+void PAWN_destroy();
 
 void PAWN_update();
 
