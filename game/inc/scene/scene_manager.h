@@ -16,8 +16,12 @@ typedef struct Scene {
 } Scene;
 
 void SCENE1_init();
+
 s8 SCENE1_update();
+
 void SCENE1_destroy();
+
+void SCENE1_hitEnemy();
 
 extern Scene scene;
 

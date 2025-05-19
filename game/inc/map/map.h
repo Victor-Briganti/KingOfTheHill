@@ -15,10 +15,11 @@ typedef struct MapObject {
   CollisionType object;
 } MapObject;
 
-void MAP_initLevel(u16 mapHeight, u16 mapWidth);
+void MAP_initLevel(const u16 mapHeight, const u16 mapWidth);
 
-void MAP_initObjects(MapObject objectVector[], u16 count);
+void MAP_initCollision(MapObject objectVector[], const u16 count);
 
-void MAP_updateLevel();
+void MAP_updateCollision(const Vect2D_s16 prev, const Vect2D_s16 cur,
+                         const CollisionType colType);
 
 #endif // __MAP_H__

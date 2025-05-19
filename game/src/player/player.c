@@ -1,8 +1,8 @@
 #include "player/player.h"
-#include "enemy/pawn.h"
 #include "global.h"
 #include "map/map.h"
 #include "node/actor.h"
+#include "scene/scene_manager.h"
 #include "tilemap/tilemap.h"
 
 #include <joy.h>
@@ -215,7 +215,7 @@ inline static void callAnimation() {
     if (!player.actor.moving) {
       if (ACTOR_checkCollision(&player.actor)) {
         kprintf("Pawn hit");
-        pawn.state = PAWN_DEAD;
+        SCENE1_hitEnemy();
       }
 
       turn = ENEMY;

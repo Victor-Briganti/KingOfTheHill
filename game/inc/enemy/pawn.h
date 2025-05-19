@@ -14,14 +14,11 @@ typedef struct Pawn {
   PawnState state;
 } Pawn;
 
-extern Pawn pawn;
+void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,
+               const s16 x, const s16 y);
 
-void PAWN_init();
+void PAWN_destroy(Pawn *pawn);
 
-void PAWN_destroy();
-
-void PAWN_update();
-
-void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y);
+void PAWN_update(Pawn *pawn);
 
 #endif // __PAWN_H__

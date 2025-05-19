@@ -13,10 +13,10 @@ typedef enum PlayerState {
 
 typedef struct Player {
   ActorNode actor;
-  
+
   // Define the cursor position
   Vect2D_s16 cursor;
-  
+
   PlayerState state;
 
   // Define the health of the player

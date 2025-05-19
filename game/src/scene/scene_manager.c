@@ -11,6 +11,8 @@
 
 Scene scene = {SCENE1_init, SCENE1_update, SCENE1_destroy};
 
+Pawn pawn;
+
 //===----------------------------------------------------------------------===//
 // PRIVATE
 //===----------------------------------------------------------------------===//
@@ -40,29 +42,35 @@ static inline void SCENE1_initPlayer() {
 }
 
 static inline void SCENE1_initEnemies() {
-  PAWN_levelInit(&pawn_sprite1, ENEMY_PAL, PAWN_SCENE1_X_POS,
-                 PAWN_SCENE1_Y_POS);
+  PAWN_init(&pawn, &pawn_sprite1, ENEMY_PAL, PAWN_SCENE1_X_POS,
+            PAWN_SCENE1_Y_POS);
+}
+
+static inline void SCENE1_updateMapCollision() {
+  MAP_updateCollision(player.actor.collisionPrevPos,
+                      player.actor.collisionCurPos, player.actor.collisionType);
+  MAP_updateCollision(pawn.actor.collisionPrevPos, pawn.actor.collisionCurPos,
+                      pawn.actor.collisionType);
 }
 
 static inline void SCENE1_updateBackground() {
   BACKGROUND_setText("LEVEL 1-1");
   BACKGROUND_setScore(0);
   TILEMAP_update(&level_map1);
-  MAP_updateLevel();
 }
 
 static inline void SCENE1_updatePlayer() { PLAYER_update(); }
 
-static inline void SCENE1_updateEnemies() { PAWN_update(); }
+static inline void SCENE1_updateEnemies() { PAWN_update(&pawn); }
 
 static inline void SCENE1_destroyPlayer() {
   PLAYER_destroy();
-  PAWN_destroy();
+  PAWN_destroy(&pawn);
   HEART_update();
 }
 
 static inline void SCENE1_destroyEnemies() {
-  PAWN_destroy();
+  PAWN_destroy(&pawn);
   turn = PLAYER;
 }
 
@@ -80,6 +88,7 @@ void SCENE1_init() {
 
 s8 SCENE1_update() {
   SCENE1_updateBackground();
+  SCENE1_updateMapCollision();
   SCENE1_updatePlayer();
   SCENE1_updateEnemies();
   SPR_update();
@@ -97,5 +106,7 @@ s8 SCENE1_update() {
 
   return 0;
 }
+
+void SCENE1_hitEnemy() { pawn.state = PAWN_DEAD; }
 
 void SCENE1_destroy() {}

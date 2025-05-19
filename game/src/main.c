@@ -1,4 +1,3 @@
-#include "enemy/pawn.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "player/player.h"
@@ -46,7 +45,6 @@ static void COMMON_init() {
   // Init the player object
   PLAYER_init();
   HEART_init();
-  PAWN_init();
 }
 
 //===----------------------------------------------------------------------===//
@@ -70,7 +68,7 @@ int main(const bool resetType) {
       s8 result = scene.update();
       if (result < 0)
         break;
-      
+
       frame++;
     }
 
