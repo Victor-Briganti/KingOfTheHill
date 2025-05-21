@@ -6,3 +6,12 @@ Scene *sceneManager[MAX_SCENE] = {
 };
 
 SceneId sceneIndex = SCENE_ID_LEVEL01;
+
+u16 mapLevelHeight;
+u16 mapLevelWidth;
+
+u16 mapLevelX;
+u16 mapLevelY;
+
+s16 playerInitX;
+s16 playerInitY;

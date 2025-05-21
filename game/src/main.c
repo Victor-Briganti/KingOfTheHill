@@ -16,15 +16,6 @@
 // GLOBALS
 //===----------------------------------------------------------------------===//
 
-u16 mapLevelHeight;
-u16 mapLevelWidth;
-
-u16 mapLevelX;
-u16 mapLevelY;
-
-s16 playerInitX;
-s16 playerInitY;
-
 GameTurn turn;
 
 u16 frame = 0;
