@@ -63,16 +63,16 @@ int main(const bool resetType) {
     if (!player.health)
       continue;
 
-    scene.init();
+    sceneManager[sceneIndex]->init();
     while (TRUE) {
-      s8 result = scene.update();
+      s8 result = sceneManager[sceneIndex]->update();
       if (result < 0)
         break;
 
       frame++;
     }
 
-    scene.destroy();
+    sceneManager[sceneIndex]->destroy();
     frame = 0;
   }
   return 0;
