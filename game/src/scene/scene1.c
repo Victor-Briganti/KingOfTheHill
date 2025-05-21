@@ -10,8 +10,6 @@
 #include "sprites.h"
 #include "tilemap/tilemap.h"
 
-Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
-
 // Total enemies on this scene
 #define MAX_ENEMIES 3
 
@@ -19,18 +17,31 @@ Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
 #define PLAYER_SCENE1_X_POS (6)  /* In Tile */
 #define PLAYER_SCENE1_Y_POS (14) /* In Tile */
 
-// Array with every enemy of the scene
-Pawn pawns[MAX_ENEMIES];
+typedef struct SceneContext {
+  // Array with every enemy of the scene
+  Pawn pawns[MAX_ENEMIES];
 
-// Defines the initial position of every enemy
-//static const Vect2D_s16 ENEMIES_POS[MAX_ENEMIES] = {{6, 0}, {2, 0}, {10, 0}};
-static const Vect2D_s16 ENEMIES_POS[MAX_ENEMIES] = {{2, 0}, {4, 0}, {6, 0}};
+  // Defines the initial position of every enemy
+  const Vect2D_s16 enemiesPos[MAX_ENEMIES];
 
-// Defines the index of the current enemy
-static u8 indexEnemy = 0;
+  // Defines the index of the current enemy
+  u8 indexEnemy;
 
-// Total number of current enemies still alive
-static u8 totalEnemies = MAX_ENEMIES;
+  // Total number of current enemies still alive
+  u8 totalEnemies;
+} SceneContext;
+
+//===----------------------------------------------------------------------===//
+// GLOBALS
+//===----------------------------------------------------------------------===//
+
+Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
+
+static SceneContext context = {
+    .enemiesPos = {{2, 0}, {6, 0}, {10, 0}},
+    .indexEnemy = 0,
+    .totalEnemies = MAX_ENEMIES,
+};
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -61,12 +72,12 @@ static inline void initPlayer() {
 
 static inline void initEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    PAWN_init(&pawns[i], &pawn_sprite1, ENEMY_PAL, ENEMIES_POS[i].x,
-              ENEMIES_POS[i].y);
+    PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
+              context.enemiesPos[i].x, context.enemiesPos[i].y);
 
-    MAP_updateCollision(pawns[i].actor.collisionPrevPos,
-                        pawns[i].actor.collisionCurPos,
-                        pawns[i].actor.collisionType);
+    MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
+                        context.pawns[i].actor.collisionCurPos,
+                        context.pawns[i].actor.collisionType);
   }
 }
 
@@ -75,10 +86,11 @@ static inline void updateMapCollision() {
                       player.actor.collisionCurPos, player.actor.collisionType);
 
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (pawns[i].state != PAWN_DEAD && pawns[i].state != PAWN_DESTROYED)
-      MAP_updateCollision(pawns[i].actor.collisionPrevPos,
-                          pawns[i].actor.collisionCurPos,
-                          pawns[i].actor.collisionType);
+    if (context.pawns[i].state != PAWN_DEAD &&
+        context.pawns[i].state != PAWN_DESTROYED)
+      MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
+                          context.pawns[i].actor.collisionCurPos,
+                          context.pawns[i].actor.collisionType);
   }
 }
 
@@ -91,15 +103,16 @@ static inline void updateBackground() {
 static inline void updatePlayer() { PLAYER_update(); }
 
 static inline void updateEnemies() {
-  u8 id = indexEnemy;
+  u8 id = context.indexEnemy;
   u8 res = -1;
   u8 tried = 0;
 
   while (tried < MAX_ENEMIES) {
 
-    if (pawns[id].state != PAWN_DEAD && pawns[id].state != PAWN_DESTROYED) {
-      res = PAWN_update(&pawns[id]);
-      indexEnemy = id;
+    if (context.pawns[id].state != PAWN_DEAD &&
+        context.pawns[id].state != PAWN_DESTROYED) {
+      res = PAWN_update(&context.pawns[id]);
+      context.indexEnemy = id;
       break;
     }
 
@@ -110,7 +123,7 @@ static inline void updateEnemies() {
 
   // Enemy finished animation, go to the next one
   if (res == 0) {
-    indexEnemy = (indexEnemy + 1) % MAX_ENEMIES;
+    context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
   }
 }
 
@@ -124,20 +137,21 @@ static inline void destroyPlayer() {
 
 static inline void destroyEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (pawns[i].state == PAWN_DEAD) {
-      PAWN_deallocDestroy(&pawns[i]);
-      totalEnemies--;
+    if (context.pawns[i].state == PAWN_DEAD) {
+      PAWN_deallocDestroy(&context.pawns[i]);
+      context.totalEnemies--;
     }
   }
 }
 
 static inline void restartEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (pawns[i].state == PAWN_DEAD || pawns[i].state == PAWN_DESTROYED)
+    if (context.pawns[i].state == PAWN_DEAD ||
+        context.pawns[i].state == PAWN_DESTROYED)
       continue;
 
-    PAWN_init(&pawns[i], &pawn_sprite1, ENEMY_PAL, ENEMIES_POS[i].x,
-              ENEMIES_POS[i].y);
+    PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
+              context.enemiesPos[i].x, context.enemiesPos[i].y);
   }
 }
 
@@ -169,7 +183,7 @@ SceneId SCENE1_update() {
   SYS_doVBlankProcess();
 
   destroyEnemies();
-  if (totalEnemies == 0)
+  if (context.totalEnemies == 0)
     return SCENE_ID_PASSED;
 
   if (player.state == PLAYER_DEAD) {
@@ -186,20 +200,21 @@ SceneId SCENE1_update() {
 
 void SCENE1_hitEnemy(const Vect2D_s16 hitPos) {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (pawns[i].state == PAWN_DEAD || pawns[i].state == PAWN_DESTROYED)
+    if (context.pawns[i].state == PAWN_DEAD ||
+        context.pawns[i].state == PAWN_DESTROYED)
       continue;
 
-    if (pawns[i].actor.collisionCurPos.x == hitPos.x &&
-        pawns[i].actor.collisionCurPos.y == hitPos.y) {
-      pawns[i].state = PAWN_DEAD;
+    if (context.pawns[i].actor.collisionCurPos.x == hitPos.x &&
+        context.pawns[i].actor.collisionCurPos.y == hitPos.y) {
+      context.pawns[i].state = PAWN_DEAD;
     }
   }
 }
 
 void SCENE1_destroy() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (pawns[i].state != PAWN_DESTROYED)
-      PAWN_dealloc(&pawns[i]);
+    if (context.pawns[i].state != PAWN_DESTROYED)
+      PAWN_dealloc(&context.pawns[i]);
   }
 
   SYS_doVBlankProcess();
