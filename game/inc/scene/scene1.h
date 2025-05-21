@@ -19,14 +19,6 @@ extern Scene scene1;
 #define MAP_SCENE1_X_POS (14) /* In Tile */
 #define MAP_SCENE1_Y_POS (6)  /* In Tile */
 
-// Player initial position
-#define PLAYER_SCENE1_X_POS (6)  /* In Tile */
-#define PLAYER_SCENE1_Y_POS (14) /* In Tile */
-
-// Pawn initial position
-#define PAWN_SCENE1_X_POS (6) /* In Tile */
-#define PAWN_SCENE1_Y_POS (0) /* In Tile */
-
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
@@ -35,7 +27,7 @@ void SCENE1_init();
 
 SceneId SCENE1_update();
 
-void SCENE1_hitEnemy();
+void SCENE1_hitEnemy(const Vect2D_s16 hitPos);
 
 void SCENE1_destroy();
 

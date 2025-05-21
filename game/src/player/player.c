@@ -215,7 +215,7 @@ inline static void callAnimation() {
     if (!player.actor.moving) {
       if (ACTOR_checkCollision(&player.actor)) {
         kprintf("Pawn hit");
-        sceneManager[sceneIndex]->hit();
+        sceneManager[sceneIndex]->hit(player.actor.collisionCurPos);
       }
 
       turn = ENEMY;

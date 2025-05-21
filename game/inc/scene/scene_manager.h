@@ -17,7 +17,7 @@ typedef enum SceneId {
 
 typedef void (*SceneInitFunction)(void);
 typedef SceneId (*SceneUpdateFunction)(void);
-typedef void (*SceneHitFunction)(void);
+typedef void (*SceneHitFunction)(Vect2D_s16);
 typedef void (*SceneDestroyFunction)(void);
 
 typedef struct Scene {

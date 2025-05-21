@@ -4,6 +4,7 @@
 #include "global.h"
 #include "hud/heart.h"
 #include "map/map.h"
+#include "maths.h"
 #include "player/player.h"
 #include "scene/scene_manager.h"
 #include "sprites.h"
@@ -11,7 +12,24 @@
 
 Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
 
-Pawn pawn;
+// Total enemies on this scene
+#define MAX_ENEMIES 3
+
+// Player initial position
+#define PLAYER_SCENE1_X_POS (6)  /* In Tile */
+#define PLAYER_SCENE1_Y_POS (14) /* In Tile */
+
+// Array with every enemy of the scene
+Pawn pawns[MAX_ENEMIES];
+
+// Defines the initial position of every enemy
+static const Vect2D_s16 ENEMIES_POS[MAX_ENEMIES] = {{6, 0}, {2, 0}, {10, 0}};
+
+// Defines the index of the current enemy
+static u8 indexEnemy = 0;
+
+// Total number of current enemies still alive
+static u8 totalEnemies = MAX_ENEMIES;
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -41,15 +59,26 @@ static inline void SCENE1_initPlayer() {
 }
 
 static inline void SCENE1_initEnemies() {
-  PAWN_init(&pawn, &pawn_sprite1, ENEMY_PAL, PAWN_SCENE1_X_POS,
-            PAWN_SCENE1_Y_POS);
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    PAWN_init(&pawns[i], &pawn_sprite1, ENEMY_PAL, ENEMIES_POS[i].x,
+              ENEMIES_POS[i].y);
+
+    MAP_updateCollision(pawns[i].actor.collisionPrevPos,
+                        pawns[i].actor.collisionCurPos,
+                        pawns[i].actor.collisionType);
+  }
 }
 
 static inline void SCENE1_updateMapCollision() {
   MAP_updateCollision(player.actor.collisionPrevPos,
                       player.actor.collisionCurPos, player.actor.collisionType);
-  MAP_updateCollision(pawn.actor.collisionPrevPos, pawn.actor.collisionCurPos,
-                      pawn.actor.collisionType);
+
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (pawns[i].state != PAWN_DEAD && pawns[i].state != PAWN_DESTROYED)
+      MAP_updateCollision(pawns[i].actor.collisionPrevPos,
+                          pawns[i].actor.collisionCurPos,
+                          pawns[i].actor.collisionType);
+  }
 }
 
 static inline void SCENE1_updateBackground() {
@@ -60,11 +89,32 @@ static inline void SCENE1_updateBackground() {
 
 static inline void SCENE1_updatePlayer() { PLAYER_update(); }
 
-static inline void SCENE1_updateEnemies() { PAWN_update(&pawn); }
+static inline void SCENE1_updateEnemies() {
+  u8 id = indexEnemy;
+  u8 res = -1;
+  u8 tried = 0;
+
+  while (tried < MAX_ENEMIES) {
+
+    if (pawns[id].state != PAWN_DEAD && pawns[id].state != PAWN_DESTROYED) {
+      res = PAWN_update(&pawns[id]);
+      indexEnemy = id;
+      break;
+    }
+
+    // Try the next enemy
+    id = (id + 1) % MAX_ENEMIES;
+    tried++;
+  }
+
+  // Enemy finished animation, go to the next one
+  if (res == 0) {
+    indexEnemy = (indexEnemy + 1) % MAX_ENEMIES;
+  }
+}
 
 static inline void SCENE1_destroyPlayer() {
   PLAYER_destroy();
-  PAWN_destroy(&pawn);
   HEART_update();
 
   if (player.health > 0)
@@ -72,8 +122,28 @@ static inline void SCENE1_destroyPlayer() {
 }
 
 static inline void SCENE1_destroyEnemies() {
-  PAWN_destroy(&pawn);
-  turn = PLAYER;
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (pawns[i].state == PAWN_DEAD) {
+      PAWN_deallocDestroy(&pawns[i]);
+      totalEnemies--;
+    }
+  }
+}
+
+static inline void SCENE1_restartEnemies() {
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (pawns[i].state == PAWN_DEAD || pawns[i].state == PAWN_DESTROYED)
+      continue;
+
+    PAWN_init(&pawns[i], &pawn_sprite1, ENEMY_PAL, ENEMIES_POS[i].x,
+              ENEMIES_POS[i].y);
+  }
+}
+
+static inline void SCENE1_restart() {
+  SCENE1_initPlayer();
+  SCENE1_restartEnemies();
+  SCENE1_updateMapCollision();
 }
 
 //===----------------------------------------------------------------------===//
@@ -96,10 +166,9 @@ SceneId SCENE1_update() {
   SPR_update();
   SYS_doVBlankProcess();
 
-  if (pawn.state == PAWN_DEAD) {
-    SCENE1_destroyEnemies();
+  SCENE1_destroyEnemies();
+  if (totalEnemies == 0)
     return SCENE_ID_PASSED;
-  }
 
   if (player.state == PLAYER_DEAD) {
     SCENE1_destroyPlayer();
@@ -109,13 +178,30 @@ SceneId SCENE1_update() {
     } else {
       // Restart the scene
       SCENE1_destroy();
-      SCENE1_init();
+      SCENE1_restart();
     }
   }
 
   return SCENE_ID_LEVEL01;
 }
 
-void SCENE1_hitEnemy() { pawn.state = PAWN_DEAD; }
+void SCENE1_hitEnemy(const Vect2D_s16 hitPos) {
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (pawns[i].state == PAWN_DEAD || pawns[i].state == PAWN_DESTROYED)
+      continue;
 
-void SCENE1_destroy() { SYS_doVBlankProcess(); }
+    if (pawns[i].actor.collisionCurPos.x == hitPos.x &&
+        pawns[i].actor.collisionCurPos.y == hitPos.y) {
+      pawns[i].state = PAWN_DEAD;
+    }
+  }
+}
+
+void SCENE1_destroy() {
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (pawns[i].state != PAWN_DESTROYED)
+      PAWN_dealloc(&pawns[i]);
+  }
+
+  SYS_doVBlankProcess();
+}

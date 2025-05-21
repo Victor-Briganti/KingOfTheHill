@@ -57,16 +57,29 @@ void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,
   ACTOR_init(&pawn->actor, sprite, palette, x, y, COLLISION_TYPE_PAWN);
 }
 
-void PAWN_destroy(Pawn *pawn) { ACTOR_destroy(&pawn->actor); }
+void PAWN_deallocDestroy(Pawn *pawn) {
+  pawn->state = PAWN_DESTROYED;
+  ACTOR_destroy(&pawn->actor);
+}
 
-void PAWN_update(Pawn *pawn) {
-  if (turn == PLAYER || pawn->state == PAWN_DEAD)
-    return;
+void PAWN_dealloc(Pawn *pawn) { ACTOR_destroy(&pawn->actor); }
+
+s8 PAWN_update(Pawn *pawn) {
+  if (turn == PLAYER)
+    return -1;
+
+  if (pawn->state == PAWN_DEAD || pawn->state == PAWN_DESTROYED)
+    return 0;
 
   if (pawn->state == PAWN_MOVING) {
     callAnimation(pawn);
-    return;
+
+    if (pawn->state == PAWN_IDLE)
+      return 0;
+    else
+      return 1;
   }
 
   startMovement(pawn);
+  return 1;
 }
