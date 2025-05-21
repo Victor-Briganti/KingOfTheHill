@@ -125,7 +125,7 @@ static void cursorInertia() {
 }
 
 static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
-  if (joy != JOY_1 || turn == ENEMY || player.state == PLAYER_MOVING)
+  if (joy != JOY_1 || player.state == PLAYER_MOVING)
     return;
 
   // Verify if the directionals are pressed
@@ -208,7 +208,7 @@ inline static void updateCursorTile() {
   }
 }
 
-inline static void callAnimation() {
+inline static s8 callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
     ACTOR_animateTo(&player.actor);
 
@@ -218,10 +218,12 @@ inline static void callAnimation() {
         sceneManager[sceneIndex]->hit(player.actor.collisionCurPos);
       }
 
-      turn = ENEMY;
       player.state = PLAYER_IDLE;
+      return 0;
     }
   }
+
+  return 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -238,22 +240,22 @@ void PLAYER_init() {
 
 void PLAYER_destroy() { ACTOR_destroy(&player.actor); }
 
-void PLAYER_update() {
+s8 PLAYER_update() {
   if (player.state == PLAYER_DAMAGED)
     ACTOR_blink(&player.actor);
   else
     ACTOR_setVisible(&player.actor);
 
-  if (turn == ENEMY || player.state == PLAYER_DEAD)
-    return;
+  if (player.state == PLAYER_DEAD)
+    return 0;
 
   if (player.state == PLAYER_MOVING) {
-    callAnimation();
-    return;
+    return callAnimation();
   }
 
   updateSelectTile();
   updateCursorTile();
+  return 1;
 }
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,

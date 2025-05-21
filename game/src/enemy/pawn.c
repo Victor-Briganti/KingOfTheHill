@@ -18,13 +18,12 @@ static const SpriteDefinition *sprites[MAX_SPRITES_ANIM] = {
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-inline static void startMovement(Pawn *pawn) {
+inline static s8 startMovement(Pawn *pawn) {
   s16 x = pawn->actor.collisionCurPos.x;
   s16 y = clamp(pawn->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
 
   if (map[y][x] != COLLISION_TYPE_EMPTY) {
-    turn = PLAYER;
-    return;
+    return 0;
   }
 
   // Player on diagonal right
@@ -41,9 +40,11 @@ inline static void startMovement(Pawn *pawn) {
 
   ACTOR_setTargetAnimPos(&pawn->actor, x, y);
   pawn->state = PAWN_MOVING;
+
+  return 1;
 }
 
-inline static void moveAnimation(Pawn *pawn) {
+inline static s8 moveAnimation(Pawn *pawn) {
   if (frame % FRAME_ANIMATION == 0) {
     ACTOR_animateTo(&pawn->actor);
 
@@ -52,17 +53,20 @@ inline static void moveAnimation(Pawn *pawn) {
         kprintf("Player hit");
         player.health--;
         player.state = PLAYER_DEAD;
-      }
-      
-      if (pawn->actor.collisionCurPos.y == mapLevelHeight - 2) {
-        pawn->state = PAWN_PROMOTION;
-        return;
+        return 0;
       }
 
-      turn = PLAYER;
+      if (pawn->actor.collisionCurPos.y == mapLevelHeight - 2) {
+        pawn->state = PAWN_PROMOTION;
+        return 1;
+      }
+
       pawn->state = PAWN_IDLE;
+      return 0;
     }
   }
+
+  return 1;
 }
 
 inline static s8 promotionAnimation(Pawn *pawn) {
@@ -99,34 +103,16 @@ void PAWN_deallocDestroy(Pawn *pawn) {
 void PAWN_dealloc(Pawn *pawn) { ACTOR_destroy(&pawn->actor); }
 
 s8 PAWN_update(Pawn *pawn) {
-  if (turn == PLAYER)
-    return -1;
-
   switch (pawn->state) {
   case PAWN_DEAD:
   case PAWN_DESTROYED:
     return 0;
-  case PAWN_MOVING: {
-    moveAnimation(pawn);
-
-    if (pawn->state == PAWN_IDLE)
-      return 0;
-
-    return 1;
-  }
-  case PAWN_IDLE: {
-    startMovement(pawn);
-    return 1;
-  }
-  case PAWN_PROMOTION: {
-    s8 res = promotionAnimation(pawn);
-    if (res == 0) {
-      turn = PLAYER;
-      return 0;
-    }
-
-    return 1;
-  }
+  case PAWN_MOVING:
+    return moveAnimation(pawn);
+  case PAWN_IDLE:
+    return startMovement(pawn);
+  case PAWN_PROMOTION:
+    return promotionAnimation(pawn);
   }
 
   return 1;

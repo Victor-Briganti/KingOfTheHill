@@ -10,6 +10,10 @@
 #include "sprites.h"
 #include "tilemap/tilemap.h"
 
+//===----------------------------------------------------------------------===//
+// DEFINITIONS
+//===----------------------------------------------------------------------===//
+
 // Total enemies on this scene
 #define MAX_ENEMIES 3
 
@@ -17,12 +21,21 @@
 #define PLAYER_SCENE1_X_POS (6)  /* In Tile */
 #define PLAYER_SCENE1_Y_POS (14) /* In Tile */
 
+typedef enum GameTurn {
+  PLAYER = 0,
+  ENEMY = 1,
+  GAME_OVER = 2,
+} GameTurn;
+
 typedef struct SceneContext {
   // Array with every enemy of the scene
   Pawn pawns[MAX_ENEMIES];
 
   // Defines the initial position of every enemy
   const Vect2D_s16 enemiesPos[MAX_ENEMIES];
+
+  // Defines whose turn it is
+  GameTurn turn;
 
   // Defines the index of the current enemy
   u8 indexEnemy;
@@ -35,9 +48,10 @@ typedef struct SceneContext {
 // GLOBALS
 //===----------------------------------------------------------------------===//
 
-Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
+Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy,SCENE1_destroy};
 
 static SceneContext context = {
+    .turn = PLAYER,
     .enemiesPos = {{2, 0}, {6, 0}, {10, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
@@ -56,8 +70,6 @@ static inline void initGlobals() {
 
   playerInitX = PLAYER_SCENE1_X_POS;
   playerInitY = PLAYER_SCENE1_Y_POS;
-
-  turn = PLAYER;
 }
 
 static inline void initBackground() {
@@ -100,7 +112,13 @@ static inline void updateBackground() {
   TILEMAP_update(&level_map1);
 }
 
-static inline void updatePlayer() { PLAYER_update(); }
+static inline void updatePlayer() { 
+  s8 res = PLAYER_update(); 
+  if (res)
+    return;
+
+  context.turn = ENEMY;
+}
 
 static inline void updateEnemies() {
   u8 id = context.indexEnemy;
@@ -124,6 +142,7 @@ static inline void updateEnemies() {
   // Enemy finished animation, go to the next one
   if (res == 0) {
     context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
+    context.turn = PLAYER;
   }
 }
 
@@ -177,8 +196,11 @@ void SCENE1_init() {
 SceneId SCENE1_update() {
   updateBackground();
   updateMapCollision();
-  updatePlayer();
-  updateEnemies();
+  if (context.turn == PLAYER)
+    updatePlayer();
+  else
+    updateEnemies();
+  
   SPR_update();
   SYS_doVBlankProcess();
 

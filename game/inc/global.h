@@ -5,18 +5,9 @@
 
 #include <genesis.h>
 
-typedef enum GameTurn {
-  PLAYER = 0,
-  ENEMY = 1,
-  GAME_OVER = 2,
-} GameTurn;
-
 //===----------------------------------------------------------------------===//
 // EXTERN
 //===----------------------------------------------------------------------===//
-
-// Define who turn is this
-extern GameTurn turn;
 
 // Define the "frame" of the game
 extern u16 frame;
