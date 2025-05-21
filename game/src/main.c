@@ -51,19 +51,25 @@ int main(const bool resetType) {
   while (TRUE) {
     SYS_doVBlankProcess();
 
+    // TODO: This should not be hard coded
+    if (sceneIndex != SCENE_ID_LEVEL01)
+      continue;
+
     if (!player.health)
       continue;
 
     sceneManager[sceneIndex]->init();
     while (TRUE) {
-      s8 result = sceneManager[sceneIndex]->update();
-      if (result < 0)
+      SceneId result = sceneManager[sceneIndex]->update();
+      if (result != sceneIndex) {
+        sceneManager[sceneIndex]->destroy();
+        sceneIndex = result;
         break;
+      }
 
       frame++;
     }
 
-    sceneManager[sceneIndex]->destroy();
     frame = 0;
   }
   return 0;

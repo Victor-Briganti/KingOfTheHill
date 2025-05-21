@@ -1,10 +1,10 @@
+#include "scene/scene1.h"
 #include "background/background.h"
 #include "enemy/pawn.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "map/map.h"
 #include "player/player.h"
-#include "scene/scene1.h"
 #include "scene/scene_manager.h"
 #include "sprites.h"
 #include "tilemap/tilemap.h"
@@ -88,7 +88,7 @@ void SCENE1_init() {
   SYS_doVBlankProcess();
 }
 
-s8 SCENE1_update() {
+SceneId SCENE1_update() {
   SCENE1_updateBackground();
   SCENE1_updateMapCollision();
   SCENE1_updatePlayer();
@@ -96,19 +96,26 @@ s8 SCENE1_update() {
   SPR_update();
   SYS_doVBlankProcess();
 
-  if (player.state == PLAYER_DEAD) {
-    SCENE1_destroyPlayer();
-    return -1;
-  }
-
   if (pawn.state == PAWN_DEAD) {
     SCENE1_destroyEnemies();
-    return 1;
+    return SCENE_ID_PASSED;
   }
 
-  return 0;
+  if (player.state == PLAYER_DEAD) {
+    SCENE1_destroyPlayer();
+
+    if (player.health == 0) {
+      return SCENE_ID_GAME_OVER;
+    } else {
+      // Restart the scene
+      SCENE1_destroy();
+      SCENE1_init();
+    }
+  }
+
+  return SCENE_ID_LEVEL01;
 }
 
 void SCENE1_hitEnemy() { pawn.state = PAWN_DEAD; }
 
-void SCENE1_destroy() {}
+void SCENE1_destroy() { SYS_doVBlankProcess(); }

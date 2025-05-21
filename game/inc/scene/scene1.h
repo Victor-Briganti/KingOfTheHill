@@ -33,7 +33,7 @@ extern Scene scene1;
 
 void SCENE1_init();
 
-s8 SCENE1_update();
+SceneId SCENE1_update();
 
 void SCENE1_hitEnemy();
 

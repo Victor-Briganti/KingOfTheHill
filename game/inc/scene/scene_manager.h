@@ -9,8 +9,14 @@
 // TYPE DEFINITION
 //===----------------------------------------------------------------------===//
 
+typedef enum SceneId {
+  SCENE_ID_LEVEL01 = 0,
+  SCENE_ID_GAME_OVER = 1,
+  SCENE_ID_PASSED = 2,
+} SceneId;
+
 typedef void (*SceneInitFunction)(void);
-typedef s8 (*SceneUpdateFunction)(void);
+typedef SceneId (*SceneUpdateFunction)(void);
 typedef void (*SceneHitFunction)(void);
 typedef void (*SceneDestroyFunction)(void);
 
@@ -20,10 +26,6 @@ typedef struct Scene {
   SceneHitFunction hit;
   SceneDestroyFunction destroy;
 } Scene;
-
-typedef enum SceneId {
-  SCENE_ID_LEVEL01 = 0,
-} SceneId;
 
 //===----------------------------------------------------------------------===//
 // EXTERN
