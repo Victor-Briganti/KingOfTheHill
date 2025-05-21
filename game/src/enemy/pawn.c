@@ -1,5 +1,18 @@
 #include "enemy/pawn.h"
+#include "global.h"
+#include "node/actor.h"
 #include "player/player.h"
+#include "scene/scene_manager.h"
+#include "sprites.h"
+
+#include <genesis.h>
+
+#define MAX_SPRITES_ANIM (7)
+
+static const SpriteDefinition *sprites[MAX_SPRITES_ANIM] = {
+    &pawn_sprite1, &pawn_sprite2, &pawn_sprite3, &pawn_sprite4,
+    &pawn_sprite5, &pawn_sprite6, &pawn_sprite7,
+};
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -30,7 +43,7 @@ inline static void startMovement(Pawn *pawn) {
   pawn->state = PAWN_MOVING;
 }
 
-inline static void callAnimation(Pawn *pawn) {
+inline static void moveAnimation(Pawn *pawn) {
   if (frame % FRAME_ANIMATION == 0) {
     ACTOR_animateTo(&pawn->actor);
 
@@ -40,11 +53,31 @@ inline static void callAnimation(Pawn *pawn) {
         player.health--;
         player.state = PLAYER_DEAD;
       }
+      
+      if (pawn->actor.collisionCurPos.y == mapLevelHeight - 2) {
+        pawn->state = PAWN_PROMOTION;
+        return;
+      }
 
       turn = PLAYER;
       pawn->state = PAWN_IDLE;
     }
   }
+}
+
+inline static s8 promotionAnimation(Pawn *pawn) {
+  if (frame % FRAME_ANIMATION == 0) {
+    if (pawn->indexSprite >= MAX_SPRITES_ANIM)
+      return 0;
+
+    ACTOR_deallocSprite(&pawn->actor);
+    ACTOR_init(&pawn->actor, sprites[pawn->indexSprite], ENEMY_PAL,
+               pawn->actor.collisionCurPos.x, pawn->actor.collisionCurPos.y,
+               COLLISION_TYPE_PAWN);
+    pawn->indexSprite++;
+  }
+
+  return 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -54,6 +87,7 @@ inline static void callAnimation(Pawn *pawn) {
 void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,
                const s16 x, const s16 y) {
   pawn->state = PAWN_IDLE;
+  pawn->indexSprite = 0;
   ACTOR_init(&pawn->actor, sprite, palette, x, y, COLLISION_TYPE_PAWN);
 }
 
@@ -68,18 +102,32 @@ s8 PAWN_update(Pawn *pawn) {
   if (turn == PLAYER)
     return -1;
 
-  if (pawn->state == PAWN_DEAD || pawn->state == PAWN_DESTROYED)
+  switch (pawn->state) {
+  case PAWN_DEAD:
+  case PAWN_DESTROYED:
     return 0;
-
-  if (pawn->state == PAWN_MOVING) {
-    callAnimation(pawn);
+  case PAWN_MOVING: {
+    moveAnimation(pawn);
 
     if (pawn->state == PAWN_IDLE)
       return 0;
-    else
-      return 1;
+
+    return 1;
+  }
+  case PAWN_IDLE: {
+    startMovement(pawn);
+    return 1;
+  }
+  case PAWN_PROMOTION: {
+    s8 res = promotionAnimation(pawn);
+    if (res == 0) {
+      turn = PLAYER;
+      return 0;
+    }
+
+    return 1;
+  }
   }
 
-  startMovement(pawn);
   return 1;
 }

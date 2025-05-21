@@ -6,6 +6,7 @@
 typedef enum PawnState {
   PAWN_MOVING,
   PAWN_IDLE,
+  PAWN_PROMOTION,
   PAWN_DEAD,
   PAWN_DESTROYED,
 } PawnState;
@@ -13,6 +14,7 @@ typedef enum PawnState {
 typedef struct Pawn {
   ActorNode actor;
   PawnState state;
+  u8 indexSprite;
 } Pawn;
 
 void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,

@@ -23,7 +23,8 @@ Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
 Pawn pawns[MAX_ENEMIES];
 
 // Defines the initial position of every enemy
-static const Vect2D_s16 ENEMIES_POS[MAX_ENEMIES] = {{6, 0}, {2, 0}, {10, 0}};
+//static const Vect2D_s16 ENEMIES_POS[MAX_ENEMIES] = {{6, 0}, {2, 0}, {10, 0}};
+static const Vect2D_s16 ENEMIES_POS[MAX_ENEMIES] = {{2, 0}, {4, 0}, {6, 0}};
 
 // Defines the index of the current enemy
 static u8 indexEnemy = 0;

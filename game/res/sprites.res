@@ -13,3 +13,5 @@ SPRITE pawn_sprite2 "sprites/pawn2.png" 2 2 FAST
 SPRITE pawn_sprite3 "sprites/pawn3.png" 2 2 FAST
 SPRITE pawn_sprite4 "sprites/pawn4.png" 2 2 FAST
 SPRITE pawn_sprite5 "sprites/pawn5.png" 2 2 FAST
+SPRITE pawn_sprite6 "sprites/pawn6.png" 2 2 FAST
+SPRITE pawn_sprite7 "sprites/pawn7.png" 2 2 FAST

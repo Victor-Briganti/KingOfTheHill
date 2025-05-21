@@ -64,6 +64,11 @@ inline void ACTOR_destroy(ActorNode *const node) {
   node->moving = FALSE;
 }
 
+inline void ACTOR_deallocSprite(const ActorNode *const node) {
+  // Release the resources
+  SPR_releaseSprite(node->sprite);
+}
+
 inline void ACTOR_animateTo(ActorNode *const node) {
   if (node->moving == FALSE)
     return;
