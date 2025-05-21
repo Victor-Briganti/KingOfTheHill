@@ -35,7 +35,7 @@ static u8 totalEnemies = MAX_ENEMIES;
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-static inline void SCENE1_initGlobals() {
+static inline void initGlobals() {
   mapLevelHeight = MAP_SCENE1_HEIGHT;
   mapLevelWidth = MAP_SCENE1_WIDTH;
 
@@ -48,17 +48,17 @@ static inline void SCENE1_initGlobals() {
   turn = PLAYER;
 }
 
-static inline void SCENE1_initBackground() {
+static inline void initBackground() {
   BACKGROUND_init();
   TILEMAP_init(&tileset);
   MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }
 
-static inline void SCENE1_initPlayer() {
+static inline void initPlayer() {
   PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
 }
 
-static inline void SCENE1_initEnemies() {
+static inline void initEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
     PAWN_init(&pawns[i], &pawn_sprite1, ENEMY_PAL, ENEMIES_POS[i].x,
               ENEMIES_POS[i].y);
@@ -69,7 +69,7 @@ static inline void SCENE1_initEnemies() {
   }
 }
 
-static inline void SCENE1_updateMapCollision() {
+static inline void updateMapCollision() {
   MAP_updateCollision(player.actor.collisionPrevPos,
                       player.actor.collisionCurPos, player.actor.collisionType);
 
@@ -81,15 +81,15 @@ static inline void SCENE1_updateMapCollision() {
   }
 }
 
-static inline void SCENE1_updateBackground() {
+static inline void updateBackground() {
   BACKGROUND_setText("LEVEL 1-1");
   BACKGROUND_setScore(0);
   TILEMAP_update(&level_map1);
 }
 
-static inline void SCENE1_updatePlayer() { PLAYER_update(); }
+static inline void updatePlayer() { PLAYER_update(); }
 
-static inline void SCENE1_updateEnemies() {
+static inline void updateEnemies() {
   u8 id = indexEnemy;
   u8 res = -1;
   u8 tried = 0;
@@ -113,7 +113,7 @@ static inline void SCENE1_updateEnemies() {
   }
 }
 
-static inline void SCENE1_destroyPlayer() {
+static inline void destroyPlayer() {
   PLAYER_destroy();
   HEART_update();
 
@@ -121,7 +121,7 @@ static inline void SCENE1_destroyPlayer() {
     player.state = PLAYER_DAMAGED;
 }
 
-static inline void SCENE1_destroyEnemies() {
+static inline void destroyEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
     if (pawns[i].state == PAWN_DEAD) {
       PAWN_deallocDestroy(&pawns[i]);
@@ -130,7 +130,7 @@ static inline void SCENE1_destroyEnemies() {
   }
 }
 
-static inline void SCENE1_restartEnemies() {
+static inline void restartEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
     if (pawns[i].state == PAWN_DEAD || pawns[i].state == PAWN_DESTROYED)
       continue;
@@ -140,10 +140,11 @@ static inline void SCENE1_restartEnemies() {
   }
 }
 
-static inline void SCENE1_restart() {
-  SCENE1_initPlayer();
-  SCENE1_restartEnemies();
-  SCENE1_updateMapCollision();
+static inline void restart() {
+  SCENE1_destroy();
+  initPlayer();
+  restartEnemies();
+  updateMapCollision();
 }
 
 //===----------------------------------------------------------------------===//
@@ -151,35 +152,32 @@ static inline void SCENE1_restart() {
 //===----------------------------------------------------------------------===//
 
 void SCENE1_init() {
-  SCENE1_initGlobals();
-  SCENE1_initBackground();
-  SCENE1_initPlayer();
-  SCENE1_initEnemies();
+  initGlobals();
+  initBackground();
+  initPlayer();
+  initEnemies();
   SYS_doVBlankProcess();
 }
 
 SceneId SCENE1_update() {
-  SCENE1_updateBackground();
-  SCENE1_updateMapCollision();
-  SCENE1_updatePlayer();
-  SCENE1_updateEnemies();
+  updateBackground();
+  updateMapCollision();
+  updatePlayer();
+  updateEnemies();
   SPR_update();
   SYS_doVBlankProcess();
 
-  SCENE1_destroyEnemies();
+  destroyEnemies();
   if (totalEnemies == 0)
     return SCENE_ID_PASSED;
 
   if (player.state == PLAYER_DEAD) {
-    SCENE1_destroyPlayer();
+    destroyPlayer();
 
-    if (player.health == 0) {
+    if (player.health == 0)
       return SCENE_ID_GAME_OVER;
-    } else {
-      // Restart the scene
-      SCENE1_destroy();
-      SCENE1_restart();
-    }
+    else
+      restart();
   }
 
   return SCENE_ID_LEVEL01;
