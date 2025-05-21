@@ -1,4 +1,4 @@
-#include "scene/scene1.h"
+#include "scene/scene2.h"
 #include "background/background.h"
 #include "enemy/pawn.h"
 #include "global.h"
@@ -15,7 +15,7 @@
 //===----------------------------------------------------------------------===//
 
 // Total enemies on this scene
-#define MAX_ENEMIES 3
+#define MAX_ENEMIES 1
 
 // Player initial position
 #define PLAYER_SCENE1_X_POS (6)  /* In Tile */
@@ -48,11 +48,11 @@ typedef struct SceneContext {
 // GLOBALS
 //===----------------------------------------------------------------------===//
 
-Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy,SCENE1_destroy};
+Scene scene2 = {SCENE2_init, SCENE2_update, SCENE2_hitEnemy, SCENE2_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
-    .enemiesPos = {{6, 0}, {2, 0}, {10, 0}},
+    .enemiesPos = {{6, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
@@ -62,11 +62,11 @@ static SceneContext context = {
 //===----------------------------------------------------------------------===//
 
 static inline void initGlobals() {
-  mapLevelHeight = MAP_SCENE1_HEIGHT;
-  mapLevelWidth = MAP_SCENE1_WIDTH;
+  mapLevelHeight = MAP_SCENE2_HEIGHT;
+  mapLevelWidth = MAP_SCENE2_WIDTH;
 
-  mapLevelX = MAP_SCENE1_X_POS;
-  mapLevelY = MAP_SCENE1_Y_POS;
+  mapLevelX = MAP_SCENE2_X_POS;
+  mapLevelY = MAP_SCENE2_Y_POS;
 
   playerInitX = PLAYER_SCENE1_X_POS;
   playerInitY = PLAYER_SCENE1_Y_POS;
@@ -79,72 +79,32 @@ static inline void initBackground() {
 }
 
 static inline void initPlayer() {
+  HEART_update();
   PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
 }
 
-static inline void initEnemies() {
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
-              context.enemiesPos[i].x, context.enemiesPos[i].y);
-
-    MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
-                        context.pawns[i].actor.collisionCurPos,
-                        context.pawns[i].actor.collisionType);
-  }
-}
+static inline void initEnemies() {}
 
 static inline void updateMapCollision() {
   MAP_updateCollision(player.actor.collisionPrevPos,
                       player.actor.collisionCurPos, player.actor.collisionType);
-
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state != PAWN_DEAD &&
-        context.pawns[i].state != PAWN_DESTROYED)
-      MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
-                          context.pawns[i].actor.collisionCurPos,
-                          context.pawns[i].actor.collisionType);
-  }
 }
 
 static inline void updateBackground() {
-  BACKGROUND_setText("LEVEL 1-1");
+  BACKGROUND_setText("LEVEL 1-2");
   BACKGROUND_setScore(0);
   TILEMAP_update(&level_map1);
 }
 
-static inline void updatePlayer() { 
-  s8 res = PLAYER_update(); 
+static inline void updatePlayer() {
+  s8 res = PLAYER_update();
   if (res)
     return;
 
-  context.turn = ENEMY;
+  //   context.turn = ENEMY;
 }
 
-static inline void updateEnemies() {
-  u8 id = context.indexEnemy;
-  u8 res = -1;
-  u8 tried = 0;
-
-  while (tried < MAX_ENEMIES) {
-
-    if (context.pawns[id].state != PAWN_DEAD &&
-        context.pawns[id].state != PAWN_DESTROYED) {
-      res = PAWN_update(&context.pawns[id]);
-      context.indexEnemy = id;
-      break;
-    }
-
-    // Try the next enemy
-    id = (id + 1) % MAX_ENEMIES;
-    tried++;
-  }
-
-  // Enemy finished animation, go to the next one
-  if (res == 0) {
-    context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
-    context.turn = PLAYER;
-  }
-}
+static inline void updateEnemies() {}
 
 static inline void destroyPlayer() {
   PLAYER_destroy();
@@ -154,28 +114,12 @@ static inline void destroyPlayer() {
     player.state = PLAYER_DAMAGED;
 }
 
-static inline void destroyEnemies() {
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD) {
-      PAWN_deallocDestroy(&context.pawns[i]);
-      context.totalEnemies--;
-    }
-  }
-}
+static inline void destroyEnemies() {}
 
-static inline void restartEnemies() {
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD ||
-        context.pawns[i].state == PAWN_DESTROYED)
-      continue;
-
-    PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
-              context.enemiesPos[i].x, context.enemiesPos[i].y);
-  }
-}
+static inline void restartEnemies() {}
 
 static inline void restart() {
-  SCENE1_destroy();
+  SCENE2_destroy();
   initPlayer();
   restartEnemies();
   updateMapCollision();
@@ -185,7 +129,7 @@ static inline void restart() {
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-void SCENE1_init() {
+void SCENE2_init() {
   initGlobals();
   initBackground();
   initPlayer();
@@ -193,14 +137,14 @@ void SCENE1_init() {
   SYS_doVBlankProcess();
 }
 
-SceneId SCENE1_update() {
+SceneId SCENE2_update() {
   updateBackground();
   updateMapCollision();
   if (context.turn == PLAYER)
     updatePlayer();
   else
     updateEnemies();
-  
+
   SPR_update();
   SYS_doVBlankProcess();
 
@@ -217,27 +161,9 @@ SceneId SCENE1_update() {
       restart();
   }
 
-  return SCENE_ID_LEVEL01;
+  return SCENE_ID_LEVEL02;
 }
 
-void SCENE1_hitEnemy(const Vect2D_s16 hitPos) {
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD ||
-        context.pawns[i].state == PAWN_DESTROYED)
-      continue;
+void SCENE2_hitEnemy(const Vect2D_s16 hitPos) {}
 
-    if (context.pawns[i].actor.collisionCurPos.x == hitPos.x &&
-        context.pawns[i].actor.collisionCurPos.y == hitPos.y) {
-      context.pawns[i].state = PAWN_DEAD;
-    }
-  }
-}
-
-void SCENE1_destroy() {
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state != PAWN_DESTROYED)
-      PAWN_dealloc(&context.pawns[i]);
-  }
-
-  SYS_doVBlankProcess();
-}
+void SCENE2_destroy() { SYS_doVBlankProcess(); }
