@@ -1,4 +1,5 @@
 #include "enemy/queen.h"
+#include "map/map.h"
 #include "node/actor.h"
 #include "player/player.h"
 #include "scene/scene_manager.h"
@@ -15,15 +16,31 @@ inline static s8 startMovement(Queen *queen) {
   const s16 playerX = player.actor.collisionCurPos.x;
   const s16 playerY = player.actor.collisionCurPos.y;
 
-  // Horizontal attack
+  // Vertical attack
   if (queenX == playerX) {
+    const s16 y = playerY > queenY ? playerY - 1 : playerY + 1;
+    Vect2D_s16 res = MAP_checkVertical((Vect2D_s16){queenX, queenY},
+                                         (Vect2D_s16){queenX, y});
+
+    if (res.x >= 0) {
+      return 0;
+    }
+
     ACTOR_setTargetAnimPos(&queen->actor, queenX, playerY);
     queen->state = QUEEN_MOVING;
     return 1;
   }
 
-  // Vertical attack
+  // Horizontal attack
   if (queenY == playerY) {
+    const s16 x = playerX > queenX ? playerX - 1 : playerX + 1;
+    Vect2D_s16 res = MAP_checkHorizontal((Vect2D_s16){queenX, queenY},
+                                         (Vect2D_s16){x, queenY});
+
+    if (res.x >= 0) {
+      return 0;
+    }
+
     ACTOR_setTargetAnimPos(&queen->actor, playerX, queenY);
     queen->state = QUEEN_MOVING;
     return 1;
@@ -31,6 +48,15 @@ inline static s8 startMovement(Queen *queen) {
 
   // Diagonal attack
   if (abs(queenY - playerY) == abs(queenX - playerX)) {
+    const s16 x = playerX > queenX ? playerX - 1 : playerX + 1;
+    const s16 y = playerY > queenY ? playerY - 1 : playerY + 1;
+
+    Vect2D_s16 res =
+        MAP_checkDiagonal((Vect2D_s16){queenX, queenY}, (Vect2D_s16){x, y});
+    if (res.x >= 0) {
+      return 0;
+    }
+
     ACTOR_setTargetAnimPos(&queen->actor, playerX, playerY);
     queen->state = QUEEN_MOVING;
     return 1;
@@ -42,6 +68,22 @@ inline static s8 startMovement(Queen *queen) {
   dx = clamp(queenX + dx, 0, mapLevelWidth - 2);
   dy = clamp(queenY + dy, 0, mapLevelHeight - 2);
 
+  Vect2D_s16 res =
+      MAP_checkVertical((Vect2D_s16){queenX, queenY}, (Vect2D_s16){dx, dy});
+  if (res.x >= 0) {
+    return 0;
+  }
+
+  res = MAP_checkHorizontal((Vect2D_s16){queenX, queenY}, (Vect2D_s16){dx, dy});
+  if (res.x >= 0) {
+    return 0;
+  }
+
+  res = MAP_checkDiagonal((Vect2D_s16){queenX, queenY}, (Vect2D_s16){dx, dy});
+  if (res.x >= 0) {
+    return 0;
+  }
+  
   ACTOR_setTargetAnimPos(&queen->actor, dx, dy);
 
   queen->state = QUEEN_MOVING;
