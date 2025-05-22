@@ -125,7 +125,7 @@ void QUEEN_deallocDestroy(Queen *queen) {
   ACTOR_destroy(&queen->actor);
 }
 
-void QUEEN_dealloc(Queen *queen) { ACTOR_destroy(&queen->actor); }
+void QUEEN_dealloc(Queen *queen) { ACTOR_deallocSprite(&queen->actor); }
 
 s8 QUEEN_update(Queen *queen) {
   switch (queen->state) {
