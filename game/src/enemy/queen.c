@@ -6,92 +6,91 @@
 
 #include <genesis.h>
 
+typedef Vect2D_s16 (*MovementCheck)(const Vect2D_s16, const Vect2D_s16);
+
 //===----------------------------------------------------------------------===//
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
+// Return TRUE if the path is empty, FALSE otherwise
+inline static bool verifyMovement(Vect2D_s16 from, Vect2D_s16 to,
+                                  MovementCheck check) {
+  const Vect2D_s16 res = check(from, to);
+  if (res.x < 0)
+    return TRUE;
+
+  return FALSE;
+}
+
 inline static s8 startMovement(Queen *queen) {
-  const s16 queenX = queen->actor.collisionCurPos.x;
-  const s16 queenY = queen->actor.collisionCurPos.y;
-  const s16 playerX = player.actor.collisionCurPos.x;
-  const s16 playerY = player.actor.collisionCurPos.y;
+  const Vect2D_s16 from = {queen->actor.collisionCurPos.x,
+                           queen->actor.collisionCurPos.y};
+  const Vect2D_s16 to = {player.actor.collisionCurPos.x,
+                         player.actor.collisionCurPos.y};
 
   // Vertical attack
-  if (queenX == playerX) {
-    const s16 y = playerY > queenY ? playerY - 1 : playerY + 1;
-    Vect2D_s16 res = MAP_checkVertical((Vect2D_s16){queenX, queenY},
-                                         (Vect2D_s16){queenX, y});
-
-    if (res.x >= 0) {
-      return 0;
+  if (from.x == to.x) {
+    const s16 y = to.y > from.y ? to.y - 1 : to.y + 1;
+    if (verifyMovement(from, (Vect2D_s16){from.x, y}, MAP_checkVertical)) {
+      ACTOR_setTargetAnimPos(&queen->actor, from.x, to.y);
+      queen->state = QUEEN_MOVING;
+      return 1;
     }
-
-    ACTOR_setTargetAnimPos(&queen->actor, queenX, playerY);
-    queen->state = QUEEN_MOVING;
-    return 1;
   }
 
   // Horizontal attack
-  if (queenY == playerY) {
-    const s16 x = playerX > queenX ? playerX - 1 : playerX + 1;
-    Vect2D_s16 res = MAP_checkHorizontal((Vect2D_s16){queenX, queenY},
-                                         (Vect2D_s16){x, queenY});
-
-    if (res.x >= 0) {
-      return 0;
+  if (from.y == to.y) {
+    const s16 x = to.x > from.x ? to.x - 1 : to.x + 1;
+    if (verifyMovement(from, (Vect2D_s16){x, from.y}, MAP_checkHorizontal)) {
+      ACTOR_setTargetAnimPos(&queen->actor, to.x, from.y);
+      queen->state = QUEEN_MOVING;
+      return 1;
     }
-
-    ACTOR_setTargetAnimPos(&queen->actor, playerX, queenY);
-    queen->state = QUEEN_MOVING;
-    return 1;
   }
 
   // Diagonal attack
-  if (abs(queenY - playerY) == abs(queenX - playerX)) {
-    const s16 x = playerX > queenX ? playerX - 1 : playerX + 1;
-    const s16 y = playerY > queenY ? playerY - 1 : playerY + 1;
-
-    Vect2D_s16 res =
-        MAP_checkDiagonal((Vect2D_s16){queenX, queenY}, (Vect2D_s16){x, y});
-    if (res.x >= 0) {
-      return 0;
+  if (abs(from.y - to.y) == abs(from.x - to.x)) {
+    const s16 x = to.x > from.x ? to.x - 1 : to.x + 1;
+    const s16 y = to.y > from.y ? to.y - 1 : to.y + 1;
+    if (verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkDiagonal)) {
+      ACTOR_setTargetAnimPos(&queen->actor, to.x, to.y);
+      queen->state = QUEEN_MOVING;
+      return 1;
     }
+  }
 
-    ACTOR_setTargetAnimPos(&queen->actor, playerX, playerY);
+  s16 x = to.x > from.x ? 2 : (to.x < from.x ? -2 : 0);
+  s16 y = to.y > from.y ? 2 : (to.y < from.y ? -2 : 0);
+  x = clamp(from.x + x, 0, mapLevelWidth - 2);
+  y = clamp(from.y + y, 0, mapLevelHeight - 2);
+
+  // Move closer to the player
+  if (x == from.x &&
+      verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkVertical)) {
+    ACTOR_setTargetAnimPos(&queen->actor, x, y);
     queen->state = QUEEN_MOVING;
     return 1;
   }
 
-  // Not aligned — move one step closer (queen-style)
-  s16 dx = playerX > queenX ? 2 : (playerX < queenX ? -2 : 0);
-  s16 dy = playerY > queenY ? 2 : (playerY < queenY ? -2 : 0);
-  dx = clamp(queenX + dx, 0, mapLevelWidth - 2);
-  dy = clamp(queenY + dy, 0, mapLevelHeight - 2);
-
-  Vect2D_s16 res =
-      MAP_checkVertical((Vect2D_s16){queenX, queenY}, (Vect2D_s16){dx, dy});
-  if (res.x >= 0) {
-    return 0;
+  if (y == from.y &&
+      verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkHorizontal)) {
+    ACTOR_setTargetAnimPos(&queen->actor, x, y);
+    queen->state = QUEEN_MOVING;
+    return 1;
   }
 
-  res = MAP_checkHorizontal((Vect2D_s16){queenX, queenY}, (Vect2D_s16){dx, dy});
-  if (res.x >= 0) {
-    return 0;
+  if (x != from.x && y != from.y &&
+      verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkDiagonal)) {
+    ACTOR_setTargetAnimPos(&queen->actor, x, y);
+    queen->state = QUEEN_MOVING;
+    return 1;
   }
 
-  res = MAP_checkDiagonal((Vect2D_s16){queenX, queenY}, (Vect2D_s16){dx, dy});
-  if (res.x >= 0) {
-    return 0;
-  }
-  
-  ACTOR_setTargetAnimPos(&queen->actor, dx, dy);
-
-  queen->state = QUEEN_MOVING;
-  return 1;
+  return 0;
 }
 
 inline static s8 moveAnimation(Queen *queen) {
-  if (frame % FRAME_ANIMATION == 0) {
+  if (frame % 32 == 0) {
     ACTOR_animateTo(&queen->actor);
 
     if (!queen->actor.moving) {
