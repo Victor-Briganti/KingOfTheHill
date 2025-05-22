@@ -1,6 +1,7 @@
 #include "enemy/queen.h"
 #include "node/actor.h"
 #include "player/player.h"
+#include "scene/scene_manager.h"
 
 #include <genesis.h>
 
@@ -9,28 +10,41 @@
 //===----------------------------------------------------------------------===//
 
 inline static s8 startMovement(Queen *queen) {
-  s16 x = queen->actor.collisionCurPos.x;
-  s16 y = clamp(queen->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
+  const s16 queenX = queen->actor.collisionCurPos.x;
+  const s16 queenY = queen->actor.collisionCurPos.y;
+  const s16 playerX = player.actor.collisionCurPos.x;
+  const s16 playerY = player.actor.collisionCurPos.y;
 
-  if (map[y][x] != COLLISION_TYPE_EMPTY) {
-    return 0;
+  // Horizontal attack
+  if (queenX == playerX) {
+    ACTOR_setTargetAnimPos(&queen->actor, queenX, playerY);
+    queen->state = QUEEN_MOVING;
+    return 1;
   }
 
-  // Player on diagonal right
-  if ((map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0) &&
-      (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
-          0)
-    x = clamp(x + 2, 0, mapLevelHeight - 2);
+  // Vertical attack
+  if (queenY == playerY) {
+    ACTOR_setTargetAnimPos(&queen->actor, playerX, queenY);
+    queen->state = QUEEN_MOVING;
+    return 1;
+  }
 
-  // Player on diagonal left
-  if ((map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0) &&
-      (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
-          0)
-    x = clamp(x - 2, 0, mapLevelHeight - 2);
+  // Diagonal attack
+  if (abs(queenY - playerY) == abs(queenX - playerX)) {
+    ACTOR_setTargetAnimPos(&queen->actor, playerX, playerY);
+    queen->state = QUEEN_MOVING;
+    return 1;
+  }
 
-  ACTOR_setTargetAnimPos(&queen->actor, x, y);
+  // Not aligned — move one step closer (queen-style)
+  s16 dx = playerX > queenX ? 2 : (playerX < queenX ? -2 : 0);
+  s16 dy = playerY > queenY ? 2 : (playerY < queenY ? -2 : 0);
+  dx = clamp(queenX + dx, 0, mapLevelWidth - 2);
+  dy = clamp(queenY + dy, 0, mapLevelHeight - 2);
+
+  ACTOR_setTargetAnimPos(&queen->actor, dx, dy);
+
   queen->state = QUEEN_MOVING;
-
   return 1;
 }
 
