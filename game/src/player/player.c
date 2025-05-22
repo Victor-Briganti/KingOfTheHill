@@ -20,6 +20,8 @@ static const CursorMovement cursorMoves[] = {
     {.x = 0, .y = -2, .direction = BUTTON_UP},
 };
 
+static u16 prevJoyState = 0;
+
 //===----------------------------------------------------------------------===//
 // PRIVATE
 //===----------------------------------------------------------------------===//
@@ -124,29 +126,24 @@ static void cursorInertia() {
   }
 }
 
-static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
-  if (joy != JOY_1 || player.state == PLAYER_MOVING)
-    return;
+static void inputHandler() {
+  const u16 state = JOY_readJoypad(JOY_1);
+  const u16 pressed = (state ^ prevJoyState) & state;
+  const u16 directional = pressed & BUTTON_DIR;
+  const u16 command = pressed & BUTTON_A;
 
-  // Verify if the directionals are pressed
-  const u16 directional = state & BUTTON_DIR;
-
-  // Verify if the command button was pressed
-  const u16 command = state & BUTTON_A;
-
-  // Act when the command is pressed
   if (command) {
     cursorInertia();
     player.state = PLAYER_MOVING;
+    prevJoyState = state;
     return;
   }
 
-  // Move when the buttons are released
-  if (!directional) {
+  if (directional) {
     s16 x = player.cursor.x;
     s16 y = player.cursor.y;
     for (u8 i = 0; i < 4; i++) {
-      if (cursorMoves[i].direction & changed) {
+      if (cursorMoves[i].direction & pressed) {
         x += cursorMoves[i].x;
         y += cursorMoves[i].y;
         handleCursorPos(x, y, cursorMoves[i].direction);
@@ -154,6 +151,8 @@ static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
       }
     }
   }
+
+  prevJoyState = state;
 }
 
 inline static void updateSelectTile() {
@@ -253,6 +252,7 @@ s8 PLAYER_update() {
     return callAnimation();
   }
 
+  inputHandler();
   updateSelectTile();
   updateCursorTile();
   return 1;
@@ -261,6 +261,5 @@ s8 PLAYER_update() {
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
   ACTOR_init(&player.actor, sprite, palette, x, y, COLLISION_TYPE_PLAYER);
-  JOY_setEventHandler(inputHandler);
   player.cursor = (Vect2D_s16){x, y - 2};
 }
