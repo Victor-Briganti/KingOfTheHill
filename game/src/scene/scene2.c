@@ -1,6 +1,6 @@
 #include "scene/scene2.h"
 #include "background/background.h"
-#include "enemy/pawn.h"
+#include "enemy/queen.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "map/map.h"
@@ -15,7 +15,7 @@
 //===----------------------------------------------------------------------===//
 
 // Total enemies on this scene
-#define MAX_ENEMIES 1
+// #define MAX_ENEMIES 1
 
 // Player initial position
 #define PLAYER_SCENE1_X_POS (6)  /* In Tile */
@@ -29,10 +29,10 @@ typedef enum GameTurn {
 
 typedef struct SceneContext {
   // Array with every enemy of the scene
-  Pawn pawns[MAX_ENEMIES];
+  Queen queen;
 
   // Defines the initial position of every enemy
-  const Vect2D_s16 enemiesPos[MAX_ENEMIES];
+  const Vect2D_s16 enemiesPos;
 
   // Defines whose turn it is
   GameTurn turn;
@@ -52,9 +52,9 @@ Scene scene2 = {SCENE2_init, SCENE2_update, SCENE2_hitEnemy, SCENE2_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
-    .enemiesPos = {{6, 0}},
+    .enemiesPos = {6, 0},
     .indexEnemy = 0,
-    .totalEnemies = MAX_ENEMIES,
+    .totalEnemies = 1,
 };
 
 //===----------------------------------------------------------------------===//
@@ -83,11 +83,21 @@ static inline void initPlayer() {
   PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
 }
 
-static inline void initEnemies() {}
+static inline void initEnemies() {
+  QUEEN_init(&context.queen, &queen_sprite, ENEMY_PAL, context.enemiesPos.x,
+             context.enemiesPos.y);
+
+  MAP_updateCollision(context.queen.actor.collisionPrevPos,
+                      context.queen.actor.collisionCurPos,
+                      context.queen.actor.collisionType);
+}
 
 static inline void updateMapCollision() {
   MAP_updateCollision(player.actor.collisionPrevPos,
                       player.actor.collisionCurPos, player.actor.collisionType);
+  MAP_updateCollision(context.queen.actor.collisionPrevPos,
+                      context.queen.actor.collisionCurPos,
+                      context.queen.actor.collisionType);
 }
 
 static inline void updateBackground() {
@@ -101,10 +111,16 @@ static inline void updatePlayer() {
   if (res)
     return;
 
-  //   context.turn = ENEMY;
+  context.turn = ENEMY;
 }
 
-static inline void updateEnemies() {}
+static inline void updateEnemies() {
+  u8 res = -1;
+
+  res = QUEEN_update(&context.queen);
+  if (res == 0)
+    context.turn = PLAYER;
+}
 
 static inline void destroyPlayer() {
   PLAYER_destroy();
@@ -114,9 +130,17 @@ static inline void destroyPlayer() {
     player.state = PLAYER_DAMAGED;
 }
 
-static inline void destroyEnemies() {}
+static inline void destroyEnemies() {
+  if (context.queen.state == QUEEN_DEAD) {
+    QUEEN_deallocDestroy(&context.queen);
+    context.totalEnemies--;
+  }
+}
 
-static inline void restartEnemies() {}
+static inline void restartEnemies() {
+  QUEEN_init(&context.queen, &queen_sprite, ENEMY_PAL, context.enemiesPos.x,
+             context.enemiesPos.y);
+}
 
 static inline void restart() {
   SCENE2_destroy();
@@ -164,6 +188,20 @@ SceneId SCENE2_update() {
   return SCENE_ID_LEVEL02;
 }
 
-void SCENE2_hitEnemy(const Vect2D_s16 hitPos) {}
+void SCENE2_hitEnemy(const Vect2D_s16 hitPos) {
+  if (context.queen.state == QUEEN_DEAD ||
+      context.queen.state == QUEEN_DESTROYED)
+    return;
 
-void SCENE2_destroy() { SYS_doVBlankProcess(); }
+  if (context.queen.actor.collisionCurPos.x == hitPos.x &&
+      context.queen.actor.collisionCurPos.y == hitPos.y) {
+    context.queen.state = QUEEN_DEAD;
+  }
+}
+
+void SCENE2_destroy() {
+  if (context.queen.state != QUEEN_DESTROYED)
+    QUEEN_dealloc(&context.queen);
+
+  SYS_doVBlankProcess();
+}
