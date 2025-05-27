@@ -1,4 +1,5 @@
 #include "enemy/pawn.h"
+#include "enemy/queen.h"
 #include "global.h"
 #include "node/actor.h"
 #include "player/player.h"
@@ -71,8 +72,14 @@ inline static s8 moveAnimation(Pawn *pawn) {
 
 inline static s8 promotionAnimation(Pawn *pawn) {
   if (frame % FRAME_ANIMATION == 0) {
-    if (pawn->indexSprite >= MAX_SPRITES_ANIM)
+    if (pawn->indexSprite >= MAX_SPRITES_ANIM) {
+      QUEEN_init(&pawn->queen, &queen_sprite, ENEMY_PAL,
+                 pawn->actor.collisionCurPos.x, pawn->actor.collisionCurPos.y);
+      ACTOR_deallocSprite(&pawn->actor);
+      ACTOR_destroy(&pawn->actor);
+      pawn->state = PAWN_PROMOTED;
       return 0;
+    }
 
     ACTOR_deallocSprite(&pawn->actor);
     ACTOR_init(&pawn->actor, sprites[pawn->indexSprite], ENEMY_PAL,
@@ -96,11 +103,24 @@ void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,
 }
 
 void PAWN_deallocDestroy(Pawn *pawn) {
+  if (pawn->state == PAWN_PROMOTED) {
+    QUEEN_deallocDestroy(&pawn->queen);
+    pawn->state = PAWN_DESTROYED;
+    return;
+  }
+  
   pawn->state = PAWN_DESTROYED;
   ACTOR_destroy(&pawn->actor);
 }
 
-void PAWN_dealloc(Pawn *pawn) { ACTOR_destroy(&pawn->actor); }
+void PAWN_dealloc(Pawn *pawn) {
+  if (pawn->state == PAWN_PROMOTED) {
+    QUEEN_dealloc(&pawn->queen);
+    return;
+  }
+
+  ACTOR_destroy(&pawn->actor);
+}
 
 s8 PAWN_update(Pawn *pawn) {
   switch (pawn->state) {
@@ -113,6 +133,8 @@ s8 PAWN_update(Pawn *pawn) {
     return startMovement(pawn);
   case PAWN_PROMOTION:
     return promotionAnimation(pawn);
+  case PAWN_PROMOTED:
+    return QUEEN_update(&pawn->queen);
   }
 
   return 1;

@@ -1,10 +1,12 @@
 #include "scene/scene1.h"
 #include "background/background.h"
 #include "enemy/pawn.h"
+#include "enemy/queen.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "map/map.h"
 #include "maths.h"
+#include "node/actor.h"
 #include "player/player.h"
 #include "scene/scene_manager.h"
 #include "sprites.h"
@@ -48,7 +50,7 @@ typedef struct SceneContext {
 // GLOBALS
 //===----------------------------------------------------------------------===//
 
-Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy,SCENE1_destroy};
+Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
@@ -103,6 +105,14 @@ static inline void updateMapCollision() {
       MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
                           context.pawns[i].actor.collisionCurPos,
                           context.pawns[i].actor.collisionType);
+
+    if (context.pawns[i].state == PAWN_PROMOTED &&
+        (context.pawns[i].queen.state != QUEEN_DEAD &&
+         context.pawns[i].queen.state != QUEEN_DESTROYED)) {
+      MAP_updateCollision(context.pawns[i].queen.actor.collisionPrevPos,
+                          context.pawns[i].queen.actor.collisionCurPos,
+                          context.pawns[i].queen.actor.collisionType);
+    }
   }
 }
 
@@ -112,8 +122,8 @@ static inline void updateBackground() {
   TILEMAP_update(&level_map1);
 }
 
-static inline void updatePlayer() { 
-  s8 res = PLAYER_update(); 
+static inline void updatePlayer() {
+  s8 res = PLAYER_update();
   if (res)
     return;
 
@@ -122,21 +132,26 @@ static inline void updatePlayer() {
 
 static inline void updateEnemies() {
   u8 id = context.indexEnemy;
-  u8 res = -1;
+  s8 res = -1;
   u8 tried = 0;
 
   while (tried < MAX_ENEMIES) {
 
-    if (context.pawns[id].state != PAWN_DEAD &&
-        context.pawns[id].state != PAWN_DESTROYED) {
+    if ((context.pawns[id].state != PAWN_DEAD &&
+         context.pawns[id].state != PAWN_DESTROYED) ||
+        (context.pawns[id].state == PAWN_PROMOTED &&
+         context.pawns[id].queen.state != QUEEN_DEAD &&
+         context.pawns[id].queen.state != QUEEN_DESTROYED)) {
       res = PAWN_update(&context.pawns[id]);
       context.indexEnemy = id;
-      break;
     }
 
     // Try the next enemy
     id = (id + 1) % MAX_ENEMIES;
     tried++;
+    if (res >= 0) {
+      break;
+    }
   }
 
   // Enemy finished animation, go to the next one
@@ -156,7 +171,9 @@ static inline void destroyPlayer() {
 
 static inline void destroyEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD) {
+    if (context.pawns[i].state == PAWN_DEAD ||
+        (context.pawns[i].state == PAWN_PROMOTED &&
+         context.pawns[i].queen.state == QUEEN_DEAD)) {
       PAWN_deallocDestroy(&context.pawns[i]);
       context.totalEnemies--;
     }
@@ -167,6 +184,11 @@ static inline void restartEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
     if (context.pawns[i].state == PAWN_DEAD ||
         context.pawns[i].state == PAWN_DESTROYED)
+      continue;
+
+    if (context.pawns[i].state == PAWN_PROMOTED &&
+        (context.pawns[i].queen.state == QUEEN_DEAD ||
+         context.pawns[i].queen.state == QUEEN_DESTROYED))
       continue;
 
     PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
@@ -200,7 +222,7 @@ SceneId SCENE1_update() {
     updatePlayer();
   else
     updateEnemies();
-  
+
   SPR_update();
   SYS_doVBlankProcess();
 
@@ -230,11 +252,22 @@ void SCENE1_hitEnemy(const Vect2D_s16 hitPos) {
         context.pawns[i].actor.collisionCurPos.y == hitPos.y) {
       context.pawns[i].state = PAWN_DEAD;
     }
+
+    if (context.pawns[i].state == PAWN_PROMOTED &&
+        context.pawns[i].queen.actor.collisionCurPos.x == hitPos.x &&
+        context.pawns[i].queen.actor.collisionCurPos.y == hitPos.y) {
+      context.pawns[i].queen.state = QUEEN_DEAD;
+    }
   }
 }
 
 void SCENE1_destroy() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (context.pawns[i].state == PAWN_PROMOTED) {
+      QUEEN_deallocDestroy(&context.pawns[i].queen);
+      context.pawns[i].state = PAWN_IDLE;
+    }
+
     if (context.pawns[i].state != PAWN_DESTROYED)
       PAWN_dealloc(&context.pawns[i]);
   }

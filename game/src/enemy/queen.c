@@ -86,7 +86,7 @@ inline static s8 startMovement(Queen *queen) {
     return 1;
   }
 
-  return 0;
+  return -1;
 }
 
 inline static s8 moveAnimation(Queen *queen) {
