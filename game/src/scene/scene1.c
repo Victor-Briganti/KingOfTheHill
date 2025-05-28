@@ -150,7 +150,7 @@ static inline void updateEnemies() {
   }
 }
 
-static inline void destroyPlayer() {
+static inline void damagePlayer() {
   PLAYER_destroy();
   HEART_update();
 
@@ -210,10 +210,10 @@ SceneId SCENE1_update() {
 
   destroyEnemies();
   if (context.totalEnemies == 0)
-    return SCENE_ID_PASSED;
+    return SCENE_ID_LEVEL02;
 
   if (player.state == PLAYER_DEAD) {
-    destroyPlayer();
+    damagePlayer();
 
     if (player.health == 0)
       return SCENE_ID_GAME_OVER;
@@ -242,6 +242,10 @@ void SCENE1_destroy() {
     if (context.enemies[i].state != ENEMY_DESTROYED)
       context.enemies[i].destroy(&context.enemies[i]);
   }
+
+  // Destroy Player
+  PLAYER_destroy();
+  HEART_update();
 
   SYS_doVBlankProcess();
 }

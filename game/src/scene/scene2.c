@@ -85,7 +85,6 @@ static inline void initPlayer() {
 
 static inline void initEnemies() {
     ENEMY_init(&context.enemy, QUEEN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
-
     MAP_updateCollision(context.enemy.actor.collisionPrevPos,
                         context.enemy.actor.collisionCurPos,
                         context.enemy.actor.collisionType);
@@ -120,7 +119,7 @@ static inline void updateEnemies() {
         context.turn = PLAYER;
 }
 
-static inline void destroyPlayer() {
+static inline void damagePlayer() {
     PLAYER_destroy();
     HEART_update();
 
@@ -174,7 +173,7 @@ SceneId SCENE2_update() {
         return SCENE_ID_PASSED;
 
     if (player.state == PLAYER_DEAD) {
-        destroyPlayer();
+        damagePlayer();
 
         if (player.health == 0)
             return SCENE_ID_GAME_OVER;
@@ -199,6 +198,10 @@ void SCENE2_hitEnemy(const Vect2D_s16 hitPos) {
 void SCENE2_destroy() {
     if (context.enemy.state != ENEMY_DESTROYED)
         context.enemy.dealloc(&context.enemy);
+
+    // Destroy Player
+    PLAYER_destroy();
+    HEART_update();
 
     SYS_doVBlankProcess();
 }

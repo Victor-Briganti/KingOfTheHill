@@ -50,7 +50,7 @@ int main(const bool resetType) {
     SYS_doVBlankProcess();
 
     // TODO: This should not be hard coded
-    if (sceneIndex != SCENE_ID_LEVEL01)
+    if (sceneIndex == SCENE_ID_PASSED)
       continue;
 
     if (!player.health)
