@@ -26,7 +26,7 @@ inline void ACTOR_updatePos(const ActorNode *const node) {
                   POS_Y(node->animationPos.y));
 }
 
-inline void ACTOR_init(ActorNode *const node, const SpriteDefinition *sprite,
+inline void ACTOR_init(ActorNode *const node, const SpriteDefinition *const sprite,
                        const u16 palette, const s16 x, const s16 y,
                        const CollisionType type) {
   PAL_setPalette(palette, sprite->palette->data, DMA);

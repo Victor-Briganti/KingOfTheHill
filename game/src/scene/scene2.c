@@ -1,6 +1,6 @@
 #include "scene/scene2.h"
 #include "background/background.h"
-#include "enemy/queen.h"
+#include "enemy/enemy.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "map/map.h"
@@ -22,26 +22,26 @@
 #define PLAYER_SCENE1_Y_POS (14) /* In Tile */
 
 typedef enum GameTurn {
-  PLAYER = 0,
-  ENEMY = 1,
-  GAME_OVER = 2,
+    PLAYER = 0,
+    ENEMY = 1,
+    GAME_OVER = 2,
 } GameTurn;
 
 typedef struct SceneContext {
-  // Array with every enemy of the scene
-  Queen queen;
+    // Array with every enemy of the scene
+    Enemy enemy;
 
-  // Defines the initial position of every enemy
-  const Vect2D_s16 enemiesPos;
+    // Defines the initial position of every enemy
+    const Vect2D_s16 enemiesPos;
 
-  // Defines whose turn it is
-  GameTurn turn;
+    // Defines whose turn it is
+    GameTurn turn;
 
-  // Defines the index of the current enemy
-  u8 indexEnemy;
+    // Defines the index of the current enemy
+    u8 indexEnemy;
 
-  // Total number of current enemies still alive
-  u8 totalEnemies;
+    // Total number of current enemies still alive
+    u8 totalEnemies;
 } SceneContext;
 
 //===----------------------------------------------------------------------===//
@@ -62,91 +62,89 @@ static SceneContext context = {
 //===----------------------------------------------------------------------===//
 
 static inline void initGlobals() {
-  mapLevelHeight = MAP_SCENE2_HEIGHT;
-  mapLevelWidth = MAP_SCENE2_WIDTH;
+    mapLevelHeight = MAP_SCENE2_HEIGHT;
+    mapLevelWidth = MAP_SCENE2_WIDTH;
 
-  mapLevelX = MAP_SCENE2_X_POS;
-  mapLevelY = MAP_SCENE2_Y_POS;
+    mapLevelX = MAP_SCENE2_X_POS;
+    mapLevelY = MAP_SCENE2_Y_POS;
 
-  playerInitX = PLAYER_SCENE1_X_POS;
-  playerInitY = PLAYER_SCENE1_Y_POS;
+    playerInitX = PLAYER_SCENE1_X_POS;
+    playerInitY = PLAYER_SCENE1_Y_POS;
 }
 
 static inline void initBackground() {
-  BACKGROUND_init();
-  TILEMAP_init(&tileset);
-  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+    BACKGROUND_init();
+    TILEMAP_init(&tileset);
+    MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }
 
 static inline void initPlayer() {
-  HEART_update();
-  PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
+    HEART_update();
+    PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
 }
 
 static inline void initEnemies() {
-  QUEEN_init(&context.queen, &queen_sprite, ENEMY_PAL, context.enemiesPos.x,
-             context.enemiesPos.y);
+    ENEMY_init(&context.enemy, PAWN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
 
-  MAP_updateCollision(context.queen.actor.collisionPrevPos,
-                      context.queen.actor.collisionCurPos,
-                      context.queen.actor.collisionType);
+    MAP_updateCollision(context.enemy.actor.collisionPrevPos,
+                        context.enemy.actor.collisionCurPos,
+                        context.enemy.actor.collisionType);
 }
 
 static inline void updateMapCollision() {
-  MAP_updateCollision(player.actor.collisionPrevPos,
-                      player.actor.collisionCurPos, player.actor.collisionType);
-  MAP_updateCollision(context.queen.actor.collisionPrevPos,
-                      context.queen.actor.collisionCurPos,
-                      context.queen.actor.collisionType);
+    MAP_updateCollision(player.actor.collisionPrevPos,
+                        player.actor.collisionCurPos, player.actor.collisionType);
+    MAP_updateCollision(context.enemy.actor.collisionPrevPos,
+                        context.enemy.actor.collisionCurPos,
+                        context.enemy.actor.collisionType);
 }
 
 static inline void updateBackground() {
-  BACKGROUND_setText("LEVEL 1-2");
-  BACKGROUND_setScore(0);
-  TILEMAP_update(&level_map1);
+    BACKGROUND_setText("LEVEL 1-2");
+    BACKGROUND_setScore(0);
+    TILEMAP_update(&level_map1);
 }
 
 static inline void updatePlayer() {
-  s8 res = PLAYER_update();
-  if (res)
-    return;
+    s8 res = PLAYER_update();
+    if (res)
+        return;
 
-  context.turn = ENEMY;
+    context.turn = ENEMY;
 }
 
 static inline void updateEnemies() {
-  u8 res = -1;
+    u8 res = -1;
 
-  res = QUEEN_update(&context.queen);
-  if (res == 0)
-    context.turn = PLAYER;
+    res = context.enemy.update(&context.enemy);
+    if (res == 0)
+        context.turn = PLAYER;
 }
 
 static inline void destroyPlayer() {
-  PLAYER_destroy();
-  HEART_update();
+    PLAYER_destroy();
+    HEART_update();
 
-  if (player.health > 0)
-    player.state = PLAYER_DAMAGED;
+    if (player.health > 0)
+        player.state = PLAYER_DAMAGED;
 }
 
 static inline void destroyEnemies() {
-  if (context.queen.state == QUEEN_DEAD) {
-    QUEEN_deallocDestroy(&context.queen);
-    context.totalEnemies--;
-  }
+    if (context.enemy.state == ENEMY_DEAD) {
+        context.enemy.destroy(&context.enemy);
+        context.totalEnemies--;
+    }
 }
 
 static inline void restartEnemies() {
-  QUEEN_init(&context.queen, &queen_sprite, ENEMY_PAL, context.enemiesPos.x,
-             context.enemiesPos.y);
+    ENEMY_init(&context.enemy, PAWN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
 }
 
 static inline void restart() {
-  SCENE2_destroy();
-  initPlayer();
-  restartEnemies();
-  updateMapCollision();
+    SCENE2_destroy();
+    initPlayer();
+    restartEnemies();
+    updateMapCollision();
 }
 
 //===----------------------------------------------------------------------===//
@@ -154,54 +152,54 @@ static inline void restart() {
 //===----------------------------------------------------------------------===//
 
 void SCENE2_init() {
-  initGlobals();
-  initBackground();
-  initPlayer();
-  initEnemies();
-  SYS_doVBlankProcess();
+    initGlobals();
+    initBackground();
+    initPlayer();
+    initEnemies();
+    SYS_doVBlankProcess();
 }
 
 SceneId SCENE2_update() {
-  updateBackground();
-  updateMapCollision();
-  if (context.turn == PLAYER)
-    updatePlayer();
-  else
-    updateEnemies();
-
-  SPR_update();
-  SYS_doVBlankProcess();
-
-  destroyEnemies();
-  if (context.totalEnemies == 0)
-    return SCENE_ID_PASSED;
-
-  if (player.state == PLAYER_DEAD) {
-    destroyPlayer();
-
-    if (player.health == 0)
-      return SCENE_ID_GAME_OVER;
+    updateBackground();
+    updateMapCollision();
+    if (context.turn == PLAYER)
+        updatePlayer();
     else
-      restart();
-  }
+        updateEnemies();
 
-  return SCENE_ID_LEVEL02;
+    SPR_update();
+    SYS_doVBlankProcess();
+
+    destroyEnemies();
+    if (context.totalEnemies == 0)
+        return SCENE_ID_PASSED;
+
+    if (player.state == PLAYER_DEAD) {
+        destroyPlayer();
+
+        if (player.health == 0)
+            return SCENE_ID_GAME_OVER;
+        else
+            restart();
+    }
+
+    return SCENE_ID_LEVEL02;
 }
 
 void SCENE2_hitEnemy(const Vect2D_s16 hitPos) {
-  if (context.queen.state == QUEEN_DEAD ||
-      context.queen.state == QUEEN_DESTROYED)
-    return;
+    if (context.enemy.state == ENEMY_DEAD ||
+        context.enemy.state == ENEMY_DESTROYED)
+        return;
 
-  if (context.queen.actor.collisionCurPos.x == hitPos.x &&
-      context.queen.actor.collisionCurPos.y == hitPos.y) {
-    context.queen.state = QUEEN_DEAD;
-  }
+    if (context.enemy.actor.collisionCurPos.x == hitPos.x &&
+        context.enemy.actor.collisionCurPos.y == hitPos.y) {
+        context.enemy.state = ENEMY_DEAD;
+    }
 }
 
 void SCENE2_destroy() {
-  if (context.queen.state != QUEEN_DESTROYED)
-    QUEEN_dealloc(&context.queen);
+    if (context.enemy.state != ENEMY_DESTROYED)
+        context.enemy.dealloc(&context.enemy);
 
-  SYS_doVBlankProcess();
+    SYS_doVBlankProcess();
 }
