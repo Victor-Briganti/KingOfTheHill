@@ -3,8 +3,6 @@
 
 #include "enemy/enemy.h"
 
-#include <genesis.h>
-
-s8 QUEEN_update2(Enemy *enemy);
+s8 QUEEN_update(Enemy *enemy);
 
 #endif // __QUEEN2_H__

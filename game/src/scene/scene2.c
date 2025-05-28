@@ -84,7 +84,7 @@ static inline void initPlayer() {
 }
 
 static inline void initEnemies() {
-    ENEMY_init(&context.enemy, QUEEN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
+    ENEMY_init(&context.enemy, TOWER_TYPE, context.enemiesPos.x, context.enemiesPos.y);
     MAP_updateCollision(context.enemy.actor.collisionPrevPos,
                         context.enemy.actor.collisionCurPos,
                         context.enemy.actor.collisionType);
@@ -136,7 +136,7 @@ static inline void destroyEnemies() {
 }
 
 static inline void restartEnemies() {
-    ENEMY_init(&context.enemy, QUEEN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
+    ENEMY_init(&context.enemy, TOWER_TYPE, context.enemiesPos.x, context.enemiesPos.y);
 }
 
 static inline void restart() {

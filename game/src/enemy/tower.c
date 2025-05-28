@@ -1,5 +1,6 @@
-#include "enemy/queen.h"
+#include "enemy/tower.h"
 #include "player/player.h"
+#include "sprites.h"
 
 typedef Vect2D_s16 (*MovementCheck)(const Vect2D_s16, const Vect2D_s16);
 
@@ -38,17 +39,6 @@ static s8 tryAttack(Enemy *enemy, const Vect2D_s16 from, const Vect2D_s16 to) {
         }
     }
 
-    // Diagonal attack
-    if (abs(from.y - to.y) == abs(from.x - to.x)) {
-        const s16 x = to.x > from.x ? to.x - 1 : to.x + 1;
-        const s16 y = to.y > from.y ? to.y - 1 : to.y + 1;
-        if (verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkDiagonal)) {
-            ACTOR_setTargetAnimPos(&enemy->actor, to.x, to.y);
-            enemy->state = ENEMY_MOVING;
-            return 1;
-        }
-    }
-
     return 0;
 }
 
@@ -68,13 +58,6 @@ static s8 tryMovement(Enemy *enemy, const Vect2D_s16 from, s16 x, s16 y) {
         return 1;
     }
 
-    if (x != from.x && y != from.y &&
-        verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkDiagonal)) {
-        ACTOR_setTargetAnimPos(&enemy->actor, x, y);
-        enemy->state = ENEMY_MOVING;
-        return 1;
-    }
-
     return 0;
 }
 
@@ -88,19 +71,10 @@ inline static s8 startMovement(Enemy *enemy) {
         player.actor.collisionCurPos.y
     };
 
-    s8 value = tryAttack(enemy, from, to);
-    if (value)
-        return value;
-
-    // Try to move diagonally
-    s16 x = to.x > from.x ? 2 : (to.x < from.x ? -2 : 0);
-    s16 y = to.y > from.y ? 2 : (to.y < from.y ? -2 : 0);
-    x = clamp(from.x + x, 0, mapLevelWidth - 2);
-    y = clamp(from.y + y, 0, mapLevelHeight - 2);
-    if (tryMovement(enemy, from, x, y))
+    if (tryAttack(enemy, from, to))
         return 1;
 
-    // Try to move horizontally
+    // Try to move horizontally first
     if (to.x != from.x) {
         const s16 dx = to.x > from.x ? 2 : -2;
         const s16 newX = clamp(from.x + dx, 0, mapLevelWidth - 2);
@@ -120,13 +94,18 @@ inline static s8 startMovement(Enemy *enemy) {
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
-    if (frame % 32 == 0) {
+    if (frame % FRAME_ANIMATION == 0) {
         ACTOR_animateTo(&enemy->actor);
 
         if (!enemy->actor.moving) {
             if (ACTOR_checkCollision(&enemy->actor)) {
                 sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
                 return 0;
+            }
+
+            if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
+                enemy->state = ENEMY_ANIMATING;
+                return 1;
             }
 
             enemy->state = ENEMY_IDLE;
@@ -141,7 +120,7 @@ inline static s8 moveAnimation(Enemy *enemy) {
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-s8 QUEEN_update(Enemy *enemy) {
+s8 TOWER_update(Enemy *enemy) {
     switch (enemy->state) {
         case ENEMY_IDLE:
             return startMovement(enemy);

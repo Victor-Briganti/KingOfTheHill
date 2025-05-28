@@ -3,8 +3,6 @@
 
 #include "enemy/enemy.h"
 
-#include <genesis.h>
-
-s8 PAWN_update2(Enemy *enemy);
+s8 PAWN_update(Enemy *enemy);
 
 #endif // __PAWN2_H__

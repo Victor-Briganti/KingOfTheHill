@@ -1,6 +1,7 @@
 #include "enemy/enemy.h"
 #include "enemy/pawn.h"
 #include "enemy/queen.h"
+#include "enemy/tower.h"
 
 #include <sprites.h>
 
@@ -27,6 +28,10 @@ static void actorInit(Enemy *enemy, const EnemyType type, const s16 x, const s16
             ACTOR_init(&enemy->actor, &queen_sprite, ENEMY_PAL, x, y, COLLISION_TYPE_QUEEN);
             return;
         }
+        case TOWER_TYPE: {
+            ACTOR_init(&enemy->actor, &tower_sprite, ENEMY_PAL, x, y, COLLISION_TYPE_TOWER);
+            return;
+        }
         default: {
             kprintf("[%s:%d]Enemy not defined", __FILE__, __LINE__);
         }
@@ -38,13 +43,19 @@ static void functionsInit(Enemy *enemy, const EnemyType type) {
         case QUEEN_TYPE: {
             enemy->dealloc = defaultDealloc;
             enemy->destroy = defaultDestroy;
-            enemy->update = QUEEN_update2;
+            enemy->update = QUEEN_update;
             return;
         }
         case PAWN_TYPE: {
             enemy->dealloc = defaultDealloc;
             enemy->destroy = defaultDestroy;
-            enemy->update = PAWN_update2;
+            enemy->update = PAWN_update;
+            return;
+        }
+        case TOWER_TYPE: {
+            enemy->dealloc = defaultDealloc;
+            enemy->destroy = defaultDestroy;
+            enemy->update = TOWER_update;
             return;
         }
         default: {

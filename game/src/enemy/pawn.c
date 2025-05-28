@@ -4,7 +4,7 @@
 
 #define MAX_SPRITES_ANIM (7)
 
-static const SpriteDefinition *sprites[MAX_SPRITES_ANIM] = {
+static const SpriteDefinition *const sprites[MAX_SPRITES_ANIM] = {
     &pawn_sprite1, &pawn_sprite2, &pawn_sprite3, &pawn_sprite4,
     &pawn_sprite5, &pawn_sprite6, &pawn_sprite7,
 };
@@ -21,13 +21,13 @@ inline static s8 startMovement(Enemy *enemy) {
     }
 
     // Player on diagonal right
-    if ((map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0) &&
+    if (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0 &&
         (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
         0)
         x = clamp(x + 2, 0, mapLevelHeight - 2);
 
     // Player on diagonal left
-    if ((map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0) &&
+    if (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0 &&
         (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
         0)
         x = clamp(x - 2, 0, mapLevelHeight - 2);
@@ -84,7 +84,7 @@ inline static s8 promotionAnimation(Enemy *enemy) {
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-s8 PAWN_update2(Enemy *enemy) {
+s8 PAWN_update(Enemy *enemy) {
     switch (enemy->state) {
         case ENEMY_IDLE:
             return startMovement(enemy);

@@ -17,5 +17,6 @@ extern const SpriteDefinition pawn_sprite5;
 extern const SpriteDefinition pawn_sprite6;
 extern const SpriteDefinition pawn_sprite7;
 extern const SpriteDefinition queen_sprite;
+extern const SpriteDefinition tower_sprite;
 
 #endif // _RES_SPRITES_H_
