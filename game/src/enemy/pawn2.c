@@ -1,5 +1,13 @@
 #include "enemy/pawn2.h"
 #include "player/player.h"
+#include "sprites.h"
+
+#define MAX_SPRITES_ANIM (7)
+
+static const SpriteDefinition *sprites[MAX_SPRITES_ANIM] = {
+    &pawn_sprite1, &pawn_sprite2, &pawn_sprite3, &pawn_sprite4,
+    &pawn_sprite5, &pawn_sprite6, &pawn_sprite7,
+};
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -42,14 +50,33 @@ inline static s8 moveAnimation(Enemy *enemy) {
                 return 0;
             }
 
-            // if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
-            //     enemy->state = PAWN_PROMOTION;
-            //     return 1;
-            // }
+            if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
+                enemy->state = ENEMY_ANIMATING;
+                return 1;
+            }
 
             enemy->state = ENEMY_IDLE;
             return 0;
         }
+    }
+
+    return 1;
+}
+
+inline static s8 promotionAnimation(Enemy *enemy) {
+    if (frame % FRAME_ANIMATION == 0) {
+        if (enemy->indexSprite >= MAX_SPRITES_ANIM) {
+            const Vect2D_s16 pos = enemy->actor.collisionCurPos;
+            enemy->destroy(enemy);
+            ENEMY_init(enemy, QUEEN_TYPE, pos.x, pos.y);
+            return 0;
+        }
+
+        ACTOR_deallocSprite(&enemy->actor);
+        ACTOR_init(&enemy->actor, sprites[enemy->indexSprite], ENEMY_PAL,
+                   enemy->actor.collisionCurPos.x, enemy->actor.collisionCurPos.y,
+                   COLLISION_TYPE_PAWN);
+        enemy->indexSprite++;
     }
 
     return 1;
@@ -65,6 +92,8 @@ s8 PAWN_update2(Enemy *enemy) {
             return startMovement(enemy);
         case ENEMY_MOVING:
             return moveAnimation(enemy);
+        case ENEMY_ANIMATING:
+            return promotionAnimation(enemy);
         default:
             return 0;
     }

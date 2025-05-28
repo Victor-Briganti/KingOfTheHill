@@ -13,6 +13,7 @@ typedef enum EnemyType {
 typedef enum EnemyState {
     ENEMY_IDLE,
     ENEMY_MOVING,
+    ENEMY_ANIMATING,
     ENEMY_DEAD,
     ENEMY_DESTROYED,
 } EnemyState;
