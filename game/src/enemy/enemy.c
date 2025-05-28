@@ -1,6 +1,6 @@
 #include "enemy/enemy.h"
-#include "enemy/pawn2.h"
-#include "enemy/queen2.h"
+#include "enemy/pawn.h"
+#include "enemy/queen.h"
 
 #include <sprites.h>
 

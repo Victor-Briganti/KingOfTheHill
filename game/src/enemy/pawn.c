@@ -1,12 +1,6 @@
 #include "enemy/pawn.h"
-#include "enemy/queen.h"
-#include "global.h"
-#include "node/actor.h"
 #include "player/player.h"
-#include "scene/scene_manager.h"
 #include "sprites.h"
-
-#include <genesis.h>
 
 #define MAX_SPRITES_ANIM (7)
 
@@ -19,123 +13,88 @@ static const SpriteDefinition *sprites[MAX_SPRITES_ANIM] = {
 // PRIVATE
 //===----------------------------------------------------------------------===//
 
-inline static s8 startMovement(Pawn *pawn) {
-  s16 x = pawn->actor.collisionCurPos.x;
-  s16 y = clamp(pawn->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
-
-  if (map[y][x] != COLLISION_TYPE_EMPTY) {
-    return 0;
-  }
-
-  // Player on diagonal right
-  if ((map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0) &&
-      (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
-          0)
-    x = clamp(x + 2, 0, mapLevelHeight - 2);
-
-  // Player on diagonal left
-  if ((map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0) &&
-      (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
-          0)
-    x = clamp(x - 2, 0, mapLevelHeight - 2);
-
-  ACTOR_setTargetAnimPos(&pawn->actor, x, y);
-  pawn->state = PAWN_MOVING;
-
-  return 1;
-}
-
-inline static s8 moveAnimation(Pawn *pawn) {
-  if (frame % FRAME_ANIMATION == 0) {
-    ACTOR_animateTo(&pawn->actor);
-
-    if (!pawn->actor.moving) {
-      if (ACTOR_checkCollision(&pawn->actor)) {
-        kprintf("Player hit");
-        player.health--;
-        player.state = PLAYER_DEAD;
+inline static s8 startMovement(Enemy *enemy) {
+    s16 x = enemy->actor.collisionCurPos.x;
+    s16 y = clamp(enemy->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
+    if (map[y][x] != COLLISION_TYPE_EMPTY) {
         return 0;
-      }
-
-      if (pawn->actor.collisionCurPos.y == mapLevelHeight - 2) {
-        pawn->state = PAWN_PROMOTION;
-        return 1;
-      }
-
-      pawn->state = PAWN_IDLE;
-      return 0;
     }
-  }
 
-  return 1;
+    // Player on diagonal right
+    if ((map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0) &&
+        (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
+        0)
+        x = clamp(x + 2, 0, mapLevelHeight - 2);
+
+    // Player on diagonal left
+    if ((map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0) &&
+        (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
+        0)
+        x = clamp(x - 2, 0, mapLevelHeight - 2);
+
+    ACTOR_setTargetAnimPos(&enemy->actor, x, y);
+    enemy->state = ENEMY_MOVING;
+
+    return 1;
 }
 
-inline static s8 promotionAnimation(Pawn *pawn) {
-  if (frame % FRAME_ANIMATION == 0) {
-    if (pawn->indexSprite >= MAX_SPRITES_ANIM) {
-      QUEEN_init(&pawn->queen, &queen_sprite, ENEMY_PAL,
-                 pawn->actor.collisionCurPos.x, pawn->actor.collisionCurPos.y);
-      ACTOR_deallocSprite(&pawn->actor);
-      ACTOR_destroy(&pawn->actor);
-      pawn->state = PAWN_PROMOTED;
-      return 0;
+inline static s8 moveAnimation(Enemy *enemy) {
+    if (frame % FRAME_ANIMATION == 0) {
+        ACTOR_animateTo(&enemy->actor);
+
+        if (!enemy->actor.moving) {
+            if (ACTOR_checkCollision(&enemy->actor)) {
+                kprintf("Player hit");
+                player.health--;
+                player.state = PLAYER_DEAD;
+                return 0;
+            }
+
+            if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
+                enemy->state = ENEMY_ANIMATING;
+                return 1;
+            }
+
+            enemy->state = ENEMY_IDLE;
+            return 0;
+        }
     }
 
-    ACTOR_deallocSprite(&pawn->actor);
-    ACTOR_init(&pawn->actor, sprites[pawn->indexSprite], ENEMY_PAL,
-               pawn->actor.collisionCurPos.x, pawn->actor.collisionCurPos.y,
-               COLLISION_TYPE_PAWN);
-    pawn->indexSprite++;
-  }
+    return 1;
+}
 
-  return 1;
+inline static s8 promotionAnimation(Enemy *enemy) {
+    if (frame % FRAME_ANIMATION == 0) {
+        if (enemy->indexSprite >= MAX_SPRITES_ANIM) {
+            const Vect2D_s16 pos = enemy->actor.collisionCurPos;
+            enemy->destroy(enemy);
+            ENEMY_init(enemy, QUEEN_TYPE, pos.x, pos.y);
+            return 0;
+        }
+
+        ACTOR_deallocSprite(&enemy->actor);
+        ACTOR_init(&enemy->actor, sprites[enemy->indexSprite], ENEMY_PAL,
+                   enemy->actor.collisionCurPos.x, enemy->actor.collisionCurPos.y,
+                   COLLISION_TYPE_PAWN);
+        enemy->indexSprite++;
+    }
+
+    return 1;
 }
 
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,
-               const s16 x, const s16 y) {
-  pawn->state = PAWN_IDLE;
-  pawn->indexSprite = 0;
-  ACTOR_init(&pawn->actor, sprite, palette, x, y, COLLISION_TYPE_PAWN);
-}
-
-void PAWN_deallocDestroy(Pawn *pawn) {
-  if (pawn->state == PAWN_PROMOTED) {
-    QUEEN_deallocDestroy(&pawn->queen);
-    pawn->state = PAWN_DESTROYED;
-    return;
-  }
-  
-  pawn->state = PAWN_DESTROYED;
-  ACTOR_destroy(&pawn->actor);
-}
-
-void PAWN_dealloc(Pawn *pawn) {
-  if (pawn->state == PAWN_PROMOTED) {
-    QUEEN_dealloc(&pawn->queen);
-    return;
-  }
-
-  ACTOR_destroy(&pawn->actor);
-}
-
-s8 PAWN_update(Pawn *pawn) {
-  switch (pawn->state) {
-  case PAWN_DEAD:
-  case PAWN_DESTROYED:
-    return 0;
-  case PAWN_MOVING:
-    return moveAnimation(pawn);
-  case PAWN_IDLE:
-    return startMovement(pawn);
-  case PAWN_PROMOTION:
-    return promotionAnimation(pawn);
-  case PAWN_PROMOTED:
-    return QUEEN_update(&pawn->queen);
-  }
-
-  return 1;
+s8 PAWN_update2(Enemy *enemy) {
+    switch (enemy->state) {
+        case ENEMY_IDLE:
+            return startMovement(enemy);
+        case ENEMY_MOVING:
+            return moveAnimation(enemy);
+        case ENEMY_ANIMATING:
+            return promotionAnimation(enemy);
+        default:
+            return 0;
+    }
 }
