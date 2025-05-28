@@ -1,7 +1,6 @@
 #include "scene/scene1.h"
 #include "background/background.h"
-#include "enemy/pawn.h"
-#include "enemy/queen.h"
+#include "enemy/enemy.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "map/map.h"
@@ -31,7 +30,10 @@ typedef enum GameTurn {
 
 typedef struct SceneContext {
   // Array with every enemy of the scene
-  Pawn pawns[MAX_ENEMIES];
+  Enemy enemies[MAX_ENEMIES];
+
+  // Array with every enemy type
+  EnemyType enemiesType[MAX_ENEMIES];
 
   // Defines the initial position of every enemy
   const Vect2D_s16 enemiesPos[MAX_ENEMIES];
@@ -54,6 +56,7 @@ Scene scene1 = {SCENE1_init, SCENE1_update, SCENE1_hitEnemy, SCENE1_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
+    .enemiesType = {PAWN_TYPE, PAWN_TYPE, PAWN_TYPE},
     .enemiesPos = {{6, 0}, {2, 0}, {10, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
@@ -86,12 +89,10 @@ static inline void initPlayer() {
 
 static inline void initEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
-              context.enemiesPos[i].x, context.enemiesPos[i].y);
-
-    MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
-                        context.pawns[i].actor.collisionCurPos,
-                        context.pawns[i].actor.collisionType);
+    ENEMY_init(&context.enemies[i], context.enemiesType[i], context.enemiesPos[i].x, context.enemiesPos[i].y);
+    MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
+                        context.enemies[i].actor.collisionCurPos,
+                        context.enemies[i].actor.collisionType);
   }
 }
 
@@ -100,19 +101,11 @@ static inline void updateMapCollision() {
                       player.actor.collisionCurPos, player.actor.collisionType);
 
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state != PAWN_DEAD &&
-        context.pawns[i].state != PAWN_DESTROYED)
-      MAP_updateCollision(context.pawns[i].actor.collisionPrevPos,
-                          context.pawns[i].actor.collisionCurPos,
-                          context.pawns[i].actor.collisionType);
-
-    if (context.pawns[i].state == PAWN_PROMOTED &&
-        (context.pawns[i].queen.state != QUEEN_DEAD &&
-         context.pawns[i].queen.state != QUEEN_DESTROYED)) {
-      MAP_updateCollision(context.pawns[i].queen.actor.collisionPrevPos,
-                          context.pawns[i].queen.actor.collisionCurPos,
-                          context.pawns[i].queen.actor.collisionType);
-    }
+    if (context.enemies[i].state != ENEMY_DEAD &&
+        context.enemies[i].state != ENEMY_DESTROYED)
+      MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
+                          context.enemies[i].actor.collisionCurPos,
+                          context.enemies[i].actor.collisionType);
   }
 }
 
@@ -123,8 +116,7 @@ static inline void updateBackground() {
 }
 
 static inline void updatePlayer() {
-  s8 res = PLAYER_update();
-  if (res)
+  if (PLAYER_update())
     return;
 
   context.turn = ENEMY;
@@ -137,12 +129,9 @@ static inline void updateEnemies() {
 
   while (tried < MAX_ENEMIES) {
 
-    if ((context.pawns[id].state != PAWN_DEAD &&
-         context.pawns[id].state != PAWN_DESTROYED) ||
-        (context.pawns[id].state == PAWN_PROMOTED &&
-         context.pawns[id].queen.state != QUEEN_DEAD &&
-         context.pawns[id].queen.state != QUEEN_DESTROYED)) {
-      res = PAWN_update(&context.pawns[id]);
+    if (context.enemies[id].state != ENEMY_DEAD &&
+         context.enemies[id].state != ENEMY_DESTROYED) {
+      res = context.enemies[id].update(&context.enemies[id]);
       context.indexEnemy = id;
     }
 
@@ -171,10 +160,8 @@ static inline void destroyPlayer() {
 
 static inline void destroyEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD ||
-        (context.pawns[i].state == PAWN_PROMOTED &&
-         context.pawns[i].queen.state == QUEEN_DEAD)) {
-      PAWN_deallocDestroy(&context.pawns[i]);
+    if (context.enemies[i].state == ENEMY_DEAD) {
+      context.enemies[i].destroy(&context.enemies[i]);
       context.totalEnemies--;
     }
   }
@@ -182,24 +169,19 @@ static inline void destroyEnemies() {
 
 static inline void restartEnemies() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD ||
-        context.pawns[i].state == PAWN_DESTROYED)
+    if (context.enemies[i].state == ENEMY_DEAD ||
+        context.enemies[i].state == ENEMY_DESTROYED)
       continue;
 
-    if (context.pawns[i].state == PAWN_PROMOTED &&
-        (context.pawns[i].queen.state == QUEEN_DEAD ||
-         context.pawns[i].queen.state == QUEEN_DESTROYED))
-      continue;
-
-    PAWN_init(&context.pawns[i], &pawn_sprite1, ENEMY_PAL,
-              context.enemiesPos[i].x, context.enemiesPos[i].y);
+    context.enemies[i].dealloc(&context.enemies[i]);
+    ENEMY_init(&context.enemies[i], context.enemiesType[i], context.enemiesPos[i].x, context.enemiesPos[i].y);
   }
 }
 
 static inline void restart() {
-  SCENE1_destroy();
   initPlayer();
   restartEnemies();
+  MAP_initLevel(mapLevelHeight, mapLevelWidth);
   updateMapCollision();
 }
 
@@ -235,8 +217,8 @@ SceneId SCENE1_update() {
 
     if (player.health == 0)
       return SCENE_ID_GAME_OVER;
-    else
-      restart();
+
+    restart();
   }
 
   return SCENE_ID_LEVEL01;
@@ -244,32 +226,21 @@ SceneId SCENE1_update() {
 
 void SCENE1_hitEnemy(const Vect2D_s16 hitPos) {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_DEAD ||
-        context.pawns[i].state == PAWN_DESTROYED)
+    if (context.enemies[i].state == ENEMY_DEAD ||
+        context.enemies[i].state == ENEMY_DESTROYED)
       continue;
 
-    if (context.pawns[i].actor.collisionCurPos.x == hitPos.x &&
-        context.pawns[i].actor.collisionCurPos.y == hitPos.y) {
-      context.pawns[i].state = PAWN_DEAD;
-    }
-
-    if (context.pawns[i].state == PAWN_PROMOTED &&
-        context.pawns[i].queen.actor.collisionCurPos.x == hitPos.x &&
-        context.pawns[i].queen.actor.collisionCurPos.y == hitPos.y) {
-      context.pawns[i].queen.state = QUEEN_DEAD;
+    if (context.enemies[i].actor.collisionCurPos.x == hitPos.x &&
+        context.enemies[i].actor.collisionCurPos.y == hitPos.y) {
+      context.enemies[i].state = ENEMY_DEAD;
     }
   }
 }
 
 void SCENE1_destroy() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.pawns[i].state == PAWN_PROMOTED) {
-      QUEEN_deallocDestroy(&context.pawns[i].queen);
-      context.pawns[i].state = PAWN_IDLE;
-    }
-
-    if (context.pawns[i].state != PAWN_DESTROYED)
-      PAWN_dealloc(&context.pawns[i]);
+    if (context.enemies[i].state != ENEMY_DESTROYED)
+      context.enemies[i].destroy(&context.enemies[i]);
   }
 
   SYS_doVBlankProcess();
