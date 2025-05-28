@@ -15,7 +15,7 @@ static const SpriteDefinition *const sprites[MAX_SPRITES_ANIM] = {
 
 inline static s8 startMovement(Enemy *enemy) {
     s16 x = enemy->actor.collisionCurPos.x;
-    s16 y = clamp(enemy->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
+    const s16 y = clamp(enemy->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
     if (map[y][x] != COLLISION_TYPE_EMPTY) {
         return 0;
     }

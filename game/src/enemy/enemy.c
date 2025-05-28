@@ -39,22 +39,19 @@ static void actorInit(Enemy *enemy, const EnemyType type, const s16 x, const s16
 }
 
 static void functionsInit(Enemy *enemy, const EnemyType type) {
+    enemy->dealloc = defaultDealloc;
+    enemy->destroy = defaultDestroy;
+
     switch (type) {
         case QUEEN_TYPE: {
-            enemy->dealloc = defaultDealloc;
-            enemy->destroy = defaultDestroy;
             enemy->update = QUEEN_update;
             return;
         }
         case PAWN_TYPE: {
-            enemy->dealloc = defaultDealloc;
-            enemy->destroy = defaultDestroy;
             enemy->update = PAWN_update;
             return;
         }
         case TOWER_TYPE: {
-            enemy->dealloc = defaultDealloc;
-            enemy->destroy = defaultDestroy;
             enemy->update = TOWER_update;
             return;
         }

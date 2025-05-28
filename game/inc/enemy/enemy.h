@@ -21,8 +21,8 @@ typedef enum EnemyState {
 
 typedef struct Enemy Enemy;
 
-typedef void (*EnemyDealloc)(Enemy*);
-typedef void (*EnemyDestroy)(Enemy*);
+typedef void (*EnemyDealloc)(const Enemy *const );
+typedef void (*EnemyDestroy)(Enemy *const enemy);
 typedef s8 (*EnemyUpdate)(Enemy*);
 
 typedef struct Enemy {
