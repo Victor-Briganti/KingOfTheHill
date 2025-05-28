@@ -27,7 +27,7 @@ void SCENE2_init();
 
 SceneId SCENE2_update();
 
-void SCENE2_hitEnemy(const Vect2D_s16 hitPos);
+void SCENE2_hit(const Vect2D_s16 hitPos);
 
 void SCENE2_destroy();
 

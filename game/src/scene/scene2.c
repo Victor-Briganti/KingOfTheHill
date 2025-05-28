@@ -48,7 +48,7 @@ typedef struct SceneContext {
 // GLOBALS
 //===----------------------------------------------------------------------===//
 
-Scene scene2 = {SCENE2_init, SCENE2_update, SCENE2_hitEnemy, SCENE2_destroy};
+Scene scene2 = {SCENE2_init, SCENE2_update, SCENE2_hit, SCENE2_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
@@ -120,6 +120,7 @@ static inline void updateEnemies() {
 }
 
 static inline void damagePlayer() {
+    player.health--;
     PLAYER_destroy();
     HEART_update();
 
@@ -184,9 +185,17 @@ SceneId SCENE2_update() {
     return SCENE_ID_LEVEL02;
 }
 
-void SCENE2_hitEnemy(const Vect2D_s16 hitPos) {
+void SCENE2_hit(const Vect2D_s16 hitPos) {
+    if (context.turn == ENEMY) {
+        if (player.actor.collisionCurPos.x == hitPos.x && player.actor.collisionCurPos.y == hitPos.y) {
+            player.state = PLAYER_DEAD;
+        }
+
+        return;
+    }
+
     if (context.enemy.state == ENEMY_DEAD ||
-        context.enemy.state == ENEMY_DESTROYED)
+       context.enemy.state == ENEMY_DESTROYED)
         return;
 
     if (context.enemy.actor.collisionCurPos.x == hitPos.x &&

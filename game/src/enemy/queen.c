@@ -107,9 +107,7 @@ inline static s8 moveAnimation(Enemy *enemy) {
 
         if (!enemy->actor.moving) {
             if (ACTOR_checkCollision(&enemy->actor)) {
-                kprintf("Player hit");
-                player.health--;
-                player.state = PLAYER_DEAD;
+                sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
                 return 0;
             }
 
