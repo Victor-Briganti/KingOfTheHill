@@ -100,19 +100,19 @@ inline static s8 startMovement(Enemy *enemy) {
     if (tryMovement(enemy, from, x, y))
         return 1;
 
-    // Try to move horizontally
-    if (to.x != from.x) {
-        const s16 dx = to.x > from.x ? 2 : -2;
-        const s16 newX = clamp(from.x + dx, 0, mapLevelWidth - 2);
-        if (tryMovement(enemy, from, newX, from.y))
-            return 1;
-    }
-
     // Try to move vertically
     if (to.y != from.y) {
         const s16 dy = to.y > from.y ? 2 : -2;
         const s16 newY = clamp(from.y + dy, 0, mapLevelHeight - 2);
         if (tryMovement(enemy, from, from.x, newY))
+            return 1;
+    }
+
+    // Try to move horizontally
+    if (to.x != from.x) {
+        const s16 dx = to.x > from.x ? 2 : -2;
+        const s16 newX = clamp(from.x + dx, 0, mapLevelWidth - 2);
+        if (tryMovement(enemy, from, newX, from.y))
             return 1;
     }
 
