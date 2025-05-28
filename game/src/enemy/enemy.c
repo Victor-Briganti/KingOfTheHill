@@ -1,8 +1,8 @@
 #include "enemy/enemy.h"
+#include "enemy/pawn2.h"
+#include "enemy/queen2.h"
 
 #include <sprites.h>
-
-#include "enemy/pawn2.h"
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -38,6 +38,7 @@ static void functionsInit(Enemy *enemy, const EnemyType type) {
         case QUEEN_TYPE: {
             enemy->dealloc = defaultDealloc;
             enemy->destroy = defaultDestroy;
+            enemy->update = QUEEN_update2;
             return;
         }
         case PAWN_TYPE: {

@@ -84,7 +84,7 @@ static inline void initPlayer() {
 }
 
 static inline void initEnemies() {
-    ENEMY_init(&context.enemy, PAWN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
+    ENEMY_init(&context.enemy, QUEEN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
 
     MAP_updateCollision(context.enemy.actor.collisionPrevPos,
                         context.enemy.actor.collisionCurPos,
@@ -106,8 +106,7 @@ static inline void updateBackground() {
 }
 
 static inline void updatePlayer() {
-    s8 res = PLAYER_update();
-    if (res)
+    if (PLAYER_update())
         return;
 
     context.turn = ENEMY;
@@ -137,7 +136,7 @@ static inline void destroyEnemies() {
 }
 
 static inline void restartEnemies() {
-    ENEMY_init(&context.enemy, PAWN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
+    ENEMY_init(&context.enemy, QUEEN_TYPE, context.enemiesPos.x, context.enemiesPos.y);
 }
 
 static inline void restart() {
@@ -179,8 +178,8 @@ SceneId SCENE2_update() {
 
         if (player.health == 0)
             return SCENE_ID_GAME_OVER;
-        else
-            restart();
+
+        restart();
     }
 
     return SCENE_ID_LEVEL02;
