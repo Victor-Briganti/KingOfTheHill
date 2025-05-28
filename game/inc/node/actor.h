@@ -3,20 +3,10 @@
 
 #include "global.h"
 #include "map/map.h"
+#include "types/collision.h"
 
 #include <genesis.h>
 #include <maths.h>
-
-typedef enum CollisionType {
-  COLLISION_TYPE_EMPTY = 0,
-  COLLISION_TYPE_PLAYER = 1 << 0,
-  COLLISION_TYPE_PAWN = 1 << 1,
-  COLLISION_TYPE_TOWER = 1 << 2,
-  COLLISION_TYPE_BISHOP = 1 << 3,
-  COLLISION_TYPE_KNIGHT = 1 << 4,
-  COLLISION_TYPE_QUEEN = 1 << 5,
-  COLLISION_TYPE_KING = 1 << 6
-} CollisionType;
 
 typedef struct ActorNode {
   // Animation components
@@ -36,7 +26,7 @@ inline void ACTOR_updatePos(const ActorNode *const node) {
                   POS_Y(node->animationPos.y));
 }
 
-inline void ACTOR_init(ActorNode *const node, const SpriteDefinition *sprite,
+inline void ACTOR_init(ActorNode *const node, const SpriteDefinition *const sprite,
                        const u16 palette, const s16 x, const s16 y,
                        const CollisionType type) {
   PAL_setPalette(palette, sprite->palette->data, DMA);
@@ -72,6 +62,11 @@ inline void ACTOR_destroy(ActorNode *const node) {
   node->collisionCurPos = vec;
   node->collisionType = COLLISION_TYPE_EMPTY;
   node->moving = FALSE;
+}
+
+inline void ACTOR_deallocSprite(const ActorNode *const node) {
+  // Release the resources
+  SPR_releaseSprite(node->sprite);
 }
 
 inline void ACTOR_animateTo(ActorNode *const node) {
@@ -111,6 +106,20 @@ inline void ACTOR_setTargetAnimPos(ActorNode *const node, const s16 x,
 inline bool ACTOR_checkCollision(const ActorNode *const node) {
   const s16 entry = map[node->collisionCurPos.y][node->collisionCurPos.x];
   return ((entry != 0) && ((~node->collisionType & entry) != 0));
+}
+
+inline void ACTOR_blink(const ActorNode *const node) {
+  if (frame % FRAME_ANIMATION == 0) {
+    if (SPR_getVisibility(node->sprite) == HIDDEN) {
+      SPR_setVisibility(node->sprite, VISIBLE);
+    } else {
+      SPR_setVisibility(node->sprite, HIDDEN);
+    }
+  }
+}
+
+inline void ACTOR_setVisible(const ActorNode *const node) {
+  SPR_setVisibility(node->sprite, VISIBLE);
 }
 
 #endif // __ACTOR_H__

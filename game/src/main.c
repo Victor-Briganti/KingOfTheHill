@@ -1,4 +1,3 @@
-#include "enemy/pawn.h"
 #include "global.h"
 #include "hud/heart.h"
 #include "player/player.h"
@@ -16,17 +15,6 @@
 //===----------------------------------------------------------------------===//
 // GLOBALS
 //===----------------------------------------------------------------------===//
-
-u16 mapLevelHeight;
-u16 mapLevelWidth;
-
-u16 mapLevelX;
-u16 mapLevelY;
-
-s16 playerInitX;
-s16 playerInitY;
-
-GameTurn turn;
 
 u16 frame = 0;
 
@@ -46,7 +34,6 @@ static void COMMON_init() {
   // Init the player object
   PLAYER_init();
   HEART_init();
-  PAWN_init();
 }
 
 //===----------------------------------------------------------------------===//
@@ -62,19 +49,25 @@ int main(const bool resetType) {
   while (TRUE) {
     SYS_doVBlankProcess();
 
+    // TODO: This should not be hard coded
+    if (sceneIndex != SCENE_ID_LEVEL01)
+      continue;
+
     if (!player.health)
       continue;
 
-    scene.init();
+    sceneManager[sceneIndex]->init();
     while (TRUE) {
-      s8 result = scene.update();
-      if (result < 0)
+      SceneId result = sceneManager[sceneIndex]->update();
+      if (result != sceneIndex) {
+        sceneManager[sceneIndex]->destroy();
+        sceneIndex = result;
         break;
-      
+      }
+
       frame++;
     }
 
-    scene.destroy();
     frame = 0;
   }
   return 0;

@@ -1,6 +1,8 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
+#include "types/collision.h"
+
 #include <genesis.h>
 
 #define MAP_MAX_HEIGHT 24 /* TODO: Change this */
@@ -8,26 +10,122 @@
 
 extern u16 map[MAP_MAX_HEIGHT][MAP_MAX_WIDTH];
 
-typedef enum MapObjectType {
-  MAP_OBJECT_EMPTY = 0,
-  MAP_OBJECT_PLAYER = 1 << 0,
-  MAP_OBJECT_PAWN = 1 << 1,
-  MAP_OBJECT_TOWER = 1 << 2,
-  MAP_OBJECT_BISHOP = 1 << 3,
-  MAP_OBJECT_KNIGHT = 1 << 4,
-  MAP_OBJECT_QUEEN = 1 << 5,
-  MAP_OBJECT_KING = 1 << 6
-} MapObjectType;
-
 typedef struct MapObject {
   u16 x, y;
-  MapObjectType object;
+  CollisionType object;
 } MapObject;
 
-void MAP_initLevel(u16 mapHeight, u16 mapWidth);
+inline void MAP_initLevel(const u16 mapHeight, const u16 mapWidth) {
+  if (mapHeight > MAP_MAX_HEIGHT && mapWidth > MAP_MAX_WIDTH)
+    kprintf("Map is bigger than supported");
 
-void MAP_initObjects(MapObject objectVector[], u16 count);
+  for (u16 i = 0; i < mapHeight; i++) {
+    for (u16 j = 0; j < mapWidth; j++) {
+      map[i][j] = 0;
+    }
+  }
+}
 
-void MAP_updateLevel();
+inline Vect2D_s16 MAP_checkVertical(const Vect2D_s16 origin,
+                                    const Vect2D_s16 dest) {
+  if (origin.y < dest.y) {
+    // Verify every position below
+    for (s16 i = origin.y + 1; i <= dest.y; i++) {
+      if (map[i][origin.x] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){origin.x, i};
+      }
+    }
+  } else {
+    // Verify every position above
+    for (s16 i = origin.y - 1; i >= dest.y; i--) {
+      if (map[i][origin.x] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){origin.x, i};
+      }
+    }
+  }
+
+  return (Vect2D_s16){-1, -1};
+}
+
+inline Vect2D_s16 MAP_checkHorizontal(const Vect2D_s16 origin,
+                                      const Vect2D_s16 dest) {
+  if (origin.x < dest.x) {
+    // Verify every position below
+    for (s16 i = origin.x + 1; i <= dest.x; i++) {
+      if (map[origin.y][i] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){i, origin.y};
+      }
+    }
+  } else {
+    // Verify every position above
+    for (s16 i = origin.x - 1; i >= dest.x; i--) {
+      if (map[origin.y][i] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){i, origin.y};
+      }
+    }
+  }
+
+  return (Vect2D_s16){-1, -1};
+}
+
+inline Vect2D_s16 MAP_checkDiagonal(const Vect2D_s16 origin,
+                                    const Vect2D_s16 dest) {
+  if (origin.x > dest.x && origin.y > dest.y) {
+    // Verify up left diagonal
+    for (s16 x = origin.x - 1, y = origin.y - 1; x >= dest.x && y >= dest.y;
+         x--, y--) {
+      if (map[y][x] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){x, y};
+      }
+    }
+  }
+
+  if (origin.x < dest.x && origin.y > dest.y) {
+    // Verify up right diagonal
+    for (s16 x = origin.x + 1, y = origin.y - 1; x <= dest.x && y >= dest.y;
+         x++, y--) {
+      if (map[y][x] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){x, y};
+      }
+    }
+  }
+
+  if (origin.x > dest.x && origin.y < dest.y) {
+    // Verify down left diagonal
+    for (s16 x = origin.x - 1, y = origin.y + 1; x >= dest.x && y <= dest.y;
+         x--, y++) {
+      if (map[y][x] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){x, y};
+      }
+    }
+  }
+
+  if (origin.x < dest.x && origin.y < dest.y) {
+    // Verify down right diagonal
+    for (s16 x = origin.x + 1, y = origin.y + 1; x <= dest.x && y <= dest.y;
+         x++, y++) {
+      if (map[y][x] != COLLISION_TYPE_EMPTY) {
+        return (Vect2D_s16){x, y};
+      }
+    }
+  }
+
+  return (Vect2D_s16){-1, -1};
+}
+
+inline void MAP_initObjects(MapObject objectVector[], const u16 count) {
+  for (u16 i = 0; i < count; i++) {
+    map[objectVector[i].y][objectVector[i].x] |= objectVector[i].object;
+  }
+}
+
+inline void MAP_updateCollision(const Vect2D_s16 prev, const Vect2D_s16 cur,
+                                const CollisionType colType) {
+  if (prev.y < 0 && prev.x < 0)
+    return;
+
+  map[prev.y][prev.x] &= ~colType;
+  map[cur.y][cur.x] |= colType;
+}
 
 #endif // __MAP_H__

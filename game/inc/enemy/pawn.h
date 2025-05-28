@@ -1,27 +1,33 @@
 #ifndef __PAWN_H__
 #define __PAWN_H__
 
+#include "enemy/queen.h"
 #include "node/actor.h"
 
 typedef enum PawnState {
   PAWN_MOVING,
   PAWN_IDLE,
+  PAWN_PROMOTION,
+  PAWN_PROMOTED,
   PAWN_DEAD,
+  PAWN_DESTROYED,
 } PawnState;
 
 typedef struct Pawn {
+  Queen queen;
   ActorNode actor;
   PawnState state;
+  u8 indexSprite;
 } Pawn;
 
-extern Pawn pawn;
+void PAWN_init(Pawn *pawn, const SpriteDefinition *sprite, const u16 palette,
+               const s16 x, const s16 y);
 
-void PAWN_init();
+void PAWN_deallocDestroy(Pawn *pawn);
 
-void PAWN_destroy();
+void PAWN_dealloc(Pawn *pawn);
 
-void PAWN_update();
-
-void PAWN_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x, s16 y);
+// Return 0 when ends its movement and 1 if still updating
+s8 PAWN_update(Pawn *pawn);
 
 #endif // __PAWN_H__

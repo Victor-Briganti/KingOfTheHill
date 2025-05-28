@@ -1,32 +1,13 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
-#include <genesis.h>
+#include "scene/scene_manager.h"
 
-typedef enum GameTurn {
-  PLAYER = 0,
-  ENEMY = 1,
-  GAME_OVER = 2,
-} GameTurn;
+#include <genesis.h>
 
 //===----------------------------------------------------------------------===//
 // EXTERN
 //===----------------------------------------------------------------------===//
-
-// Current Level Size Information
-extern u16 mapLevelHeight;
-extern u16 mapLevelWidth;
-
-// Current Map Level Size Information
-extern u16 mapLevelX;
-extern u16 mapLevelY;
-
-// Current Level Player Initial Position
-extern s16 playerInitX;
-extern s16 playerInitY;
-
-// Define who turn is this
-extern GameTurn turn;
 
 // Define the "frame" of the game
 extern u16 frame;

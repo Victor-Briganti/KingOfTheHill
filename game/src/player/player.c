@@ -1,8 +1,8 @@
 #include "player/player.h"
-#include "enemy/pawn.h"
 #include "global.h"
 #include "map/map.h"
 #include "node/actor.h"
+#include "scene/scene_manager.h"
 #include "tilemap/tilemap.h"
 
 #include <joy.h>
@@ -19,6 +19,8 @@ static const CursorMovement cursorMoves[] = {
     {.x = 0, .y = 2, .direction = BUTTON_DOWN},
     {.x = 0, .y = -2, .direction = BUTTON_UP},
 };
+
+static u16 prevJoyState = 0;
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -124,29 +126,24 @@ static void cursorInertia() {
   }
 }
 
-static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
-  if (joy != JOY_1 || turn == ENEMY || player.state == PLAYER_MOVING)
-    return;
+static void inputHandler() {
+  const u16 state = JOY_readJoypad(JOY_1);
+  const u16 pressed = (state ^ prevJoyState) & state;
+  const u16 directional = pressed & BUTTON_DIR;
+  const u16 command = pressed & BUTTON_A;
 
-  // Verify if the directionals are pressed
-  const u16 directional = state & BUTTON_DIR;
-
-  // Verify if the command button was pressed
-  const u16 command = state & BUTTON_A;
-
-  // Act when the command is pressed
   if (command) {
     cursorInertia();
     player.state = PLAYER_MOVING;
+    prevJoyState = state;
     return;
   }
 
-  // Move when the buttons are released
-  if (!directional) {
+  if (directional) {
     s16 x = player.cursor.x;
     s16 y = player.cursor.y;
     for (u8 i = 0; i < 4; i++) {
-      if (cursorMoves[i].direction & changed) {
+      if (cursorMoves[i].direction & pressed) {
         x += cursorMoves[i].x;
         y += cursorMoves[i].y;
         handleCursorPos(x, y, cursorMoves[i].direction);
@@ -154,6 +151,8 @@ static void inputHandler(const u16 joy, const u16 changed, const u16 state) {
       }
     }
   }
+
+  prevJoyState = state;
 }
 
 inline static void updateSelectTile() {
@@ -208,20 +207,22 @@ inline static void updateCursorTile() {
   }
 }
 
-inline static void callAnimation() {
+inline static s8 callAnimation() {
   if (frame % FRAME_ANIMATION == 0) {
     ACTOR_animateTo(&player.actor);
 
     if (!player.actor.moving) {
       if (ACTOR_checkCollision(&player.actor)) {
         kprintf("Pawn hit");
-        pawn.state = PAWN_DEAD;
+        sceneManager[sceneIndex]->hit(player.actor.collisionCurPos);
       }
 
-      turn = ENEMY;
       player.state = PLAYER_IDLE;
+      return 0;
     }
   }
+
+  return 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -238,23 +239,27 @@ void PLAYER_init() {
 
 void PLAYER_destroy() { ACTOR_destroy(&player.actor); }
 
-void PLAYER_update() {
-  if (turn == ENEMY || player.state == PLAYER_DEAD)
-    return;
+s8 PLAYER_update() {
+  if (player.state == PLAYER_DAMAGED)
+    ACTOR_blink(&player.actor);
+  else
+    ACTOR_setVisible(&player.actor);
+
+  if (player.state == PLAYER_DEAD)
+    return 0;
 
   if (player.state == PLAYER_MOVING) {
-    callAnimation();
-    return;
+    return callAnimation();
   }
 
+  inputHandler();
   updateSelectTile();
   updateCursorTile();
+  return 1;
 }
 
 void PLAYER_levelInit(const SpriteDefinition *sprite, u16 palette, s16 x,
                       s16 y) {
   ACTOR_init(&player.actor, sprite, palette, x, y, COLLISION_TYPE_PLAYER);
-  JOY_setEventHandler(inputHandler);
-  player.state = PLAYER_IDLE;
   player.cursor = (Vect2D_s16){x, y - 2};
 }
