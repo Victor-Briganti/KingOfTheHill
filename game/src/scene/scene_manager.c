@@ -9,7 +9,7 @@ Scene *sceneManager[MAX_SCENE] = {
     &scene3,
 };
 
-SceneId sceneIndex = SCENE_ID_LEVEL03;
+SceneId sceneIndex = SCENE_ID_LEVEL01;
 
 u16 mapLevelHeight;
 u16 mapLevelWidth;

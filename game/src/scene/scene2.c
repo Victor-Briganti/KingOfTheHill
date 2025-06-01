@@ -210,7 +210,7 @@ SceneId SCENE2_update() {
 
     destroyEnemies();
     if (context.totalEnemies == 0)
-        return SCENE_ID_PASSED;
+        return SCENE_ID_LEVEL03;
 
     if (player.state == PLAYER_DEAD) {
         damagePlayer();

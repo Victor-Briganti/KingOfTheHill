@@ -19,3 +19,5 @@ SPRITE pawn_sprite7 "sprites/pawn7.png" 2 2 FAST
 SPRITE queen_sprite "sprites/queen.png" 2 2 FAST
 
 SPRITE tower_sprite "sprites/tower.png" 2 2 FAST
+
+SPRITE bishop_sprite "sprites/bishop.png" 2 2 FAST
