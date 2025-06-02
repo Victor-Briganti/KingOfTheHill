@@ -212,6 +212,10 @@ inline static s8 callAnimation() {
     ACTOR_animateTo(&player.actor);
 
     if (!player.actor.moving) {
+      MAP_updateCollision(player.actor.collisionPrevPos,
+                          player.actor.collisionCurPos,
+                          player.actor.collisionType);
+
       if (ACTOR_checkCollision(&player.actor)) {
         sceneManager[sceneIndex]->hit(player.actor.collisionCurPos);
       }

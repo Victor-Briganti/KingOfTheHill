@@ -26,9 +26,9 @@ inline void ACTOR_updatePos(const ActorNode *const node) {
                   POS_Y(node->animationPos.y));
 }
 
-inline void ACTOR_init(ActorNode *const node, const SpriteDefinition *const sprite,
-                       const u16 palette, const s16 x, const s16 y,
-                       const CollisionType type) {
+inline void ACTOR_init(ActorNode *const node,
+                       const SpriteDefinition *const sprite, const u16 palette,
+                       const s16 x, const s16 y, const CollisionType type) {
   PAL_setPalette(palette, sprite->palette->data, DMA);
   node->sprite = SPR_addSprite(sprite, POS_X(x), POS_Y(y),
                                TILE_ATTR(palette, FALSE, FALSE, FALSE));
@@ -50,9 +50,8 @@ inline void ACTOR_destroy(ActorNode *const node) {
   SPR_releaseSprite(node->sprite);
 
   // Clean the map
-  map[node->collisionPrevPos.y][node->collisionPrevPos.x] =
-      COLLISION_TYPE_EMPTY;
-  map[node->collisionCurPos.y][node->collisionCurPos.x] = COLLISION_TYPE_EMPTY;
+  MAP_removeCollision(node->collisionPrevPos, node->collisionType);
+  MAP_removeCollision(node->collisionCurPos, node->collisionType);
 
   // Clean other values
   const Vect2D_s16 vec = {-1, -1};

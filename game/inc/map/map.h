@@ -113,12 +113,6 @@ inline Vect2D_s16 MAP_checkDiagonal(const Vect2D_s16 origin,
   return (Vect2D_s16){-1, -1};
 }
 
-inline void MAP_initObjects(MapObject objectVector[], const u16 count) {
-  for (u16 i = 0; i < count; i++) {
-    map[objectVector[i].y][objectVector[i].x] |= objectVector[i].object;
-  }
-}
-
 inline void MAP_updateCollision(const Vect2D_s16 prev, const Vect2D_s16 cur,
                                 const CollisionType colType) {
   if (prev.y < 0 && prev.x < 0)
@@ -126,6 +120,14 @@ inline void MAP_updateCollision(const Vect2D_s16 prev, const Vect2D_s16 cur,
 
   map[prev.y][prev.x] &= ~colType;
   map[cur.y][cur.x] |= colType;
+}
+
+inline void MAP_removeCollision(const Vect2D_s16 vec,
+                                const CollisionType colType) {
+  if (vec.y < 0 && vec.x < 0)
+    return;
+
+  map[vec.y][vec.x] &= ~colType;
 }
 
 #endif // __MAP_H__

@@ -42,9 +42,8 @@ static void actorInit(Enemy *enemy, const EnemyType type, const s16 x,
                COLLISION_TYPE_BISHOP);
     return;
   }
-  default: {
+  default:
     kprintf("[%s:%d]Enemy not defined", __FILE__, __LINE__);
-  }
   }
 }
 
