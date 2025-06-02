@@ -77,7 +77,7 @@ inline static s8 startMovement(Enemy *enemy) {
       return 1;
   }
 
-  // Try to move horizontally first
+  // Try to move horizontally
   if (to.x != from.x) {
     const s16 dx = to.x > from.x ? 2 : -2;
     const s16 newX = clamp(from.x + dx, 0, mapLevelWidth - 2);

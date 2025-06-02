@@ -2,14 +2,16 @@
 #include "scene/scene1.h"
 #include "scene/scene2.h"
 #include "scene/scene3.h"
+#include "scene/scene4.h"
 
 Scene *sceneManager[MAX_SCENE] = {
     &scene1,
     &scene2,
     &scene3,
+    &scene4,
 };
 
-SceneId sceneIndex = SCENE_ID_LEVEL01;
+SceneId sceneIndex = SCENE_ID_LEVEL04;
 
 u16 mapLevelHeight;
 u16 mapLevelWidth;
