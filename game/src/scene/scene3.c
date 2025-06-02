@@ -219,7 +219,7 @@ SceneId SCENE3_update() {
     restart();
   }
 
-  return SCENE_ID_LEVEL03;
+  return SCENE_ID_LEVEL04;
 }
 
 void SCENE3_hit(const Vect2D_s16 hitPos) {
