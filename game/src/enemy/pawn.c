@@ -43,6 +43,10 @@ inline static s8 moveAnimation(Enemy *enemy) {
     ACTOR_animateTo(&enemy->actor);
 
     if (!enemy->actor.moving) {
+      MAP_updateCollision(enemy->actor.collisionPrevPos,
+                          enemy->actor.collisionCurPos,
+                          enemy->actor.collisionType);
+
       if (ACTOR_checkCollision(&enemy->actor)) {
         sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
         return 0;
@@ -66,7 +70,12 @@ inline static s8 promotionAnimation(Enemy *enemy) {
     if (enemy->indexSprite >= MAX_SPRITES_ANIM) {
       const Vect2D_s16 pos = enemy->actor.collisionCurPos;
       enemy->destroy(enemy);
+
       ENEMY_init(enemy, QUEEN_TYPE, pos.x, pos.y);
+      MAP_updateCollision(enemy->actor.collisionPrevPos,
+                          enemy->actor.collisionCurPos,
+                          enemy->actor.collisionType);
+
       return 0;
     }
 

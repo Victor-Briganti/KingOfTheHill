@@ -120,6 +120,10 @@ inline static s8 moveAnimation(Enemy *enemy) {
     ACTOR_animateTo(&enemy->actor);
 
     if (!enemy->actor.moving) {
+      MAP_updateCollision(enemy->actor.collisionPrevPos,
+                          enemy->actor.collisionCurPos,
+                          enemy->actor.collisionType);
+
       if (ACTOR_checkCollision(&enemy->actor)) {
         sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
         return 0;

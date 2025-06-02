@@ -87,6 +87,8 @@ static inline void initBackground() {
 
 static inline void initPlayer() {
   PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
+  MAP_updateCollision(player.actor.collisionPrevPos,
+                      player.actor.collisionCurPos, player.actor.collisionType);
 }
 
 static inline void initEnemies() {
@@ -96,19 +98,6 @@ static inline void initEnemies() {
     MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
                         context.enemies[i].actor.collisionCurPos,
                         context.enemies[i].actor.collisionType);
-  }
-}
-
-static inline void updateMapCollision() {
-  MAP_updateCollision(player.actor.collisionPrevPos,
-                      player.actor.collisionCurPos, player.actor.collisionType);
-
-  for (u8 i = 0; i < MAX_ENEMIES; i++) {
-    if (context.enemies[i].state != ENEMY_DEAD &&
-        context.enemies[i].state != ENEMY_DESTROYED)
-      MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
-                          context.enemies[i].actor.collisionCurPos,
-                          context.enemies[i].actor.collisionType);
   }
 }
 
@@ -150,6 +139,10 @@ static inline void updateEnemies() {
     context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
     context.turn = PLAYER;
   }
+
+  // Enemies could not move pass to the player
+  if (res == -1 && tried == MAX_ENEMIES)
+    context.turn = PLAYER;
 }
 
 static inline void damagePlayer() {
@@ -179,14 +172,16 @@ static inline void restartEnemies() {
     context.enemies[i].dealloc(&context.enemies[i]);
     ENEMY_init(&context.enemies[i], context.enemiesType[i],
                context.enemiesPos[i].x, context.enemiesPos[i].y);
+    MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
+                        context.enemies[i].actor.collisionCurPos,
+                        context.enemies[i].actor.collisionType);
   }
 }
 
 static inline void restart() {
+  MAP_initLevel(mapLevelHeight, mapLevelWidth);
   initPlayer();
   restartEnemies();
-  MAP_initLevel(mapLevelHeight, mapLevelWidth);
-  updateMapCollision();
 }
 
 //===----------------------------------------------------------------------===//
@@ -203,7 +198,6 @@ void SCENE3_init() {
 
 SceneId SCENE3_update() {
   updateBackground();
-  updateMapCollision();
   if (context.turn == PLAYER)
     updatePlayer();
   else
