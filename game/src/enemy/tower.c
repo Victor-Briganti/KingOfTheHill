@@ -10,109 +10,105 @@ typedef Vect2D_s16 (*MovementCheck)(const Vect2D_s16, const Vect2D_s16);
 // Return TRUE if the path is empty, FALSE otherwise
 inline static bool verifyMovement(const Vect2D_s16 from, const Vect2D_s16 to,
                                   const MovementCheck check) {
-    const Vect2D_s16 res = check(from, to);
-    if (res.x < 0)
-        return TRUE;
+  const Vect2D_s16 res = check(from, to);
+  if (res.x < 0)
+    return TRUE;
 
-    return FALSE;
+  return FALSE;
 }
 
 static s8 tryAttack(Enemy *enemy, const Vect2D_s16 from, const Vect2D_s16 to) {
-    // Vertical attack
-    if (from.x == to.x) {
-        const s16 y = to.y > from.y ? to.y - 1 : to.y + 1;
-        if (verifyMovement(from, (Vect2D_s16){from.x, y}, MAP_checkVertical)) {
-            ACTOR_setTargetAnimPos(&enemy->actor, from.x, to.y);
-            enemy->state = ENEMY_MOVING;
-            return 1;
-        }
+  // Vertical attack
+  if (from.x == to.x) {
+    const s16 y = to.y > from.y ? to.y - 1 : to.y + 1;
+    if (verifyMovement(from, (Vect2D_s16){from.x, y}, MAP_checkVertical)) {
+      ACTOR_setTargetAnimPos(&enemy->actor, from.x, to.y);
+      enemy->state = ENEMY_MOVING;
+      return 1;
     }
+  }
 
-    // Horizontal attack
-    if (from.y == to.y) {
-        const s16 x = to.x > from.x ? to.x - 1 : to.x + 1;
-        if (verifyMovement(from, (Vect2D_s16){x, from.y}, MAP_checkHorizontal)) {
-            ACTOR_setTargetAnimPos(&enemy->actor, to.x, from.y);
-            enemy->state = ENEMY_MOVING;
-            return 1;
-        }
+  // Horizontal attack
+  if (from.y == to.y) {
+    const s16 x = to.x > from.x ? to.x - 1 : to.x + 1;
+    if (verifyMovement(from, (Vect2D_s16){x, from.y}, MAP_checkHorizontal)) {
+      ACTOR_setTargetAnimPos(&enemy->actor, to.x, from.y);
+      enemy->state = ENEMY_MOVING;
+      return 1;
     }
+  }
 
-    return 0;
+  return 0;
 }
 
 static s8 tryMovement(Enemy *enemy, const Vect2D_s16 from, s16 x, s16 y) {
-    // Move closer to the player
-    if (x == from.x &&
-        verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkVertical)) {
-        ACTOR_setTargetAnimPos(&enemy->actor, x, y);
-        enemy->state = ENEMY_MOVING;
-        return 1;
-    }
+  // Move closer to the player
+  if (x == from.x &&
+      verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkVertical)) {
+    ACTOR_setTargetAnimPos(&enemy->actor, x, y);
+    enemy->state = ENEMY_MOVING;
+    return 1;
+  }
 
-    if (y == from.y &&
-        verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkHorizontal)) {
-        ACTOR_setTargetAnimPos(&enemy->actor, x, y);
-        enemy->state = ENEMY_MOVING;
-        return 1;
-    }
+  if (y == from.y &&
+      verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkHorizontal)) {
+    ACTOR_setTargetAnimPos(&enemy->actor, x, y);
+    enemy->state = ENEMY_MOVING;
+    return 1;
+  }
 
-    return 0;
+  return 0;
 }
 
 inline static s8 startMovement(Enemy *enemy) {
-    const Vect2D_s16 from = {
-        enemy->actor.collisionCurPos.x,
-        enemy->actor.collisionCurPos.y
-    };
-    const Vect2D_s16 to = {
-        player.actor.collisionCurPos.x,
-        player.actor.collisionCurPos.y
-    };
+  const Vect2D_s16 from = {enemy->actor.collisionCurPos.x,
+                           enemy->actor.collisionCurPos.y};
+  const Vect2D_s16 to = {player.actor.collisionCurPos.x,
+                         player.actor.collisionCurPos.y};
 
-    if (tryAttack(enemy, from, to))
-        return 1;
+  if (tryAttack(enemy, from, to))
+    return 1;
 
-    // Try to move vertically
-    if (to.y != from.y) {
-        const s16 dy = to.y > from.y ? 2 : -2;
-        const s16 newY = clamp(from.y + dy, 0, mapLevelHeight - 2);
-        if (tryMovement(enemy, from, from.x, newY))
-            return 1;
-    }
+  // Try to move vertically
+  if (to.y != from.y) {
+    const s16 dy = to.y > from.y ? 2 : -2;
+    const s16 newY = clamp(from.y + dy, 0, mapLevelHeight - 2);
+    if (tryMovement(enemy, from, from.x, newY))
+      return 1;
+  }
 
-    // Try to move horizontally first
-    if (to.x != from.x) {
-        const s16 dx = to.x > from.x ? 2 : -2;
-        const s16 newX = clamp(from.x + dx, 0, mapLevelWidth - 2);
-        if (tryMovement(enemy, from, newX, from.y))
-            return 1;
-    }
+  // Try to move horizontally first
+  if (to.x != from.x) {
+    const s16 dx = to.x > from.x ? 2 : -2;
+    const s16 newX = clamp(from.x + dx, 0, mapLevelWidth - 2);
+    if (tryMovement(enemy, from, newX, from.y))
+      return 1;
+  }
 
-    return -1;
+  return -1;
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
-    if (frame % FRAME_ANIMATION == 0) {
-        ACTOR_animateTo(&enemy->actor);
+  if (frame % FRAME_ANIMATION == 0) {
+    ACTOR_animateTo(&enemy->actor);
 
-        if (!enemy->actor.moving) {
-            if (ACTOR_checkCollision(&enemy->actor)) {
-                sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
-                return 0;
-            }
+    if (!enemy->actor.moving) {
+      if (ACTOR_checkCollision(&enemy->actor)) {
+        sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
+        return 0;
+      }
 
-            if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
-                enemy->state = ENEMY_ANIMATING;
-                return 1;
-            }
+      if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
+        enemy->state = ENEMY_ANIMATING;
+        return 1;
+      }
 
-            enemy->state = ENEMY_IDLE;
-            return 0;
-        }
+      enemy->state = ENEMY_IDLE;
+      return 0;
     }
+  }
 
-    return 1;
+  return 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -120,12 +116,12 @@ inline static s8 moveAnimation(Enemy *enemy) {
 //===----------------------------------------------------------------------===//
 
 s8 TOWER_update(Enemy *enemy) {
-    switch (enemy->state) {
-        case ENEMY_IDLE:
-            return startMovement(enemy);
-        case ENEMY_MOVING:
-            return moveAnimation(enemy);
-        default:
-            return 0;
-    }
+  switch (enemy->state) {
+  case ENEMY_IDLE:
+    return startMovement(enemy);
+  case ENEMY_MOVING:
+    return moveAnimation(enemy);
+  default:
+    return 0;
+  }
 }

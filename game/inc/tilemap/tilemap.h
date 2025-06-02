@@ -27,20 +27,16 @@ static const s16 TILE_OFFSET_UP[4][2] = {{1, -1}, {0, -1}, {1, -2}, {0, -2}};
 static const s16 TILE_OFFSET_DOWN[4][2] = {{1, 2}, {0, 2}, {1, 3}, {0, 3}};
 
 static const s16 TILE_OFFSET_UP_RIGHT[4][2] = {
-    {2, -2}, {2, -1}, {3, -2}, {3, -1}
-};
+    {2, -2}, {2, -1}, {3, -2}, {3, -1}};
 
 static const s16 TILE_OFFSET_UP_LEFT[4][2] = {
-    {-1, -2}, {-2, -1}, {-2, -2}, {-1, -1}
-};
+    {-1, -2}, {-2, -1}, {-2, -2}, {-1, -1}};
 
 static const s16 TILE_OFFSET_DOWN_RIGHT[4][2] = {
-    {2, 2}, {3, 2}, {2, 3}, {3, 3}
-};
+    {2, 2}, {3, 2}, {2, 3}, {3, 3}};
 
 static const s16 TILE_OFFSET_DOWN_LEFT[4][2] = {
-    {-1, 2}, {-2, 2}, {-1, 3}, {-2, 3}
-};
+    {-1, 2}, {-2, 2}, {-1, 3}, {-2, 3}};
 
 static const s16 TILE_OFFSET_CENTER[4][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
 
@@ -49,24 +45,24 @@ static const s16 TILE_OFFSET_CENTER[4][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
 //===----------------------------------------------------------------------===//
 
 inline void TILEMAP_init(const TileSet *tileset) {
-    PAL_setPalette(TILEMAP_PAL, tileset_palette.data, DMA);
-    VDP_loadTileSet(tileset, TILE_USER_INDEX, DMA);
+  PAL_setPalette(TILEMAP_PAL, tileset_palette.data, DMA);
+  VDP_loadTileSet(tileset, TILE_USER_INDEX, DMA);
 }
 
 inline void TILEMAP_update(const TileMap *const tilemap) {
-    VDP_setTileMapEx(
-        TILEMAP_PLANE, tilemap,
-        TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX), mapLevelX,
-        mapLevelY, 0, 0, tilemap->w, tilemap->h, DMA);
+  VDP_setTileMapEx(
+      TILEMAP_PLANE, tilemap,
+      TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX), mapLevelX,
+      mapLevelY, 0, 0, tilemap->w, tilemap->h, DMA);
 }
 
-inline void TILEMAP_placeTiles(const s16 x, const s16 y, const s16 mapPosX, const s16 mapPosY,
-                               const u16 tileIndex, const s16 offsets[][2],
-                               const u16 count) {
-    u16 attr = TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex);
-    for (u16 i = 0; i < count; i++)
-        VDP_setTileMapXY(TILEMAP_PLANE, attr, x + mapPosX + offsets[i][0],
-                         y + mapPosY + offsets[i][1]);
+inline void TILEMAP_placeTiles(const s16 x, const s16 y, const s16 mapPosX,
+                               const s16 mapPosY, const u16 tileIndex,
+                               const s16 offsets[][2], const u16 count) {
+  u16 attr = TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tileIndex);
+  for (u16 i = 0; i < count; i++)
+    VDP_setTileMapXY(TILEMAP_PLANE, attr, x + mapPosX + offsets[i][0],
+                     y + mapPosY + offsets[i][1]);
 }
 
 #define TILEMAP_updateRightTile(x, y, mapPosX, mapPosY, tileIndex)             \
@@ -85,7 +81,7 @@ inline void TILEMAP_placeTiles(const s16 x, const s16 y, const s16 mapPosX, cons
   TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
                      TILE_OFFSET_DOWN, 4)
 
-#define TILEMAP_updateUpRightTile(x, y, mapPosX, mapPosY, tileIndex)            \
+#define TILEMAP_updateUpRightTile(x, y, mapPosX, mapPosY, tileIndex)           \
   TILEMAP_placeTiles((x), (y), (mapPosX), (mapPosY), (tileIndex),              \
                      TILE_OFFSET_UP_RIGHT, 4)
 
