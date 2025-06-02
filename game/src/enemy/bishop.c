@@ -1,7 +1,14 @@
 #include "enemy/bishop.h"
+#include "map/map.h"
+#include "maths.h"
 #include "player/player.h"
+#include "types.h"
+
+#define DIAGONAL_NUM 4
 
 typedef Vect2D_s16 (*MovementCheck)(const Vect2D_s16, const Vect2D_s16);
+
+const s16 diagonals[DIAGONAL_NUM][2] = {{-2, -2}, {2, -2}, {-2, 2}, {2, 2}};
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -45,22 +52,36 @@ static s8 tryMovement(Enemy *enemy, const Vect2D_s16 from, s16 x, s16 y) {
 }
 
 inline static s8 startMovement(Enemy *enemy) {
-  const Vect2D_s16 from = {enemy->actor.collisionCurPos.x,
-                           enemy->actor.collisionCurPos.y};
-  const Vect2D_s16 to = {player.actor.collisionCurPos.x,
-                         player.actor.collisionCurPos.y};
+  const Vect2D_s16 from = enemy->actor.collisionCurPos;
+  const Vect2D_s16 to = player.actor.collisionCurPos;
 
-  s8 value = tryAttack(enemy, from, to);
+  const s8 value = tryAttack(enemy, from, to);
   if (value)
     return value;
 
-  // Try to move diagonally
-  s16 x = to.x > from.x ? 2 : (to.x < from.x ? -2 : 0);
-  s16 y = to.y > from.y ? 2 : (to.y < from.y ? -2 : 0);
-  x = clamp(from.x + x, 0, mapLevelWidth - 2);
-  y = clamp(from.y + y, 0, mapLevelHeight - 2);
-  if (tryMovement(enemy, from, x, y))
-    return 1;
+  u32 bestDist = MAX_U32;
+  s32 bestX = from.x;
+  s32 bestY = from.y;
+
+  for (u8 i = 0; i < DIAGONAL_NUM; i++) {
+    const s32 x = clamp(from.x + diagonals[i][0], 0, mapLevelWidth - 2);
+    const s32 y = clamp(from.y + diagonals[i][1], 0, mapLevelHeight - 2);
+
+    if (verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkDiagonal)) {
+      const s32 dx = to.x - x;
+      const s32 dy = to.y - y;
+      const u32 dist = getApproximatedDistance(dx, dy);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestX = x;
+        bestY = y;
+      }
+    }
+  }
+
+  if (bestX != from.x || bestY != from.y)
+    return tryMovement(enemy, from, bestX, bestY);
 
   return -1;
 }
