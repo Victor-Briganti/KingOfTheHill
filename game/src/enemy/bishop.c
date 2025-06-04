@@ -1,4 +1,5 @@
 #include "enemy/bishop.h"
+#include "enemy/enemy.h"
 #include "map/map.h"
 #include "maths.h"
 #include "player/player.h"
@@ -55,10 +56,6 @@ inline static s8 startMovement(Enemy *enemy) {
   const Vect2D_s16 from = enemy->actor.collisionCurPos;
   const Vect2D_s16 to = player.actor.collisionCurPos;
 
-  const s8 value = tryAttack(enemy, from, to);
-  if (value)
-    return value;
-
   u32 bestDist = MAX_U32;
   s32 bestX = from.x;
   s32 bestY = from.y;
@@ -84,6 +81,17 @@ inline static s8 startMovement(Enemy *enemy) {
     return tryMovement(enemy, from, bestX, bestY);
 
   return -1;
+}
+
+inline static s8 startAttack(Enemy *enemy) {
+  const Vect2D_s16 from = enemy->actor.collisionCurPos;
+  const Vect2D_s16 to = player.actor.collisionCurPos;
+  const s8 value = tryAttack(enemy, from, to);
+
+  if (!value)
+    enemy->state = ENEMY_IDLE;
+
+  return value;
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
@@ -116,6 +124,8 @@ s8 BISHOP_update(Enemy *enemy) {
   switch (enemy->state) {
   case ENEMY_IDLE:
     return startMovement(enemy);
+  case ENEMY_ATTACKING:
+    return startAttack(enemy);
   case ENEMY_MOVING:
     return moveAnimation(enemy);
   default:

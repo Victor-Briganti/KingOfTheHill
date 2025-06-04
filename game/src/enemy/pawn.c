@@ -20,22 +20,46 @@ inline static s8 startMovement(Enemy *enemy) {
     return 0;
   }
 
-  // Player on diagonal right
-  if (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0 &&
-      (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
-          0)
-    x = clamp(x + 2, 0, mapLevelHeight - 2);
-
-  // Player on diagonal left
-  if (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0 &&
-      (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
-          0)
-    x = clamp(x - 2, 0, mapLevelHeight - 2);
-
   ACTOR_setTargetAnimPos(&enemy->actor, x, y);
   enemy->state = ENEMY_MOVING;
 
   return 1;
+}
+
+inline static s8 tryAttack(Enemy *enemy) {
+  s16 x = enemy->actor.collisionCurPos.x;
+  const s16 y =
+      clamp(enemy->actor.collisionCurPos.y + 2, 0, mapLevelHeight - 2);
+  if (map[y][x] != COLLISION_TYPE_EMPTY) {
+    return 0;
+  }
+
+  bool enemyAttacked = 0;
+
+  // Player on diagonal right
+  if (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] != 0 &&
+      (map[y][clamp(x + 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
+          0) {
+    enemyAttacked = 1;
+    x = clamp(x + 2, 0, mapLevelHeight - 2);
+  }
+
+  // Player on diagonal left
+  if (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] != 0 &&
+      (map[y][clamp(x - 2, 0, mapLevelHeight - 2)] & ~COLLISION_TYPE_PLAYER) ==
+          0) {
+    enemyAttacked = 1;
+    x = clamp(x - 2, 0, mapLevelHeight - 2);
+  }
+
+  if (enemyAttacked) {
+    ACTOR_setTargetAnimPos(&enemy->actor, x, y);
+    enemy->state = ENEMY_MOVING;
+    return 1;
+  }
+  
+  enemy->state = ENEMY_IDLE;
+  return 0;
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
@@ -97,6 +121,8 @@ s8 PAWN_update(Enemy *enemy) {
   switch (enemy->state) {
   case ENEMY_IDLE:
     return startMovement(enemy);
+  case ENEMY_ATTACKING:
+    return tryAttack(enemy);
   case ENEMY_MOVING:
     return moveAnimation(enemy);
   case ENEMY_ANIMATING:

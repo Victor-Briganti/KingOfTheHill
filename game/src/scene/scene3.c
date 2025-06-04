@@ -115,34 +115,50 @@ static inline void updatePlayer() {
 }
 
 static inline void updateEnemies() {
-  u8 id = context.indexEnemy;
-  s8 res = -1;
-  u8 tried = 0;
+  // First check if any enemy is currently moving
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (context.enemies[i].state == ENEMY_MOVING ||
+        context.enemies[i].state == ENEMY_ANIMATING) {
+      const s8 res = context.enemies[i].update(&context.enemies[i]);
+      if (res == 0) {
+        context.turn = PLAYER;
+        context.indexEnemy = (i + 1) % MAX_ENEMIES;
+      }
+      return;
+    }
+  }
 
-  while (tried < MAX_ENEMIES) {
+  // No enemies are moving - try attacks first
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    u8 id = (context.indexEnemy + i) % MAX_ENEMIES;
     if (context.enemies[id].state != ENEMY_DEAD &&
         context.enemies[id].state != ENEMY_DESTROYED) {
-      res = context.enemies[id].update(&context.enemies[id]);
-      context.indexEnemy = id;
-    }
-
-    // Try the next enemy
-    id = (id + 1) % MAX_ENEMIES;
-    tried++;
-    if (res >= 0) {
-      break;
+      context.enemies[id].state = ENEMY_ATTACKING;
+      const s8 res = context.enemies[id].update(&context.enemies[id]);
+      if (res > 0) {
+        context.indexEnemy = id;
+        return;
+      }
     }
   }
 
-  // Enemy finished animation, go to the next one
-  if (res == 0) {
-    context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
-    context.turn = PLAYER;
+  // No attacks possible - try to move one enemy
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    u8 id = (context.indexEnemy + i) % MAX_ENEMIES;
+    if (context.enemies[id].state != ENEMY_DEAD &&
+        context.enemies[id].state != ENEMY_DESTROYED) {
+      context.enemies[id].state = ENEMY_IDLE;
+      const s8 res = context.enemies[id].update(&context.enemies[id]);
+      if (res > 0) {
+        context.indexEnemy = id;
+        return;
+      }
+    }
   }
 
-  // Enemies could not move pass to the player
-  if (res == -1 && tried == MAX_ENEMIES)
-    context.turn = PLAYER;
+  // No attacks or moves possible - turn ends
+  context.turn = PLAYER;
+  context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
 }
 
 static inline void damagePlayer() {

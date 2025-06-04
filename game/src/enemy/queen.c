@@ -84,10 +84,6 @@ inline static s8 startMovement(Enemy *enemy) {
   const Vect2D_s16 to = {player.actor.collisionCurPos.x,
                          player.actor.collisionCurPos.y};
 
-  s8 value = tryAttack(enemy, from, to);
-  if (value)
-    return value;
-
   // Try to move diagonally
   s16 x = to.x > from.x ? 2 : (to.x < from.x ? -2 : 0);
   s16 y = to.y > from.y ? 2 : (to.y < from.y ? -2 : 0);
@@ -113,6 +109,17 @@ inline static s8 startMovement(Enemy *enemy) {
   }
 
   return -1;
+}
+
+inline static s8 startAttack(Enemy *enemy) {
+  const Vect2D_s16 from = enemy->actor.collisionCurPos;
+  const Vect2D_s16 to = player.actor.collisionCurPos;
+  const s8 value = tryAttack(enemy, from, to);
+
+  if (!value)
+    enemy->state = ENEMY_IDLE;
+
+  return value;
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
@@ -145,6 +152,8 @@ s8 QUEEN_update(Enemy *enemy) {
   switch (enemy->state) {
   case ENEMY_IDLE:
     return startMovement(enemy);
+  case ENEMY_ATTACKING:
+    return startAttack(enemy);
   case ENEMY_MOVING:
     return moveAnimation(enemy);
   default:

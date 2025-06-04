@@ -66,9 +66,6 @@ inline static s8 startMovement(Enemy *enemy) {
   const Vect2D_s16 to = {player.actor.collisionCurPos.x,
                          player.actor.collisionCurPos.y};
 
-  if (tryAttack(enemy, from, to))
-    return 1;
-
   // Try to move vertically
   if (to.y != from.y) {
     const s16 dy = to.y > from.y ? 2 : -2;
@@ -86,6 +83,17 @@ inline static s8 startMovement(Enemy *enemy) {
   }
 
   return -1;
+}
+
+inline static s8 startAttack(Enemy *enemy) {
+  const Vect2D_s16 from = enemy->actor.collisionCurPos;
+  const Vect2D_s16 to = player.actor.collisionCurPos;
+  const s8 value = tryAttack(enemy, from, to);
+
+  if (!value)
+    enemy->state = ENEMY_IDLE;
+
+  return value;
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
@@ -123,6 +131,8 @@ s8 TOWER_update(Enemy *enemy) {
   switch (enemy->state) {
   case ENEMY_IDLE:
     return startMovement(enemy);
+  case ENEMY_ATTACKING:
+    return startAttack(enemy);
   case ENEMY_MOVING:
     return moveAnimation(enemy);
   default:
