@@ -16,7 +16,7 @@
 //===----------------------------------------------------------------------===//
 
 // Total enemies on this scene
-#define MAX_ENEMIES 8
+#define MAX_ENEMIES 6
 
 // Player initial position
 #define PLAYER_SCENE5_X_POS (6)  /* In Tile */
@@ -56,10 +56,17 @@ Scene scene5 = {SCENE5_init, SCENE5_update, SCENE5_hit, SCENE5_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
-    .enemiesType = {TOWER_TYPE, BISHOP_TYPE, BISHOP_TYPE, PAWN_TYPE, PAWN_TYPE,
-                    PAWN_TYPE, PAWN_TYPE, PAWN_TYPE},
+    .enemiesType =
+        {
+            TOWER_TYPE,
+            BISHOP_TYPE,
+            BISHOP_TYPE,
+            PAWN_TYPE,
+            PAWN_TYPE,
+            PAWN_TYPE,
+        },
     .enemiesPos =
-        {{6, 0}, {0, 0}, {12, 0}, {6, 2}, {0, 2}, {2, 2}, {10, 2}, {12, 2}},
+        {{6, 0}, {0, 0}, {12, 0}, {6, 2}, {0, 2}, {12, 2}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
