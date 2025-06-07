@@ -8,7 +8,7 @@
 inline void BACKGROUND_init() {
   // Draw background
   VDP_drawImageEx(BACKGROUND_PLANE, &background_level,
-                  TILE_ATTR_FULL(BACKGROUND_PAL, 0, FALSE, FALSE, 1), 0, 0,
+                  TILE_ATTR_FULL(BACKGROUND_PAL, 0, FALSE, FALSE, TILE_USER_INDEX), 0, 0,
                   true, DMA);
 
   // Render level info
