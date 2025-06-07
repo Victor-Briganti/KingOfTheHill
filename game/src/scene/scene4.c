@@ -204,6 +204,12 @@ static inline void restart() {
 //===----------------------------------------------------------------------===//
 
 void SCENE4_init() {
+  player.health++;
+  if (player.health > player.totalHealth) {
+    player.health = player.totalHealth;
+  }
+  HEART_update();
+  
   initGlobals();
   initBackground();
   initPlayer();

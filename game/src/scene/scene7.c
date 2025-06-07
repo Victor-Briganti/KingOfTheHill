@@ -102,7 +102,7 @@ static inline void initEnemies() {
 }
 
 static inline void updateBackground() {
-  BACKGROUND_setText("LEVEL 2-3");
+  BACKGROUND_setText("LEVEL 3-1");
   BACKGROUND_setScore(0);
   TILEMAP_update(&level_map1);
 }
@@ -205,6 +205,12 @@ static inline void restart() {
 //===----------------------------------------------------------------------===//
 
 void SCENE7_init() {
+  player.health++;
+  if (player.health > player.totalHealth) {
+    player.health = player.totalHealth;
+  }
+  HEART_update();
+
   initGlobals();
   initBackground();
   initPlayer();
