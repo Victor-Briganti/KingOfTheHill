@@ -5,9 +5,12 @@
 #include "scene/scene4.h"
 #include "scene/scene5.h"
 #include "scene/scene6.h"
+#include "scene/scene7.h"
+#include "scene/scene8.h"
+#include "scene/scene9.h"
 
-Scene *sceneManager[MAX_SCENE] = {&scene1, &scene2, &scene3,
-                                  &scene4, &scene5, &scene6};
+Scene *sceneManager[MAX_SCENE] = {&scene1, &scene2, &scene3, &scene4, &scene5,
+                                  &scene6, &scene7, &scene8, &scene9};
 
 SceneId sceneIndex = SCENE_ID_LEVEL01;
 

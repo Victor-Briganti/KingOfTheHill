@@ -59,7 +59,7 @@ static SceneContext context = {
     .enemiesType = {TOWER_TYPE, TOWER_TYPE, TOWER_TYPE, PAWN_TYPE, PAWN_TYPE,
                     PAWN_TYPE, PAWN_TYPE, PAWN_TYPE},
     .enemiesPos =
-        {{6, 0}, {0, 0}, {12, 0}, {6, 2}, {0, 2}, {2, 2}, {10, 2}, {12, 2}},
+        {{0, 0}, {6, 0}, {12, 0}, {4, 4}, {6, 4}, {8, 4}, {2, 0}, {10, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
@@ -235,7 +235,7 @@ SceneId SCENE3_update() {
     restart();
   }
 
-  return SCENE_ID_LEVEL04;
+  return SCENE_ID_LEVEL03;
 }
 
 void SCENE3_hit(const Vect2D_s16 hitPos) {

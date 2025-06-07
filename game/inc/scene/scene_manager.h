@@ -3,7 +3,7 @@
 
 #include <genesis.h>
 
-#define MAX_SCENE 6
+#define MAX_SCENE 9
 
 //===----------------------------------------------------------------------===//
 // TYPE DEFINITION
@@ -16,6 +16,9 @@ typedef enum SceneId {
   SCENE_ID_LEVEL04 = 3,
   SCENE_ID_LEVEL05 = 4,
   SCENE_ID_LEVEL06 = 5,
+  SCENE_ID_LEVEL07 = 6,
+  SCENE_ID_LEVEL08 = 7,
+  SCENE_ID_LEVEL09 = 8,
   SCENE_ID_GAME_OVER = -1,
   SCENE_ID_PASSED = 999,
 } SceneId;

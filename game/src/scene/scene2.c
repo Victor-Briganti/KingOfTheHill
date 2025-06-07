@@ -57,7 +57,7 @@ Scene scene2 = {SCENE2_init, SCENE2_update, SCENE2_hit, SCENE2_destroy};
 static SceneContext context = {
     .turn = PLAYER,
     .enemiesType = {TOWER_TYPE, PAWN_TYPE, PAWN_TYPE, PAWN_TYPE, PAWN_TYPE},
-    .enemiesPos = {{6, 0}, {2, 0}, {0, 0}, {10, 0}, {12, 0}},
+    .enemiesPos = {{6, 0}, {4, 2}, {8, 2}, {2, 0}, {12, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
