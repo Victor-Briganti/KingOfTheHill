@@ -3,6 +3,7 @@
 #include "enemy/pawn.h"
 #include "enemy/queen.h"
 #include "enemy/tower.h"
+#include "enemy/knight.h"
 
 #include <sprites.h>
 
@@ -42,6 +43,11 @@ static void actorInit(Enemy *enemy, const EnemyType type, const s16 x,
                COLLISION_TYPE_BISHOP);
     return;
   }
+  case KNIGHT_TYPE: {
+    ACTOR_init(&enemy->actor, &knight_sprite, ENEMY_PAL, x, y,
+               COLLISION_TYPE_KNIGHT);
+    return;
+  }
   default:
     kprintf("[%s:%d]Enemy not defined", __FILE__, __LINE__);
   }
@@ -66,6 +72,10 @@ static void functionsInit(Enemy *enemy, const EnemyType type) {
   }
   case BISHOP_TYPE: {
     enemy->update = BISHOP_update;
+    return;
+  }
+  case KNIGHT_TYPE: {
+    enemy->update = KNIGHT_update;
     return;
   }
   default: {

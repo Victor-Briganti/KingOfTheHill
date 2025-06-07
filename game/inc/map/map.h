@@ -130,4 +130,14 @@ inline void MAP_removeCollision(const Vect2D_s16 vec,
   map[vec.y][vec.x] &= ~colType;
 }
 
+inline CollisionType MAP_getCollision(const Vect2D_s16 vec) {
+  if (vec.y < 0 && vec.x < 0) {
+    kprintf("[%s:%d]Invalid position (%d, %d)", __FILE__, __LINE__, vec.x,
+            vec.y);
+    return COLLISION_TYPE_EMPTY;
+  }
+
+  return map[vec.y][vec.x];
+}
+
 #endif // __MAP_H__

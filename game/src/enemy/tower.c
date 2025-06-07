@@ -110,11 +110,6 @@ inline static s8 moveAnimation(Enemy *enemy) {
         return 0;
       }
 
-      if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
-        enemy->state = ENEMY_ANIMATING;
-        return 1;
-      }
-
       enemy->state = ENEMY_IDLE;
       return 0;
     }
