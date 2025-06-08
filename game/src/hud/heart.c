@@ -39,7 +39,7 @@ void HEART_init() {
 
 void HEART_draw() {
   for (u8 i = 0; i < MAX_HEARTS; i++)
-    OVERLAY_init(&heart.node[i], &heart_full, ENEMY_PAL, heartX[i], heartY);
+    OVERLAY_init(&heart.node[i], getHeartSprite(i), ENEMY_PAL, heartX[i], heartY);
 }
 
 void HEART_release() {
