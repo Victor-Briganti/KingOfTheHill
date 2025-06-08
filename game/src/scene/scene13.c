@@ -103,10 +103,21 @@ static inline void initGlobals() {
   playerInitY = PLAYER_SCENE13_Y_POS;
 }
 
+static inline void initTransition() {
+  SPR_clear();
+  BACKGROUND_initTransition(&level5_1_transition);
+  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+}
+
 static inline void initBackground() {
+  // Release the background level transition
+  BACKGROUND_release();
+  
+  // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+  
+  HEART_draw();
 }
 
 static inline void initPlayer() {
@@ -224,6 +235,25 @@ static inline void restart() {
   restartEnemies();
 }
 
+static inline bool loadingScene() {
+  static u16 count = 0;
+  static bool loading = TRUE;
+
+  if (count < 4096) {
+    if (frame % 32 == 0) {
+      count++;
+      if (count == 4096) {
+        initBackground();
+        initPlayer();
+        initEnemies();
+        loading = FALSE;
+      }
+    }
+  }
+
+  return loading;
+}
+
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
@@ -233,16 +263,16 @@ void SCENE13_init() {
   if (player.health > player.totalHealth) {
     player.health = player.totalHealth;
   }
-  HEART_update();
-
+  
   initGlobals();
-  initBackground();
-  initPlayer();
-  initEnemies();
+  initTransition();
   SYS_doVBlankProcess();
 }
 
 SceneId SCENE13_update() {
+  if (loadingScene())
+    return SCENE_ID_LEVEL13;
+
   updateBackground();
   if (context.turn == PLAYER)
     updatePlayer();
@@ -296,9 +326,11 @@ void SCENE13_destroy() {
       context.enemies[i].destroy(&context.enemies[i]);
   }
 
-  // Destroy Player
+  // Release everything else
   PLAYER_destroy();
-  HEART_update();
+  HEART_release();
+  BACKGROUND_release();
+  SPR_defragVRAM();
 
   SYS_doVBlankProcess();
 }
