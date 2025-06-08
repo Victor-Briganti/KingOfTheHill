@@ -56,9 +56,17 @@ Scene scene6 = {SCENE6_init, SCENE6_update, SCENE6_hit, SCENE6_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
-    .enemiesType = {TOWER_TYPE, TOWER_TYPE, TOWER_TYPE, BISHOP_TYPE, BISHOP_TYPE, PAWN_TYPE, PAWN_TYPE,
-                    PAWN_TYPE, PAWN_TYPE},
-    .enemiesPos = {{6, 0}, {0, 0}, {12, 0}, {4, 0}, {8, 0},{10, 0}, {2, 0}, {0, 2}, {12, 2}},
+    .enemiesType = {TOWER_TYPE, TOWER_TYPE, TOWER_TYPE, BISHOP_TYPE,
+                    BISHOP_TYPE, PAWN_TYPE, PAWN_TYPE, PAWN_TYPE, PAWN_TYPE},
+    .enemiesPos = {{6, 0},
+                   {0, 0},
+                   {12, 0},
+                   {4, 0},
+                   {8, 0},
+                   {10, 0},
+                   {2, 0},
+                   {0, 2},
+                   {12, 2}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
@@ -78,10 +86,21 @@ static inline void initGlobals() {
   playerInitY = PLAYER_SCENE6_Y_POS;
 }
 
+static inline void initTransition() {
+  SPR_clear();
+  BACKGROUND_initTransition(&level2_3_transition);
+  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+}
+
 static inline void initBackground() {
+  // Release the background level transition
+  BACKGROUND_release();
+
+  // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+
+  HEART_draw();
 }
 
 static inline void initPlayer() {
@@ -199,19 +218,39 @@ static inline void restart() {
   restartEnemies();
 }
 
+static inline bool loadingScene() {
+  static u16 count = 0;
+  static bool loading = TRUE;
+
+  if (count < 4096) {
+    if (frame % 32 == 0) {
+      count++;
+      if (count == 4096) {
+        initBackground();
+        initPlayer();
+        initEnemies();
+        loading = FALSE;
+      }
+    }
+  }
+
+  return loading;
+}
+
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
 void SCENE6_init() {
   initGlobals();
-  initBackground();
-  initPlayer();
-  initEnemies();
+  initTransition();
   SYS_doVBlankProcess();
 }
 
 SceneId SCENE6_update() {
+  if (loadingScene())
+    return SCENE_ID_LEVEL06;
+
   updateBackground();
   if (context.turn == PLAYER)
     updatePlayer();
@@ -265,9 +304,11 @@ void SCENE6_destroy() {
       context.enemies[i].destroy(&context.enemies[i]);
   }
 
-  // Destroy Player
+  // Release everything else
   PLAYER_destroy();
-  HEART_update();
+  HEART_release();
+  BACKGROUND_release();
+  SPR_defragVRAM();
 
   SYS_doVBlankProcess();
 }
