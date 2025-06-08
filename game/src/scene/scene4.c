@@ -79,7 +79,7 @@ static inline void initGlobals() {
 }
 
 static inline void initTransition() {
-  SPR_clear();
+  VDP_init();
   BACKGROUND_initTransition(&level2_1_transition);
   MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }
@@ -303,7 +303,9 @@ void SCENE4_destroy() {
 
   // Destroy Player
   PLAYER_destroy();
-  HEART_update();
+  HEART_release();
+  BACKGROUND_release();
+  SPR_defragVRAM();
 
   SYS_doVBlankProcess();
 }

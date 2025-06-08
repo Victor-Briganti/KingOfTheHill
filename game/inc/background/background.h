@@ -37,9 +37,6 @@ inline void BACKGROUND_setText(const char *const string) {
 }
 
 inline void BACKGROUND_release() {
-  VDP_clearPlane(BG_A, 1);
-  VDP_clearPlane(BG_B, 1);
-  VDP_clearPlane(WINDOW, 1);
   tile_index = TILE_USER_INDEX;
 }
 

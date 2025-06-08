@@ -62,8 +62,7 @@ static SceneContext context = {
             BISHOP_TYPE,
             BISHOP_TYPE,
         },
-    .enemiesPos =
-        {{6, 0}, {2, 0}, {10, 0}},
+    .enemiesPos = {{6, 0}, {2, 0}, {10, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
@@ -84,7 +83,7 @@ static inline void initGlobals() {
 }
 
 static inline void initTransition() {
-  SPR_clear();
+  VDP_init();
   BACKGROUND_initTransition(&level2_2_transition);
   MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }
@@ -92,11 +91,11 @@ static inline void initTransition() {
 static inline void initBackground() {
   // Release the background level transition
   BACKGROUND_release();
-  
+
   // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  
+
   HEART_draw();
 }
 

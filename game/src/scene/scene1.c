@@ -80,7 +80,7 @@ static inline void initGlobals() {
 }
 
 static inline void initTransition() {
-  SPR_clear();
+  VDP_init();
   BACKGROUND_initTransition(&level1_1_transition);
   MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }

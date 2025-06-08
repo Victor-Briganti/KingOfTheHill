@@ -80,7 +80,7 @@ static inline void initGlobals() {
 }
 
 static inline void initTransition() {
-  SPR_clear();
+  VDP_init();
   BACKGROUND_initTransition(&level3_1_transition);
   MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }
@@ -88,11 +88,11 @@ static inline void initTransition() {
 static inline void initBackground() {
   // Release the background level transition
   BACKGROUND_release();
-  
+
   // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  
+
   HEART_draw();
 }
 
