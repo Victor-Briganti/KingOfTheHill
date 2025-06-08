@@ -12,6 +12,9 @@
 // Define the "frame" of the game
 extern u16 frame;
 
+// Define the tile index of the game
+extern u16 tile_index;
+
 //===----------------------------------------------------------------------===//
 // SCREEN
 //===----------------------------------------------------------------------===//

@@ -1,5 +1,6 @@
 IMAGE background "gfx/background/background.png" FAST
 IMAGE background_level "gfx/background/background_level.png" FAST
+IMAGE level1_1_transition "gfx/background/level1_1_transition.png" FAST
 
 PALETTE tileset_palette "gfx/tiles/tileset_palette.pal"
 TILESET tileset "gfx/tiles/tileset.png" BEST ALL
