@@ -12,6 +12,9 @@
 // Define the "frame" of the game
 extern u16 frame;
 
+// Define the tile index of the game
+extern u16 tile_index;
+
 //===----------------------------------------------------------------------===//
 // SCREEN
 //===----------------------------------------------------------------------===//
@@ -51,7 +54,7 @@ extern u16 frame;
 #define SCORE_TEXT_Y 1
 
 // Level position
-#define LEVEL_TEXT_X 15
+#define LEVEL_TEXT_X 17
 #define LEVEL_TEXT_Y 1
 
 //===----------------------------------------------------------------------===//

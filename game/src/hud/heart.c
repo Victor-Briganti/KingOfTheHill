@@ -33,11 +33,18 @@ static const SpriteDefinition *getHeartSprite(const s8 heartIndex) {
 //===----------------------------------------------------------------------===//
 
 void HEART_init() {
-  for (u8 i = 0; i < MAX_HEARTS; i++) {
+  for (u8 i = 0; i < MAX_HEARTS; i++)
     heart.status[i] = FULL;
+}
 
-    OVERLAY_init(&heart.node[i], &heart_full, ENEMY_PAL, heartX[i], heartY);
-  }
+void HEART_draw() {
+  for (u8 i = 0; i < MAX_HEARTS; i++)
+    OVERLAY_init(&heart.node[i], getHeartSprite(i), ENEMY_PAL, heartX[i], heartY);
+}
+
+void HEART_release() {
+  for (u8 i = 0; i < MAX_HEARTS; i++)
+    OVERLAY_releaseSprite(&heart.node[i]);
 }
 
 void HEART_update() {

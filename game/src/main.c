@@ -17,6 +17,7 @@
 //===----------------------------------------------------------------------===//
 
 u16 frame = 0;
+u16 tile_index = TILE_USER_INDEX;
 
 //===----------------------------------------------------------------------===//
 // AUXILIARY
@@ -46,6 +47,7 @@ int main(const bool resetType) {
   }
 
   COMMON_init();
+  SYS_showFrameLoad(true);
   while (TRUE) {
     SYS_doVBlankProcess();
 

@@ -1,13 +1,22 @@
 #include "scene/scene_manager.h"
 #include "scene/scene1.h"
+#include "scene/scene10.h"
+#include "scene/scene11.h"
+#include "scene/scene12.h"
+#include "scene/scene13.h"
+#include "scene/scene14.h"
 #include "scene/scene2.h"
 #include "scene/scene3.h"
+#include "scene/scene4.h"
+#include "scene/scene5.h"
+#include "scene/scene6.h"
+#include "scene/scene7.h"
+#include "scene/scene8.h"
+#include "scene/scene9.h"
 
 Scene *sceneManager[MAX_SCENE] = {
-    &scene1,
-    &scene2,
-    &scene3,
-};
+    &scene1, &scene2, &scene3,  &scene4,  &scene5,  &scene6,  &scene7,
+    &scene8, &scene9, &scene10, &scene11, &scene12, &scene13, &scene14};
 
 SceneId sceneIndex = SCENE_ID_LEVEL01;
 

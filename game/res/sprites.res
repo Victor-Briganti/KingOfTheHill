@@ -21,3 +21,5 @@ SPRITE queen_sprite "sprites/queen.png" 2 2 FAST
 SPRITE tower_sprite "sprites/tower.png" 2 2 FAST
 
 SPRITE bishop_sprite "sprites/bishop.png" 2 2 FAST
+
+SPRITE knight_sprite "sprites/horse.png" 2 2 FAST

@@ -20,6 +20,8 @@ typedef struct Heart {
 extern Heart heart;
 
 void HEART_init();
+void HEART_draw();
 void HEART_update();
+void HEART_release();
 
 #endif // __HEART_H__

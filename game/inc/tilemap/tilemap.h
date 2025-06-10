@@ -46,14 +46,13 @@ static const s16 TILE_OFFSET_CENTER[4][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
 
 inline void TILEMAP_init(const TileSet *tileset) {
   PAL_setPalette(TILEMAP_PAL, tileset_palette.data, DMA);
-  VDP_loadTileSet(tileset, TILE_USER_INDEX, DMA);
+  VDP_loadTileSet(tileset, tile_index, DMA);
 }
 
 inline void TILEMAP_update(const TileMap *const tilemap) {
-  VDP_setTileMapEx(
-      TILEMAP_PLANE, tilemap,
-      TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, TILE_USER_INDEX), mapLevelX,
-      mapLevelY, 0, 0, tilemap->w, tilemap->h, DMA);
+  VDP_setTileMapEx(TILEMAP_PLANE, tilemap,
+                   TILE_ATTR_FULL(TILEMAP_PAL, 0, FALSE, FALSE, tile_index),
+                   mapLevelX, mapLevelY, 0, 0, tilemap->w, tilemap->h, DMA);
 }
 
 inline void TILEMAP_placeTiles(const s16 x, const s16 y, const s16 mapPosX,

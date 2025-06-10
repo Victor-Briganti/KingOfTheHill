@@ -59,7 +59,7 @@ static SceneContext context = {
     .enemiesType = {TOWER_TYPE, TOWER_TYPE, TOWER_TYPE, PAWN_TYPE, PAWN_TYPE,
                     PAWN_TYPE, PAWN_TYPE, PAWN_TYPE},
     .enemiesPos =
-        {{6, 0}, {0, 0}, {12, 0}, {6, 2}, {0, 2}, {2, 2}, {10, 2}, {12, 2}},
+        {{0, 0}, {6, 0}, {12, 0}, {4, 4}, {6, 4}, {8, 4}, {2, 0}, {10, 0}},
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
 };
@@ -79,10 +79,21 @@ static inline void initGlobals() {
   playerInitY = PLAYER_SCENE3_Y_POS;
 }
 
+static inline void initTransition() {
+  VDP_init();
+  BACKGROUND_initTransition(&level1_3_transition);
+  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+}
+
 static inline void initBackground() {
+  // Release the background level transition
+  BACKGROUND_release();
+  
+  // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  MAP_initLevel(mapLevelHeight, mapLevelWidth);
+  
+  HEART_draw();
 }
 
 static inline void initPlayer() {
@@ -115,34 +126,50 @@ static inline void updatePlayer() {
 }
 
 static inline void updateEnemies() {
-  u8 id = context.indexEnemy;
-  s8 res = -1;
-  u8 tried = 0;
+  // First check if any enemy is currently moving
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (context.enemies[i].state == ENEMY_MOVING ||
+        context.enemies[i].state == ENEMY_ANIMATING) {
+      const s8 res = context.enemies[i].update(&context.enemies[i]);
+      if (res == 0) {
+        context.turn = PLAYER;
+        context.indexEnemy = (i + 1) % MAX_ENEMIES;
+      }
+      return;
+    }
+  }
 
-  while (tried < MAX_ENEMIES) {
+  // No enemies are moving - try attacks first
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    u8 id = (context.indexEnemy + i) % MAX_ENEMIES;
     if (context.enemies[id].state != ENEMY_DEAD &&
         context.enemies[id].state != ENEMY_DESTROYED) {
-      res = context.enemies[id].update(&context.enemies[id]);
-      context.indexEnemy = id;
-    }
-
-    // Try the next enemy
-    id = (id + 1) % MAX_ENEMIES;
-    tried++;
-    if (res >= 0) {
-      break;
+      context.enemies[id].state = ENEMY_ATTACKING;
+      const s8 res = context.enemies[id].update(&context.enemies[id]);
+      if (res > 0) {
+        context.indexEnemy = id;
+        return;
+      }
     }
   }
 
-  // Enemy finished animation, go to the next one
-  if (res == 0) {
-    context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
-    context.turn = PLAYER;
+  // No attacks possible - try to move one enemy
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    u8 id = (context.indexEnemy + i) % MAX_ENEMIES;
+    if (context.enemies[id].state != ENEMY_DEAD &&
+        context.enemies[id].state != ENEMY_DESTROYED) {
+      context.enemies[id].state = ENEMY_IDLE;
+      const s8 res = context.enemies[id].update(&context.enemies[id]);
+      if (res > 0) {
+        context.indexEnemy = id;
+        return;
+      }
+    }
   }
 
-  // Enemies could not move pass to the player
-  if (res == -1 && tried == MAX_ENEMIES)
-    context.turn = PLAYER;
+  // No attacks or moves possible - turn ends
+  context.turn = PLAYER;
+  context.indexEnemy = (context.indexEnemy + 1) % MAX_ENEMIES;
 }
 
 static inline void damagePlayer() {
@@ -184,19 +211,39 @@ static inline void restart() {
   restartEnemies();
 }
 
+static inline bool loadingScene() {
+  static u16 count = 0;
+  static bool loading = TRUE;
+
+  if (count < 4096) {
+    if (frame % 32 == 0) {
+      count++;
+      if (count == 4096) {
+        initBackground();
+        initPlayer();
+        initEnemies();
+        loading = FALSE;
+      }
+    }
+  }
+
+  return loading;
+}
+
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
 void SCENE3_init() {
   initGlobals();
-  initBackground();
-  initPlayer();
-  initEnemies();
+  initTransition();
   SYS_doVBlankProcess();
 }
 
 SceneId SCENE3_update() {
+  if (loadingScene())
+    return SCENE_ID_LEVEL03;
+
   updateBackground();
   if (context.turn == PLAYER)
     updatePlayer();
@@ -208,7 +255,7 @@ SceneId SCENE3_update() {
 
   destroyEnemies();
   if (context.totalEnemies == 0)
-    return SCENE_ID_PASSED;
+    return SCENE_ID_LEVEL04;
 
   if (player.state == PLAYER_DEAD) {
     damagePlayer();
@@ -250,9 +297,11 @@ void SCENE3_destroy() {
       context.enemies[i].destroy(&context.enemies[i]);
   }
 
-  // Destroy Player
+  // Release everything else
   PLAYER_destroy();
-  HEART_update();
+  HEART_release();
+  BACKGROUND_release();
+  SPR_defragVRAM();
 
   SYS_doVBlankProcess();
 }
