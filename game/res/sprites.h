@@ -20,5 +20,7 @@ extern const SpriteDefinition queen_sprite;
 extern const SpriteDefinition tower_sprite;
 extern const SpriteDefinition bishop_sprite;
 extern const SpriteDefinition knight_sprite;
+extern const SpriteDefinition king_sprite1;
+extern const SpriteDefinition king_sprite2;
 
 #endif // _RES_SPRITES_H_

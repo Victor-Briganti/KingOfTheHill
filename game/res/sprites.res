@@ -23,3 +23,6 @@ SPRITE tower_sprite "sprites/tower.png" 2 2 FAST
 SPRITE bishop_sprite "sprites/bishop.png" 2 2 FAST
 
 SPRITE knight_sprite "sprites/horse.png" 2 2 FAST
+
+SPRITE king_sprite1 "sprites/king1.png" 2 2 FAST
+SPRITE king_sprite2 "sprites/king2.png" 2 2 FAST
