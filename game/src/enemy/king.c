@@ -2,6 +2,7 @@
 #include "enemy/enemy.h"
 #include "maths.h"
 #include "player/player.h"
+#include "scene/scene15.h"
 #include "scene/scene_manager.h"
 #include "sprites.h"
 
@@ -96,8 +97,14 @@ inline static s8 startMovement(Enemy *enemy) {
 }
 
 inline static s8 tryAttack(Enemy *enemy) {
+  static u8 tries = 0;
   static u16 count = 0;
   s8 res = 1;
+
+  if (tries != 3) {
+    tries++;
+    return -1;
+  }
 
   if (frame % FRAME_ANIMATION == 0) {
     if (count == ANIMATION_TIME) {
@@ -105,6 +112,8 @@ inline static s8 tryAttack(Enemy *enemy) {
       res = 0;
       enemy->indexSprite = 0;
       enemy->state = ENEMY_IDLE;
+      tries = 0;
+      SCENE15_resurrectEnemy();
     } else
       enemy->indexSprite = (enemy->indexSprite + 1) % MAX_SPRITES_ANIM;
 

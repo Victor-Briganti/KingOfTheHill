@@ -31,4 +31,6 @@ void SCENE15_hit(const Vect2D_s16 hitPos);
 
 void SCENE15_destroy();
 
+void SCENE15_resurrectEnemy();
+
 #endif // __SCENE15_H__

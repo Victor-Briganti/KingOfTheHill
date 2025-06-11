@@ -10,13 +10,14 @@
 #include "scene/scene_manager.h"
 #include "sprites.h"
 #include "tilemap/tilemap.h"
+#include "types/collision.h"
 
 //===----------------------------------------------------------------------===//
 // DEFINITIONS
 //===----------------------------------------------------------------------===//
 
 // Total enemies on this scene
-#define MAX_ENEMIES 1
+#define MAX_ENEMIES 9
 
 // Player initial position
 #define PLAYER_SCENE15_X_POS (6)  /* In Tile */
@@ -58,11 +59,27 @@ static SceneContext context = {
     .turn = PLAYER,
     .enemiesType =
         {
-            KING_TYPE,
+          PAWN_TYPE,
+          PAWN_TYPE,
+          PAWN_TYPE,
+          TOWER_TYPE,
+          BISHOP_TYPE,
+          KNIGHT_TYPE,
+          KNIGHT_TYPE,
+          QUEEN_TYPE,
+          KING_TYPE,
         },
     .enemiesPos =
         {
-            {6, 0},
+          {6, 4},
+          {4, 4},
+          {10, 4},
+          {0, 0},
+          {2, 0},
+          {0, 6},
+          {12, 8},
+          {12, 0},
+          {6, 0},
         },
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
@@ -308,4 +325,22 @@ void SCENE15_destroy() {
   SPR_defragVRAM();
 
   SYS_doVBlankProcess();
+}
+
+void SCENE15_resurrectEnemy() {
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (context.enemies[i].state == ENEMY_DESTROYED) {
+      Vect2D_s16 vec = context.enemiesPos[i];
+
+      if (MAP_getCollision(vec) != COLLISION_TYPE_EMPTY) {
+        continue;
+      }
+
+      ENEMY_init(&context.enemies[i], context.enemiesType[i], vec.x, vec.y);
+      MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
+                          context.enemies[i].actor.collisionCurPos,
+                          context.enemies[i].actor.collisionType);
+      return;
+    }
+  }
 }
