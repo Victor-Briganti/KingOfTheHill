@@ -35,8 +35,9 @@ inline void BACKGROUND_init() {
   VDP_setTextPlane(BACKGROUND_PLANE);
 }
 
-inline void BACKGROUND_setText(const char *const string) {
-  VDP_drawText(string, LEVEL_TEXT_X, LEVEL_TEXT_Y);
+inline void BACKGROUND_setText(const char *const string, const u16 x,
+                               const u16 y) {
+  VDP_drawText(string, x, y);
 }
 
 inline void BACKGROUND_release() { tile_index = TILE_USER_INDEX; }
