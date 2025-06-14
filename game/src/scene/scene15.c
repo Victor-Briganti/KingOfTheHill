@@ -134,8 +134,7 @@ static inline void initEnemies() {
 }
 
 static inline void updateBackground() {
-  BACKGROUND_setText("LEVEL 5-3");
-  
+  BACKGROUND_setText("LEVEL 5-3", LEVEL_TEXT_X, LEVEL_TEXT_Y);
   TILEMAP_update(&level_map1);
 }
 
