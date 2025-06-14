@@ -96,7 +96,7 @@ static inline void initBackground() {
 }
 
 static inline void initPlayer() {
-  PLAYER_levelInit(&goblin_sprite1, PLAYER_PAL, playerInitX, playerInitY);
+  PLAYER_levelInit(&demon_sprite, PLAYER_PAL, playerInitX, playerInitY);
   MAP_updateCollision(player.actor.collisionPrevPos,
                       player.actor.collisionCurPos, player.actor.collisionType);
 }
