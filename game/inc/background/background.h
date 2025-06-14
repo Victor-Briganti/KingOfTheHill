@@ -13,7 +13,7 @@ inline void BACKGROUND_initTransition(const Image *image) {
       true, DMA);
 }
 
-inline void BACKGROUND_gameOver(const Image *image) {
+inline void BACKGROUND_initImage(const Image *image) {
   // Draw background
   VDP_drawImageEx(
       BACKGROUND_PLANE, image,

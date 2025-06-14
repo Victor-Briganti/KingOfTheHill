@@ -3,29 +3,30 @@
 
 #include <genesis.h>
 
-#define MAX_SCENE 16
+#define MAX_SCENE 17
 
 //===----------------------------------------------------------------------===//
 // TYPE DEFINITION
 //===----------------------------------------------------------------------===//
 
 typedef enum SceneId {
-  SCENE_ID_GAME_OVER = 0,
-  SCENE_ID_LEVEL01 = 1,
-  SCENE_ID_LEVEL02 = 2,
-  SCENE_ID_LEVEL03 = 3,
-  SCENE_ID_LEVEL04 = 4,
-  SCENE_ID_LEVEL05 = 5,
-  SCENE_ID_LEVEL06 = 6,
-  SCENE_ID_LEVEL07 = 7,
-  SCENE_ID_LEVEL08 = 8,
-  SCENE_ID_LEVEL09 = 9,
-  SCENE_ID_LEVEL10 = 10,
-  SCENE_ID_LEVEL11 = 11,
-  SCENE_ID_LEVEL12 = 12,
-  SCENE_ID_LEVEL13 = 13,
-  SCENE_ID_LEVEL14 = 14,
-  SCENE_ID_LEVEL15 = 15,
+  SCENE_ID_INIT = 0,
+  SCENE_ID_GAME_OVER = 1,
+  SCENE_ID_LEVEL01 = 2,
+  SCENE_ID_LEVEL02 = 3,
+  SCENE_ID_LEVEL03 = 4,
+  SCENE_ID_LEVEL04 = 5,
+  SCENE_ID_LEVEL05 = 6,
+  SCENE_ID_LEVEL06 = 7,
+  SCENE_ID_LEVEL07 = 8,
+  SCENE_ID_LEVEL08 = 9,
+  SCENE_ID_LEVEL09 = 10,
+  SCENE_ID_LEVEL10 = 11,
+  SCENE_ID_LEVEL11 = 12,
+  SCENE_ID_LEVEL12 = 13,
+  SCENE_ID_LEVEL13 = 14,
+  SCENE_ID_LEVEL14 = 15,
+  SCENE_ID_LEVEL15 = 16,
   SCENE_ID_PASSED = 999,
 } SceneId;
 
