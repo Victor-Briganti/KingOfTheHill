@@ -33,7 +33,7 @@ void GAME_OVER_init() {
 
 u16 count = 0;
 SceneId GAME_OVER_update() {
-  if (frame % FRAME_ANIMATION == 0) {
+  if (frame % 32 == 0) {
     if (count == 4096) {
       count = 0;
       return SCENE_ID_LEVEL01;

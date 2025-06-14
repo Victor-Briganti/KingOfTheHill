@@ -132,7 +132,7 @@ static inline void initEnemies() {
 
 static inline void updateBackground() {
   BACKGROUND_setText("LEVEL 4-3");
-  BACKGROUND_setScore(0);
+  
   TILEMAP_update(&level_map1);
 }
 
@@ -234,7 +234,7 @@ static inline bool loadingScene() {
   static bool loading = TRUE;
 
   if (count < 4096) {
-    if (frame % 32 == 0) {
+    if (frame % FRAME_ANIMATION == 0) {
       count++;
       if (count == 4096) {
         initBackground();

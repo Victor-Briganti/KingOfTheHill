@@ -71,7 +71,7 @@ inline static s8 startAttack(Enemy *enemy) {
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
-  if (frame % FRAME_ANIMATION == 0) {
+  if (frame % (FRAME_ANIMATION / 2) == 0) {
     ACTOR_animateTo(&enemy->actor);
 
     if (!enemy->actor.moving) {

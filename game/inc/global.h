@@ -49,10 +49,6 @@ extern u16 tile_index;
 // TEXT
 //===----------------------------------------------------------------------===//
 
-// Score position
-#define SCORE_TEXT_X 0
-#define SCORE_TEXT_Y 1
-
 // Level position
 #define LEVEL_TEXT_X 17
 #define LEVEL_TEXT_Y 1
@@ -61,6 +57,6 @@ extern u16 tile_index;
 // FRAME
 //===----------------------------------------------------------------------===//
 
-#define FRAME_ANIMATION 30
+#define FRAME_ANIMATION 8
 
 #endif // __GLOBAL_H__

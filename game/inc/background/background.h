@@ -35,12 +35,6 @@ inline void BACKGROUND_init() {
   VDP_setTextPlane(BACKGROUND_PLANE);
 }
 
-inline void BACKGROUND_setScore(const u16 score) {
-  char scoreText[6];
-  sprintf(scoreText, "%d", score);
-  VDP_drawText(scoreText, SCORE_TEXT_X, SCORE_TEXT_Y);
-}
-
 inline void BACKGROUND_setText(const char *const string) {
   VDP_drawText(string, LEVEL_TEXT_X, LEVEL_TEXT_Y);
 }
