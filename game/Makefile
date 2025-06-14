@@ -3,7 +3,7 @@
 GDK := "/home/nessuno/Documents/UTFPR/Jogos/sgdk/sgdk"
 GENS := "/home/nessuno/Documents/UTFPR/Jogos/sgdk/gens/gens.exe"
 CWD := $(shell pwd)
-JOBS ?= 4
+JOBS ?= 1
 
 all: build
 

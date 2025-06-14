@@ -1,5 +1,6 @@
 #include "enemy/knight.h"
 #include "map/map.h"
+#include "player/player.h"
 #include "types/collision.h"
 
 typedef Vect2D_s16 (*MovementCheck)(const Vect2D_s16, const Vect2D_s16);
@@ -10,6 +11,8 @@ typedef Vect2D_s16 (*MovementCheck)(const Vect2D_s16, const Vect2D_s16);
 
 inline static s8 startMovement(Enemy *enemy) {
   const Vect2D_s16 from = enemy->actor.collisionCurPos;
+  const Vect2D_s16 to = player.actor.collisionCurPos;
+
   const Vect2D_s16 movements[8] = {
       {from.x - 2, from.y - 4}, {from.x + 2, from.y - 4},
       {from.x - 2, from.y + 4}, {from.x + 2, from.y + 4},
@@ -25,7 +28,9 @@ inline static s8 startMovement(Enemy *enemy) {
         MAP_getCollision(movements[i]) != COLLISION_TYPE_EMPTY)
       continue;
 
-    const u32 dist = getApproximatedDistance(movements[i].x, movements[i].y);
+    const s32 dx = to.x - movements[i].x;
+    const s32 dy = to.y - movements[i].y;
+    const u32 dist = getApproximatedDistance(dx, dy);
     if (dist < bestDist) {
       bestDist = dist;
       bestMovement = movements[i];
@@ -66,7 +71,7 @@ inline static s8 startAttack(Enemy *enemy) {
 }
 
 inline static s8 moveAnimation(Enemy *enemy) {
-  if (frame % FRAME_ANIMATION == 0) {
+  if (frame % (FRAME_ANIMATION / 2) == 0) {
     ACTOR_animateTo(&enemy->actor);
 
     if (!enemy->actor.moving) {

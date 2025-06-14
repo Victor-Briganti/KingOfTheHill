@@ -11,6 +11,7 @@ typedef enum EnemyType {
   TOWER_TYPE,
   BISHOP_TYPE,
   KNIGHT_TYPE,
+  KING_TYPE,
 } EnemyType;
 
 typedef enum EnemyState {

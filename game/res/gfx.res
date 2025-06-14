@@ -1,5 +1,7 @@
 IMAGE background "gfx/background/background.png" FAST
 IMAGE background_level "gfx/background/background_level.png" FAST
+IMAGE background_gameover "gfx/background/background_gameover.png" FAST
+IMAGE background_init "gfx/background/background_init.png" FAST
 
 IMAGE level1_1_transition "gfx/background/level1_1_transition.png" FAST
 IMAGE level1_2_transition "gfx/background/level1_2_transition.png" FAST

@@ -208,7 +208,7 @@ inline static void updateCursorTile() {
 }
 
 inline static s8 callAnimation() {
-  if (frame % FRAME_ANIMATION == 0) {
+  if (frame % (FRAME_ANIMATION / 2) == 0) {
     ACTOR_animateTo(&player.actor);
 
     if (!player.actor.moving) {

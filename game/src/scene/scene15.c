@@ -1,4 +1,4 @@
-#include "scene/scene13.h"
+#include "scene/scene15.h"
 #include "background/background.h"
 #include "enemy/enemy.h"
 #include "global.h"
@@ -10,17 +10,18 @@
 #include "scene/scene_manager.h"
 #include "sprites.h"
 #include "tilemap/tilemap.h"
+#include "types/collision.h"
 
 //===----------------------------------------------------------------------===//
 // DEFINITIONS
 //===----------------------------------------------------------------------===//
 
 // Total enemies on this scene
-#define MAX_ENEMIES 11
+#define MAX_ENEMIES 9
 
 // Player initial position
-#define PLAYER_SCENE13_X_POS (6)  /* In Tile */
-#define PLAYER_SCENE13_Y_POS (14) /* In Tile */
+#define PLAYER_SCENE15_X_POS (6)  /* In Tile */
+#define PLAYER_SCENE15_Y_POS (14) /* In Tile */
 
 typedef enum GameTurn {
   PLAYER = 0,
@@ -52,37 +53,33 @@ typedef struct SceneContext {
 // GLOBALS
 //===----------------------------------------------------------------------===//
 
-Scene scene13 = {SCENE13_init, SCENE13_update, SCENE13_hit, SCENE13_destroy};
+Scene scene15 = {SCENE15_init, SCENE15_update, SCENE15_hit, SCENE15_destroy};
 
 static SceneContext context = {
     .turn = PLAYER,
     .enemiesType =
         {
-            BISHOP_TYPE,
-            BISHOP_TYPE,
-            TOWER_TYPE,
-            QUEEN_TYPE,
-            KNIGHT_TYPE,
-            KNIGHT_TYPE,
-            PAWN_TYPE,
-            PAWN_TYPE,
-            PAWN_TYPE,
-            PAWN_TYPE,
-            PAWN_TYPE,
+          PAWN_TYPE,
+          PAWN_TYPE,
+          PAWN_TYPE,
+          TOWER_TYPE,
+          BISHOP_TYPE,
+          KNIGHT_TYPE,
+          KNIGHT_TYPE,
+          QUEEN_TYPE,
+          KING_TYPE,
         },
     .enemiesPos =
         {
-            {4, 0},
-            {10, 0},
-            {0, 0},
-            {12, 0},
-            {10, 2},
-            {0, 4},
-            {2, 4},
-            {6, 2},
-            {6, 6},
-            {8, 6},
-            {12, 6},
+          {6, 4},
+          {4, 4},
+          {10, 4},
+          {0, 0},
+          {2, 0},
+          {0, 6},
+          {12, 8},
+          {12, 0},
+          {6, 0},
         },
     .indexEnemy = 0,
     .totalEnemies = MAX_ENEMIES,
@@ -93,30 +90,30 @@ static SceneContext context = {
 //===----------------------------------------------------------------------===//
 
 static inline void initGlobals() {
-  mapLevelHeight = MAP_SCENE13_HEIGHT;
-  mapLevelWidth = MAP_SCENE13_WIDTH;
+  mapLevelHeight = MAP_SCENE15_HEIGHT;
+  mapLevelWidth = MAP_SCENE15_WIDTH;
 
-  mapLevelX = MAP_SCENE13_X_POS;
-  mapLevelY = MAP_SCENE13_Y_POS;
+  mapLevelX = MAP_SCENE15_X_POS;
+  mapLevelY = MAP_SCENE15_Y_POS;
 
-  playerInitX = PLAYER_SCENE13_X_POS;
-  playerInitY = PLAYER_SCENE13_Y_POS;
+  playerInitX = PLAYER_SCENE15_X_POS;
+  playerInitY = PLAYER_SCENE15_Y_POS;
 }
 
 static inline void initTransition() {
   VDP_init();
-  BACKGROUND_initTransition(&level5_1_transition);
+  BACKGROUND_initTransition(&level5_3_transition);
   MAP_initLevel(mapLevelHeight, mapLevelWidth);
 }
 
 static inline void initBackground() {
   // Release the background level transition
   BACKGROUND_release();
-  
+
   // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  
+
   HEART_draw();
 }
 
@@ -137,7 +134,7 @@ static inline void initEnemies() {
 }
 
 static inline void updateBackground() {
-  BACKGROUND_setText("LEVEL 5-1");
+  BACKGROUND_setText("LEVEL 5-3");
   
   TILEMAP_update(&level_map1);
 }
@@ -258,20 +255,15 @@ static inline bool loadingScene() {
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-void SCENE13_init() {
-  player.health++;
-  if (player.health > player.totalHealth) {
-    player.health = player.totalHealth;
-  }
-  
+void SCENE15_init() {
   initGlobals();
   initTransition();
   SYS_doVBlankProcess();
 }
 
-SceneId SCENE13_update() {
+SceneId SCENE15_update() {
   if (loadingScene())
-    return SCENE_ID_LEVEL13;
+    return SCENE_ID_LEVEL15;
 
   updateBackground();
   if (context.turn == PLAYER)
@@ -284,7 +276,7 @@ SceneId SCENE13_update() {
 
   destroyEnemies();
   if (context.totalEnemies == 0)
-    return SCENE_ID_LEVEL14;
+    return SCENE_ID_LEVEL15;
 
   if (player.state == PLAYER_DEAD) {
     damagePlayer();
@@ -295,10 +287,10 @@ SceneId SCENE13_update() {
     restart();
   }
 
-  return SCENE_ID_LEVEL13;
+  return SCENE_ID_LEVEL15;
 }
 
-void SCENE13_hit(const Vect2D_s16 hitPos) {
+void SCENE15_hit(const Vect2D_s16 hitPos) {
   if (context.turn == ENEMY) {
     if (player.actor.collisionCurPos.x == hitPos.x &&
         player.actor.collisionCurPos.y == hitPos.y) {
@@ -320,7 +312,7 @@ void SCENE13_hit(const Vect2D_s16 hitPos) {
   }
 }
 
-void SCENE13_destroy() {
+void SCENE15_destroy() {
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
     if (context.enemies[i].state != ENEMY_DESTROYED)
       context.enemies[i].destroy(&context.enemies[i]);
@@ -333,4 +325,22 @@ void SCENE13_destroy() {
   SPR_defragVRAM();
 
   SYS_doVBlankProcess();
+}
+
+void SCENE15_resurrectEnemy() {
+  for (u8 i = 0; i < MAX_ENEMIES; i++) {
+    if (context.enemies[i].state == ENEMY_DESTROYED) {
+      Vect2D_s16 vec = context.enemiesPos[i];
+
+      if (MAP_getCollision(vec) != COLLISION_TYPE_EMPTY) {
+        continue;
+      }
+
+      ENEMY_init(&context.enemies[i], context.enemiesType[i], vec.x, vec.y);
+      MAP_updateCollision(context.enemies[i].actor.collisionPrevPos,
+                          context.enemies[i].actor.collisionCurPos,
+                          context.enemies[i].actor.collisionType);
+      return;
+    }
+  }
 }
