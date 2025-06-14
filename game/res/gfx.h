@@ -3,6 +3,7 @@
 
 extern const Image background;
 extern const Image background_level;
+extern const Image background_gameover;
 extern const Image level1_1_transition;
 extern const Image level1_2_transition;
 extern const Image level1_3_transition;

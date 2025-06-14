@@ -55,9 +55,6 @@ int main(const bool resetType) {
     if (sceneIndex == SCENE_ID_PASSED)
       continue;
 
-    if (!player.health)
-      continue;
-
     sceneManager[sceneIndex]->init();
     while (TRUE) {
       SceneId result = sceneManager[sceneIndex]->update();

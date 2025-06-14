@@ -13,6 +13,15 @@ inline void BACKGROUND_initTransition(const Image *image) {
       true, DMA);
 }
 
+inline void BACKGROUND_gameOver(const Image *image) {
+  // Draw background
+  VDP_drawImageEx(
+      BACKGROUND_PLANE, image,
+      TILE_ATTR_FULL(BACKGROUND_PAL, 0, FALSE, FALSE, TILE_USER_INDEX), 0, 0,
+      true, DMA);
+  tile_index += background_level.tileset->numTile;
+}
+
 inline void BACKGROUND_init() {
   // Draw background
   VDP_drawImageEx(BACKGROUND_PLANE, &background_level,
@@ -36,8 +45,6 @@ inline void BACKGROUND_setText(const char *const string) {
   VDP_drawText(string, LEVEL_TEXT_X, LEVEL_TEXT_Y);
 }
 
-inline void BACKGROUND_release() {
-  tile_index = TILE_USER_INDEX;
-}
+inline void BACKGROUND_release() { tile_index = TILE_USER_INDEX; }
 
 #endif // __BACKGROUND_H__
