@@ -47,13 +47,9 @@ int main(const bool resetType) {
   }
 
   COMMON_init();
-  SYS_showFrameLoad(true);
+  // SYS_showFrameLoad(true);
   while (TRUE) {
     SYS_doVBlankProcess();
-
-    // TODO: This should not be hard coded
-    if (sceneIndex == SCENE_ID_PASSED)
-      continue;
 
     sceneManager[sceneIndex]->init();
     while (TRUE) {
