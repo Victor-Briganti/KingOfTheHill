@@ -21,9 +21,6 @@ Scene gameOver = {GAME_OVER_init, GAME_OVER_update, GAME_OVER_hit,
 //===----------------------------------------------------------------------===//
 
 static inline void initBackground() {
-  XGM_stopPlay();
-  XGM_setLoopNumber(0);
-  XGM_startPlay(&death_music);
   VDP_init();
   BACKGROUND_initImage(&background_gameover);
 }
@@ -33,6 +30,7 @@ static inline void initBackground() {
 //===----------------------------------------------------------------------===//
 
 void GAME_OVER_init() {
+  XGM_stopPlay();
   initBackground();
   SYS_doVBlankProcess();
 }

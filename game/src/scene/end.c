@@ -1,6 +1,7 @@
 #include "scene/end.h"
 #include "background/background.h"
 #include "gfx.h"
+#include "sfx.h"
 #include "maths.h"
 #include "scene/scene_manager.h"
 #include "sys.h"
@@ -25,6 +26,7 @@ static inline void initBackground() {
 //===----------------------------------------------------------------------===//
 
 void END_init() {
+  XGM_stopPlay();
   initBackground();
   SYS_doVBlankProcess();
 }

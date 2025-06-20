@@ -37,9 +37,6 @@ static void COMMON_init() {
   PLAYER_init();
   HEART_init();
 
-  // Init the song
-  XGM_startPlay(&background_music);
-
   // Init the sounds
   XGM_setPCM(ID_MOVE_SOUND, &move_sound, LEN_MOVE_SOUND);
   XGM_setPCM(ID_DEATH_SOUND, &death_sound, LEN_DEATH_SOUND);
@@ -70,8 +67,17 @@ int main(const bool resetType) {
         break;
       }
 
-      if (!XGM_isPlaying() && sceneIndex != SCENE_ID_GAME_OVER) {
-        XGM_startPlay(&background_music);
+      if (!XGM_isPlaying()) {
+        switch (sceneIndex) {
+        case SCENE_ID_GAME_OVER:
+          XGM_startPlay(&death_music);
+          break;
+        case SCENE_ID_END:
+          XGM_startPlay(&win_music);
+          break;
+        default:
+          XGM_startPlay(&background_music);
+        }
       }
 
       frame++;

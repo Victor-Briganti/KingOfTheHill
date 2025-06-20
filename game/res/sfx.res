@@ -1,5 +1,6 @@
 XGM background_music "sfx/background.vgm" -1
 XGM death_music "sfx/game_over.vgm" -1
+XGM win_music "sfx/win.vgm" -1
 
 WAV move_sound "sfx/move.wav" DEFAULT
 WAV death_sound "sfx/death.wav" DEFAULT
