@@ -327,6 +327,7 @@ void SCENE15_destroy() {
 }
 
 void SCENE15_resurrectEnemy() {
+  XGM_startPlayPCM(ID_RESURRECT_SOUND, PRIO_RESURRECT_SOUND, CHN_RESURRECT_SOUND);
   for (u8 i = 0; i < MAX_ENEMIES; i++) {
     if (context.enemies[i].state == ENEMY_DESTROYED) {
       Vect2D_s16 vec = context.enemiesPos[i];

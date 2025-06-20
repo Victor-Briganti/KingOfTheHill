@@ -81,6 +81,7 @@ inline static s8 moveAnimation(Enemy *enemy) {
 
       if (enemy->actor.collisionCurPos.y == mapLevelHeight - 2) {
         enemy->state = ENEMY_ANIMATING;
+        XGM_startPlayPCM(ID_TRANSFORM_SOUND, PRIO_TRANSFORM_SOUND, CHN_TRANSFORM_SOUND);
         return 1;
       }
 

@@ -3,10 +3,10 @@
 #include "global.h"
 #include "scene/scene_manager.h"
 
-#include <snd/xgm.h>
-#include <maths.h>
 #include <gfx.h>
+#include <maths.h>
 #include <sfx.h>
+#include <snd/xgm.h>
 #include <sys.h>
 
 //===----------------------------------------------------------------------===//
@@ -39,8 +39,14 @@ void GAME_OVER_init() {
 
 u16 count = 0;
 SceneId GAME_OVER_update() {
+  JOY_update();
+
+  if (JOY_readJoypad(JOY_1) & BUTTON_START) {
+    return SCENE_ID_LEVEL01;
+  }
+
   if (frame % 32 == 0) {
-    if (count == 8192) {
+    if (count == 4096) {
       count = 0;
       return SCENE_ID_LEVEL01;
     }
@@ -53,6 +59,4 @@ SceneId GAME_OVER_update() {
 
 void GAME_OVER_hit(const Vect2D_s16 hitPos) {}
 
-void GAME_OVER_destroy() {
-  SYS_reset();
-}
+void GAME_OVER_destroy() { SYS_reset(); }

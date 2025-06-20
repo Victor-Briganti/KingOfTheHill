@@ -38,13 +38,14 @@ static void COMMON_init() {
   HEART_init();
 
   // Init the song
-  XGM_setLoopNumber(-1);
   XGM_startPlay(&background_music);
 
   // Init the sounds
   XGM_setPCM(ID_MOVE_SOUND, &move_sound, LEN_MOVE_SOUND);
   XGM_setPCM(ID_DEATH_SOUND, &death_sound, LEN_DEATH_SOUND);
   XGM_setPCM(ID_ATTACK_SOUND, &attack_sound, LEN_ATTACK_SOUND);
+  XGM_setPCM(ID_TRANSFORM_SOUND, &transform_sound, LEN_TRANFORM_SOUND);
+  XGM_setPCM(ID_RESURRECT_SOUND, &resurrect_sound, LEN_RESURRECT_SOUND);
 }
 
 //===----------------------------------------------------------------------===//
@@ -57,7 +58,6 @@ int main(const bool resetType) {
   }
 
   COMMON_init();
-  // SYS_showFrameLoad(true);
   while (TRUE) {
     SYS_doVBlankProcess();
 
@@ -68,6 +68,10 @@ int main(const bool resetType) {
         sceneManager[sceneIndex]->destroy();
         sceneIndex = result;
         break;
+      }
+
+      if (!XGM_isPlaying() && sceneIndex != SCENE_ID_GAME_OVER) {
+        XGM_startPlay(&background_music);
       }
 
       frame++;
