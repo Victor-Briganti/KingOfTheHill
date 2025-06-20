@@ -36,6 +36,10 @@ SceneId INIT_update() {
     return SCENE_ID_LEVEL01;
   }
 
+  if (JOY_readJoypad(JOY_1) & BUTTON_B) {
+    return SCENE_ID_CREDITS;
+  }
+
   return SCENE_ID_INIT;
 }
 

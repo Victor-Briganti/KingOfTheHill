@@ -217,6 +217,7 @@ inline static s8 callAnimation() {
                           player.actor.collisionType);
 
       if (ACTOR_checkCollision(&player.actor)) {
+        XGM_startPlayPCM(ID_ATTACK_SOUND, PRIO_ATTACK_SOUND, CHN_ATTACK_SOUND);
         sceneManager[sceneIndex]->hit(player.actor.collisionCurPos);
       }
 
@@ -252,6 +253,7 @@ s8 PLAYER_update() {
     return 0;
 
   if (player.state == PLAYER_MOVING) {
+    XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
     return callAnimation();
   }
 

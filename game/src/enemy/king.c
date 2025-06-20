@@ -34,6 +34,7 @@ static s8 tryMovement(Enemy *enemy, const Vect2D_s16 from, s16 x, s16 y) {
       verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkVertical)) {
     ACTOR_setTargetAnimPos(&enemy->actor, x, y);
     enemy->state = ENEMY_MOVING;
+    XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
     return 1;
   }
 
@@ -41,6 +42,7 @@ static s8 tryMovement(Enemy *enemy, const Vect2D_s16 from, s16 x, s16 y) {
       verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkHorizontal)) {
     ACTOR_setTargetAnimPos(&enemy->actor, x, y);
     enemy->state = ENEMY_MOVING;
+    XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
     return 1;
   }
 
@@ -48,6 +50,7 @@ static s8 tryMovement(Enemy *enemy, const Vect2D_s16 from, s16 x, s16 y) {
       verifyMovement(from, (Vect2D_s16){x, y}, MAP_checkDiagonal)) {
     ACTOR_setTargetAnimPos(&enemy->actor, x, y);
     enemy->state = ENEMY_MOVING;
+    XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
     return 1;
   }
 
@@ -138,6 +141,7 @@ inline static s8 moveAnimation(Enemy *enemy) {
 
       if (ACTOR_checkCollision(&enemy->actor)) {
         sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
+        XGM_startPlayPCM(ID_DEATH_SOUND, PRIO_DEATH_SOUND, CHN_DEATH_SOUND);
         return 0;
       }
 

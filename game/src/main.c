@@ -6,6 +6,7 @@
 #include <genesis.h>
 #include <gfx.h>
 #include <joy.h>
+#include <sfx.h>
 #include <sprite_eng.h>
 #include <sprites.h>
 #include <sys.h>
@@ -35,6 +36,13 @@ static void COMMON_init() {
   // Init the player object
   PLAYER_init();
   HEART_init();
+
+  // Init the sounds
+  XGM_setPCM(ID_MOVE_SOUND, &move_sound, LEN_MOVE_SOUND);
+  XGM_setPCM(ID_DEATH_SOUND, &death_sound, LEN_DEATH_SOUND);
+  XGM_setPCM(ID_ATTACK_SOUND, &attack_sound, LEN_ATTACK_SOUND);
+  XGM_setPCM(ID_TRANSFORM_SOUND, &transform_sound, LEN_TRANFORM_SOUND);
+  XGM_setPCM(ID_RESURRECT_SOUND, &resurrect_sound, LEN_RESURRECT_SOUND);
 }
 
 //===----------------------------------------------------------------------===//
@@ -47,13 +55,8 @@ int main(const bool resetType) {
   }
 
   COMMON_init();
-  SYS_showFrameLoad(true);
   while (TRUE) {
     SYS_doVBlankProcess();
-
-    // TODO: This should not be hard coded
-    if (sceneIndex == SCENE_ID_PASSED)
-      continue;
 
     sceneManager[sceneIndex]->init();
     while (TRUE) {
@@ -62,6 +65,19 @@ int main(const bool resetType) {
         sceneManager[sceneIndex]->destroy();
         sceneIndex = result;
         break;
+      }
+
+      if (!XGM_isPlaying()) {
+        switch (sceneIndex) {
+        case SCENE_ID_GAME_OVER:
+          XGM_startPlay(&death_music);
+          break;
+        case SCENE_ID_END:
+          XGM_startPlay(&win_music);
+          break;
+        default:
+          XGM_startPlay(&background_music);
+        }
       }
 
       frame++;

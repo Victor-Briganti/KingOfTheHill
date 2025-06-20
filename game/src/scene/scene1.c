@@ -88,11 +88,11 @@ static inline void initTransition() {
 static inline void initBackground() {
   // Release the background level transition
   BACKGROUND_release();
-  
+
   // Init the scene background
   BACKGROUND_init();
   TILEMAP_init(&tileset);
-  
+
   HEART_draw();
 }
 
@@ -113,8 +113,7 @@ static inline void initEnemies() {
 }
 
 static inline void updateBackground() {
-  BACKGROUND_setText("LEVEL 1-1");
-  
+  BACKGROUND_setText("LEVEL 1-1", LEVEL_TEXT_X, LEVEL_TEXT_Y);
   TILEMAP_update(&level_map1);
 }
 
