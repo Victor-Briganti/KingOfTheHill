@@ -1,4 +1,4 @@
-#include "scene/init.h"
+#include "scene/credits.h"
 #include "background/background.h"
 #include "gfx.h"
 #include "maths.h"
@@ -6,10 +6,10 @@
 #include "sys.h"
 
 //===----------------------------------------------------------------------===//
-// GLOBALS
+// GLOBALSs
 //===----------------------------------------------------------------------===//
 
-Scene init = {INIT_init, INIT_update, INIT_hit, INIT_destroy};
+Scene credits = {CREDITS_init, CREDITS_update, CREDITS_hit, CREDITS_destroy};
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -17,32 +17,29 @@ Scene init = {INIT_init, INIT_update, INIT_hit, INIT_destroy};
 
 static inline void initBackground() {
   VDP_init();
-  BACKGROUND_initImage(&background_init);
+  BACKGROUND_initImage(&background_credits);
 }
 
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-void INIT_init() {
+void CREDITS_init() {
+  XGM_stopPlay();
   initBackground();
   SYS_doVBlankProcess();
 }
 
-SceneId INIT_update() {
+SceneId CREDITS_update() {
   JOY_update();
 
-  if (JOY_readJoypad(JOY_1) & BUTTON_START) {
-    return SCENE_ID_LEVEL01;
+  if (JOY_readJoypad(JOY_1) != 0) {
+    return SCENE_ID_INIT;
   }
 
-  if (JOY_readJoypad(JOY_1) & BUTTON_B) {
-    return SCENE_ID_CREDITS;
-  }
-
-  return SCENE_ID_INIT;
+  return SCENE_ID_CREDITS;
 }
 
-void INIT_hit(const Vect2D_s16 hitPos) {}
+void CREDITS_hit(const Vect2D_s16 hitPos) {}
 
-void INIT_destroy() { BACKGROUND_release(); }
+void CREDITS_destroy() { SYS_reset(); }

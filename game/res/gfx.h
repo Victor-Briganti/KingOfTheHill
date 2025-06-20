@@ -6,6 +6,7 @@ extern const Image background_level;
 extern const Image background_gameover;
 extern const Image background_init;
 extern const Image background_end;
+extern const Image background_credits;
 extern const Image level1_1_transition;
 extern const Image level1_2_transition;
 extern const Image level1_3_transition;
