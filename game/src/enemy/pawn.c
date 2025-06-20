@@ -22,6 +22,7 @@ inline static s8 startMovement(Enemy *enemy) {
 
   ACTOR_setTargetAnimPos(&enemy->actor, x, y);
   enemy->state = ENEMY_MOVING;
+  XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
 
   return 1;
 }
@@ -55,6 +56,7 @@ inline static s8 tryAttack(Enemy *enemy) {
   if (enemyAttacked) {
     ACTOR_setTargetAnimPos(&enemy->actor, x, y);
     enemy->state = ENEMY_MOVING;
+    XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
     return 1;
   }
   
@@ -72,6 +74,7 @@ inline static s8 moveAnimation(Enemy *enemy) {
                           enemy->actor.collisionType);
 
       if (ACTOR_checkCollision(&enemy->actor)) {
+        XGM_startPlayPCM(ID_DEATH_SOUND, PRIO_DEATH_SOUND, CHN_DEATH_SOUND);
         sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
         return 0;
       }

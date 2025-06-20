@@ -40,6 +40,7 @@ inline static s8 startMovement(Enemy *enemy) {
   if (bestMovement.x >= 0 && bestMovement.y >= 0) {
     ACTOR_setTargetAnimPos(&enemy->actor, bestMovement.x, bestMovement.y);
     enemy->state = ENEMY_MOVING;
+    XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
     return 1;
   }
 
@@ -62,6 +63,7 @@ inline static s8 startAttack(Enemy *enemy) {
     if (MAP_getCollision(movements[i]) == COLLISION_TYPE_PLAYER) {
       ACTOR_setTargetAnimPos(&enemy->actor, movements[i].x, movements[i].y);
       enemy->state = ENEMY_MOVING;
+      XGM_startPlayPCM(ID_MOVE_SOUND, PRIO_MOVE_SOUND, CHN_MOVE_SOUND);
       return 1;
     }
   }
@@ -81,6 +83,7 @@ inline static s8 moveAnimation(Enemy *enemy) {
 
       if (ACTOR_checkCollision(&enemy->actor)) {
         sceneManager[sceneIndex]->hit(enemy->actor.collisionCurPos);
+        XGM_startPlayPCM(ID_DEATH_SOUND, PRIO_DEATH_SOUND, CHN_DEATH_SOUND);
         return 0;
       }
 
