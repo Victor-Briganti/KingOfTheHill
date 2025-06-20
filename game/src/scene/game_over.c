@@ -1,10 +1,13 @@
 #include "scene/game_over.h"
 #include "background/background.h"
-#include "gfx.h"
 #include "global.h"
-#include "maths.h"
 #include "scene/scene_manager.h"
-#include "sys.h"
+
+#include <snd/xgm.h>
+#include <maths.h>
+#include <gfx.h>
+#include <sfx.h>
+#include <sys.h>
 
 //===----------------------------------------------------------------------===//
 // GLOBALS
@@ -18,6 +21,9 @@ Scene gameOver = {GAME_OVER_init, GAME_OVER_update, GAME_OVER_hit,
 //===----------------------------------------------------------------------===//
 
 static inline void initBackground() {
+  XGM_stopPlay();
+  XGM_setLoopNumber(0);
+  XGM_startPlay(&death_music);
   VDP_init();
   BACKGROUND_initImage(&background_gameover);
 }
@@ -34,7 +40,7 @@ void GAME_OVER_init() {
 u16 count = 0;
 SceneId GAME_OVER_update() {
   if (frame % 32 == 0) {
-    if (count == 4096) {
+    if (count == 8192) {
       count = 0;
       return SCENE_ID_LEVEL01;
     }

@@ -5,6 +5,7 @@
 
 #include <genesis.h>
 #include <gfx.h>
+#include <sfx.h>
 #include <joy.h>
 #include <sprite_eng.h>
 #include <sprites.h>
@@ -35,6 +36,10 @@ static void COMMON_init() {
   // Init the player object
   PLAYER_init();
   HEART_init();
+  
+  // Init the song
+  XGM_setLoopNumber(-1);
+  XGM_startPlay(&background_music);
 }
 
 //===----------------------------------------------------------------------===//
