@@ -1,4 +1,4 @@
-#include "scene/init.h"
+#include "scene/movements.h"
 #include "background/background.h"
 #include "gfx.h"
 #include "maths.h"
@@ -6,10 +6,10 @@
 #include "sys.h"
 
 //===----------------------------------------------------------------------===//
-// GLOBALS
+// GLOBALSs
 //===----------------------------------------------------------------------===//
 
-Scene init = {INIT_init, INIT_update, INIT_hit, INIT_destroy};
+Scene movements = {MOVEMENTS_init, MOVEMENTS_update, MOVEMENTS_hit, MOVEMENTS_destroy};
 
 //===----------------------------------------------------------------------===//
 // PRIVATE
@@ -17,36 +17,29 @@ Scene init = {INIT_init, INIT_update, INIT_hit, INIT_destroy};
 
 static inline void initBackground() {
   VDP_init();
-  BACKGROUND_initImage(&background_init);
+  BACKGROUND_initImage(&background_movements);
 }
 
 //===----------------------------------------------------------------------===//
 // PUBLIC
 //===----------------------------------------------------------------------===//
 
-void INIT_init() {
+void MOVEMENTS_init() {
+  XGM_stopPlay();
   initBackground();
   SYS_doVBlankProcess();
 }
 
-SceneId INIT_update() {
+SceneId MOVEMENTS_update() {
   JOY_update();
 
-  if (JOY_readJoypad(JOY_1) & BUTTON_START) {
-    return SCENE_ID_LEVEL01;
+  if (JOY_readJoypad(JOY_1) != 0) {
+    return SCENE_ID_INIT;
   }
 
-  if (JOY_readJoypad(JOY_1) & BUTTON_B) {
-    return SCENE_ID_CREDITS;
-  }
-
-  if (JOY_readJoypad(JOY_1) & BUTTON_A) {
-    return SCENE_ID_MOVEMENTS;
-  }
-
-  return SCENE_ID_INIT;
+  return SCENE_ID_MOVEMENTS;
 }
 
-void INIT_hit(const Vect2D_s16 hitPos) {}
+void MOVEMENTS_hit(const Vect2D_s16 hitPos) {}
 
-void INIT_destroy() { BACKGROUND_release(); }
+void MOVEMENTS_destroy() { SYS_reset(); }

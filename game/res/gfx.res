@@ -4,6 +4,7 @@ IMAGE background_gameover "gfx/background/background_gameover.png" FAST
 IMAGE background_init "gfx/background/background_init.png" FAST
 IMAGE background_end "gfx/background/background_end.png" FAST
 IMAGE background_credits "gfx/background/background_credits.png" FAST
+IMAGE background_movements "gfx/background/background_movements.png" FAST
 
 IMAGE level1_1_transition "gfx/background/level1_1_transition.png" FAST
 IMAGE level1_2_transition "gfx/background/level1_2_transition.png" FAST
